@@ -24,7 +24,12 @@ WORKDIR /app
 COPY . .
 
 # MySQL 환경 변수들을 빌드에서 사용
-RUN echo "Building with MySQL root password: ${MYSQL_ROOT_PASSWORD}"
+RUN echo "Building with MySQL root password: ${MYSQL_ROOT_PASSWORD}" && \
+    echo "MySQL Database: ${MYSQL_DATABASE}" && \
+    echo "MySQL User: ${MYSQL_USER}" && \
+    echo "MySQL Password: ${MYSQL_PASSWORD}" && \
+    echo "MySQL Replication User: ${MYSQL_REPLICATION_USER}" && \
+    echo "MySQL Replication Password: ${MYSQL_REPLICATION_PASSWORD}"
 
 # gradlew 실행 권한 부여
 RUN chmod +x gradlew

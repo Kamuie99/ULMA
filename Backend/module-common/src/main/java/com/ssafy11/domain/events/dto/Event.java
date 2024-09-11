@@ -7,10 +7,9 @@ import java.time.LocalDateTime;
 
 @Builder
 @Getter
-public class Events {
+public class Event {
     private Integer id;
     private String category;
     private String name;
     private LocalDateTime eventTime;
-    private Integer userId;
 }

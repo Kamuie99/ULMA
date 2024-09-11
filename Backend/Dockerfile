@@ -23,6 +23,9 @@ WORKDIR /app
 # 빌드에 필요한 파일 복사
 COPY . .
 
+# MySQL 환경 변수들을 빌드에서 사용
+RUN echo "Building with MySQL root password: ${MYSQL_ROOT_PASSWORD}"
+
 # gradlew 실행 권한 부여
 RUN chmod +x gradlew
 
@@ -34,11 +37,6 @@ FROM alpine/java:21-jdk
 
 # 컨테이너 내 작업 디렉토리 설정
 WORKDIR /app
-
-
-
-# MySQL 환경 변수들을 빌드에서 사용
-RUN echo "Building with MySQL root password: ${MYSQL_ROOT_PASSWORD}"
 
 # 1단계에서 생성된 JAR 파일 복사 (module-api의 실행 가능한 JAR 파일)
 COPY --from=build /app/module-api/build/libs/module-api.jar /app/module-api.jar

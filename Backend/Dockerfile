@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Gradle Wrapper 및 설정 파일 복사 (의존성 캐싱용)
 COPY gradle/ gradle/
-COPY gradlew ./  # Gradle Wrapper 복사
+COPY gradlew ./gradlew  # Gradle Wrapper 복사
 COPY settings.gradle ./ 
 COPY build.gradle ./
 

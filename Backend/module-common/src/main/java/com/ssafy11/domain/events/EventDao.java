@@ -1,12 +1,12 @@
 package com.ssafy11.domain.events;
 
-import com.ssafy11.domain.events.dto.Events;
-import com.ssafy11.domain.friends.dto.Friends;
-
-import java.util.List;
+import com.ssafy11.domain.common.PageDto;
+import com.ssafy11.domain.events.dto.Event;
+import com.ssafy11.domain.common.PaginatedResponse;
+import com.ssafy11.domain.participant.dto.Participant;
 
 public interface EventDao {
-    Integer save(EventCommand event);
-    List<Events> getEvents(Integer userId);
-    List<Friends> getGuests(Integer userId, Integer eventId);
+    Integer addEvent(EventCommand event);
+    PaginatedResponse<Event> getEvents(Integer userId, PageDto pageDto);
+    PaginatedResponse<Participant> getEvent(Integer eventId, PageDto pageDto);
 }

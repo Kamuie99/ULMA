@@ -9,6 +9,7 @@ public record EventCommand(
         String category,
         String name,
         LocalDateTime date,
-        Integer userId) {
+        Integer userId
+) {
 }
 

@@ -6,7 +6,6 @@ plugins {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jooq'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
     runtimeOnly 'com.mysql:mysql-connector-j'
     jooqGenerator 'com.mysql:mysql-connector-j'
     runtimeOnly 'com.h2database:h2'
@@ -24,15 +23,15 @@ jooq {
                 logging = Logging.WARN
                 jdbc {
                     driver = 'com.mysql.cj.jdbc.Driver'
-                    url = "jdbc:mysql://j11e204.p.ssafy.io:3306/contest"
-                    user = 'testuser'
-                    password = 'testpassword'
+                    url = 'jdbc:mysql://localhost:3306/ulma'
+                    user = 'root'
+                    password = '1234'
                 }
                 generator {
                     name = 'org.jooq.codegen.DefaultGenerator'
                     database {
                         name = 'org.jooq.meta.mysql.MySQLDatabase'
-                        inputSchema = System.getenv('MYSQL_DATABASE') ?: 'ulma'
+                        inputSchema = 'ulma'
                         forcedTypes {
                             forcedType {
                                 name = 'varchar'

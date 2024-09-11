@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/friends")
+@RequestMapping("/api/participant")
 public class ParticipantController {
 
     private final ParticipantService participantService;
@@ -22,16 +22,15 @@ public class ParticipantController {
         this.participantService = participantService;
     }
 
-    //경조사비 추가
     //동일 이름 검증
-    @GetMapping("same/{userId}")
+    @GetMapping("/same/{userId}")
     public ResponseEntity<?> sameName(@PathVariable("userId") Integer userId, @RequestParam("name") String name) {
         List<UserRelation> userRelationList = participantService.sameName(userId, name);
         return ResponseEntity.ok(userRelationList);
     }
 
     //송금 내역 확인
-    @GetMapping("{userId}/{guestID}")
+    @GetMapping("/{userId}/{guestID}")
     public ResponseEntity<?> getTransactions(@PathVariable("userId") Integer userId,
                                             @PathVariable("guestID") Integer guestId,
                                             @ModelAttribute PageDto pagedto) {

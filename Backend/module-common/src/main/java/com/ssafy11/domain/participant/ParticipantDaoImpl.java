@@ -7,6 +7,7 @@ import com.ssafy11.domain.participant.dto.UserRelation;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -16,7 +17,7 @@ import java.util.List;
 
 import static com.ssafy11.ulma.generated.Tables.*;
 
-@Service
+@Repository
 @RequiredArgsConstructor
 public class ParticipantDaoImpl implements ParticipantDao {
 

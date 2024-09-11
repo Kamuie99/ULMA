@@ -3,6 +3,7 @@ package com.ssafy11.domain.users;
 import static com.ssafy11.ulma.generated.Tables.*;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import org.jooq.DSLContext;
 import org.jooq.Record1;
@@ -14,12 +15,13 @@ import org.springframework.util.Assert;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Repository
 public class UserDaoImpl implements UserDao {
 
 	private final DSLContext dsl;
 
-	@Transactional(readOnly = false)
+	@Transactional
 	@Override
 	public Integer save(UserCommand command) {
 		Record1<Integer> one = dsl.insertInto(
@@ -28,8 +30,9 @@ public class UserDaoImpl implements UserDao {
 				USERS.EMAIL,
 				USERS.PASSWORD,
 				USERS.NAME,
+				USERS.PHONE_NUMBER,
 				USERS.CREATED_AT)
-			.values(command.loginId(), command.email(), command.password(), command.name(), LocalDateTime.now())
+			.values(command.loginId(), command.email(), command.password(), command.name(), command.phoneNumber(), LocalDateTime.now())
 			.returningResult(USERS.ID)
 			.fetchOne();
 
@@ -62,5 +65,20 @@ public class UserDaoImpl implements UserDao {
 				.from(USERS)
 				.where(USERS.LOGIN_ID.eq(loginId))
 		);
+	}
+
+	@Override
+	public Optional<Users> findByLoginId(String loginId) {
+		return Optional.ofNullable(dsl.selectFrom(USERS)
+			.where(USERS.LOGIN_ID.eq(loginId))
+			.fetchOneInto(Users.class));
+	}
+
+	@Override
+	public void updateRefreshToken(String loginId, String refreshToken) {
+		dsl.update(USERS)
+			.set(USERS.REFRESH_TOKEN, refreshToken)
+			.where(USERS.LOGIN_ID.eq(loginId))
+			.execute();
 	}
 }

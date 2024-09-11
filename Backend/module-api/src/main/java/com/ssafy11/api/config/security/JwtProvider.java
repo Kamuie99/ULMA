@@ -32,15 +32,21 @@ public class JwtProvider {
 
     @Value("${jwt.secret.key}")
     private String secretString;
-    @Value("${jwt.expiration.time}")
+    @Value("${jwt.secret.expiration}")
     private long expirationTime;
+    @Value("${jwt.refresh.key}")
+    private String refreshString;
+    @Value("${jwt.refresh.expiration}")
+    private long refreshExpirationTime;
 
 
     private SecretKey secretKey;
+    private SecretKey refreshSecretKey;
 
     @PostConstruct
     public void init() {
         this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretString));
+        this.refreshSecretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(refreshString));
     }
 
     public String createToken(Authentication authentication) {
@@ -52,6 +58,15 @@ public class JwtProvider {
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
+    }
+
+    public String refreshToken(Authentication authentication) {
+        return Jwts.builder()
+            .subject(authentication.getName())
+            .issuedAt(new Date(System.currentTimeMillis()))
+            .expiration(new Date(System.currentTimeMillis() + refreshExpirationTime))
+            .signWith(SignatureAlgorithm.HS256, refreshSecretKey)
+            .compact();
     }
 
     public Authentication getAuthentication(String token) {
@@ -72,7 +87,8 @@ public class JwtProvider {
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
-    public boolean validateToken(String token) {
+    public boolean validateToken(String token, KeyType key) {
+        SecretKey secretKey = key.equals(KeyType.SECRET) ? this.secretKey : this.refreshSecretKey;
         try {
             Jwts.parser()
                     .verifyWith(secretKey)
@@ -91,6 +107,16 @@ public class JwtProvider {
         }
 
         return false;
+    }
+
+    public String getLoginId(String refreshToken) {
+        Claims claims = Jwts
+            .parser()
+            .verifyWith(refreshSecretKey)
+            .build()
+            .parseSignedClaims(refreshToken)
+            .getPayload();
+        return claims.getSubject();
     }
 
     private String getAuthorities(Authentication authentication) {

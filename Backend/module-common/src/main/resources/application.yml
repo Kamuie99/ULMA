@@ -6,9 +6,9 @@ spring:
     # 마스터 데이터베이스 설정 (쓰기/읽기)
     master:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://${DB_HOST_MASTER:localhost}:3306/${MYSQL_DATABASE:ulma}
-      username: ${MYSQL_USER:root}
-      password: ${MYSQL_PASSWORD:1234}
+      url: jdbc:mysql://$j11e204.p.ssafy.io:3306/contest
+      username: testuser
+      password: testpassword
 
     # 슬레이브 데이터베이스 설정 (읽기 전용)
     slave:

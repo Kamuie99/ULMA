@@ -24,9 +24,9 @@ jooq {
                 logging = Logging.WARN
                 jdbc {
                     driver = 'com.mysql.cj.jdbc.Driver'
-                    url = "jdbc:mysql://${System.getenv('DB_HOST_MASTER') ?: 'localhost'}:3306/${System.getenv('MYSQL_DATABASE') ?: 'ulma'}"
-                    user = System.getenv('MYSQL_USER') ?: 'root'
-                    password = System.getenv('MYSQL_PASSWORD') ?: '1234'
+                    url = "jdbc:mysql://$j11e204.p.ssafy.io:3306/contest"
+                    user = 'testuser'
+                    password = 'testpassword'
                 }
                 generator {
                     name = 'org.jooq.codegen.DefaultGenerator'

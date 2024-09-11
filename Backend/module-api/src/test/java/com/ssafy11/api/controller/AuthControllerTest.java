@@ -20,11 +20,13 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy11.api.config.sms.SmsSender;
 import com.ssafy11.api.config.util.VerificationUtil;
+import com.ssafy11.api.dto.JwtResponse;
 import com.ssafy11.api.dto.MailVerification;
 import com.ssafy11.api.dto.MailVerificationRequest;
 import com.ssafy11.api.dto.SmsVerification;
 import com.ssafy11.api.dto.SmsVerificationRequest;
 import com.ssafy11.api.dto.UserJoinRequest;
+import com.ssafy11.api.dto.UserLoginRequest;
 import com.ssafy11.api.service.AuthService;
 import com.ssafy11.domain.users.UserDao;
 
@@ -67,7 +69,7 @@ class AuthControllerTest {
 		given(authService.isRegisterdNumber(anyString())).willReturn(false);
 
 		// when
-		ResultActions resultActions = this.mockMvc.perform(post("/auth/phone")
+		ResultActions resultActions = this.mockMvc.perform(post("/api/auth/phone")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content("{\"phoneNumber\": \"" + phoneNumber + "\"}"));
 
@@ -84,12 +86,12 @@ class AuthControllerTest {
 		given(authService.isRegisterdNumber(anyString())).willReturn(true);
 
 		// when
-		ResultActions resultActions = this.mockMvc.perform(post("/auth/phone")
+		ResultActions resultActions = this.mockMvc.perform(post("/api/auth/phone")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content("{\"phoneNumber\": \"" + phoneNumber + "\"}"));
 
 		// then
-		resultActions.andExpect(status().isBadRequest());
+		resultActions.andExpect(status().isConflict());
 		verify(authService, times(1)).sendSms(any());
 	}
 
@@ -105,7 +107,7 @@ class AuthControllerTest {
 		SmsVerificationRequest request = new SmsVerificationRequest(phoneNumber, smsCode);
 
 		// when
-		ResultActions resultActions = this.mockMvc.perform(put("/auth/phone")
+		ResultActions resultActions = this.mockMvc.perform(put("/api/auth/phone")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(this.objectMapper.writeValueAsString(request)));
 
@@ -125,7 +127,7 @@ class AuthControllerTest {
 		SmsVerificationRequest request = new SmsVerificationRequest(phoneNumber, "incorrect");
 
 		// when
-		ResultActions resultActions = this.mockMvc.perform(put("/auth/phone")
+		ResultActions resultActions = this.mockMvc.perform(put("/api/auth/phone")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(this.objectMapper.writeValueAsString(request)));
 
@@ -143,7 +145,7 @@ class AuthControllerTest {
 		SmsVerificationRequest request = new SmsVerificationRequest(phoneNumber, smsCode);
 
 		// when
-		ResultActions resultActions = this.mockMvc.perform(put("/auth/phone")
+		ResultActions resultActions = this.mockMvc.perform(put("/api/auth/phone")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(this.objectMapper.writeValueAsString(request)));
 
@@ -159,13 +161,13 @@ class AuthControllerTest {
 		given(authService.isRegisterdEmail(anyString())).willReturn(false);
 
 		// when
-		ResultActions resultActions = this.mockMvc.perform(post("/auth/email")
+		ResultActions resultActions = this.mockMvc.perform(post("/api/auth/email")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content("{\"email\": \"" + email + "\"}"));
 
 		// then
 		resultActions.andExpect(status().isOk());
-		verify(authService, times(1)).sendEmail(any());
+		verify(authService, times(1)).sendJoinEmail(any());
 	}
 
 	@DisplayName("등록된 이메일에 대해 메일 인증 요청을 하면 실패한다")
@@ -176,13 +178,13 @@ class AuthControllerTest {
 		given(authService.isRegisterdEmail(anyString())).willReturn(true);
 
 		// when
-		ResultActions resultActions = this.mockMvc.perform(post("/auth/email")
+		ResultActions resultActions = this.mockMvc.perform(post("/api/auth/email")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content("{\"email\": \"" + email + "\"}"));
 
 		// then
-		resultActions.andExpect(status().isBadRequest());
-		verify(authService, times(1)).sendEmail(any());
+		resultActions.andExpect(status().isConflict());
+		verify(authService, times(1)).sendJoinEmail(any());
 	}
 
 	@DisplayName("메일 인증이 성공한다")
@@ -197,7 +199,7 @@ class AuthControllerTest {
 		MailVerificationRequest request = new MailVerificationRequest(email, mailCode);
 
 		// when
-		ResultActions resultActions = this.mockMvc.perform(put("/auth/email")
+		ResultActions resultActions = this.mockMvc.perform(put("/api/auth/email")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(this.objectMapper.writeValueAsString(request)));
 
@@ -217,7 +219,7 @@ class AuthControllerTest {
 		MailVerificationRequest request = new MailVerificationRequest(email, "incorrect");
 
 		// when
-		ResultActions resultActions = this.mockMvc.perform(put("/auth/email")
+		ResultActions resultActions = this.mockMvc.perform(put("/api/auth/email")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(this.objectMapper.writeValueAsString(request)));
 
@@ -235,7 +237,7 @@ class AuthControllerTest {
 		MailVerificationRequest request = new MailVerificationRequest(email, mailCode);
 
 		// when
-		ResultActions resultActions = this.mockMvc.perform(put("/auth/email")
+		ResultActions resultActions = this.mockMvc.perform(put("/api/auth/email")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(this.objectMapper.writeValueAsString(request)));
 
@@ -251,7 +253,7 @@ class AuthControllerTest {
 		given(this.authService.isRegisterdLoginId(loginId)).willReturn(true);
 
 		// when
-		ResultActions resultActions = this.mockMvc.perform(get("/auth/loginId")
+		ResultActions resultActions = this.mockMvc.perform(get("/api/auth/loginId")
 			.param("loginId", loginId));
 
 		// then
@@ -270,9 +272,10 @@ class AuthControllerTest {
 			.phoneNumber("01012345678")
 			.loginId("test")
 			.build();
+		doReturn(1).when(this.authService).join(any());
 
 		// when
-		ResultActions resultActions = this.mockMvc.perform(post("/auth/join")
+		ResultActions resultActions = this.mockMvc.perform(post("/api/auth/join")
 			.contentType(MediaType.APPLICATION_JSON)
 			.content(this.objectMapper.writeValueAsString(request)));
 
@@ -280,5 +283,42 @@ class AuthControllerTest {
 		resultActions.andExpect(status().isOk());
 	}
 
+	@DisplayName("아이디, 패스워드가 일치하면 로그인이 성공한다")
+	@Test
+	void login_success() throws Exception {
+		// given
+		String loginId = "test";
+		String password = "password";
+		UserLoginRequest loginRequest = new UserLoginRequest(loginId, password);
+		JwtResponse jwtResponse = new JwtResponse("accessToken", "refreshToken");
+		doReturn(jwtResponse).when(this.authService).login(any());
 
+		// when
+		ResultActions resultActions = this.mockMvc.perform(post("/api/auth/login")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(this.objectMapper.writeValueAsString(loginRequest)));
+
+		// then
+		resultActions.andExpect(status().isOk())
+			.andExpect(jsonPath("accessToken").exists())
+			.andExpect(jsonPath("refreshToken").exists());
+	}
+
+	@DisplayName("리프레시 토큰이 정상적이면 엑세스 토큰을 재발급한다")
+	@Test
+	void getAccessToken_success() throws Exception {
+		// given
+		String refreshToken = "refreshToken";
+		JwtResponse jwtResponse = new JwtResponse("accessToken", "refreshToken");
+		doReturn(jwtResponse).when(this.authService).getAccessToken(any());
+
+		// when
+		ResultActions resultActions = this.mockMvc.perform(post("/api/auth/accessToken")
+			.header("Authorization", "Bearer " + refreshToken));
+
+		// then
+		resultActions.andExpect(status().isOk())
+			.andExpect(jsonPath("accessToken").exists())
+			.andExpect(jsonPath("refreshToken").exists());
+	}
 }

@@ -6,22 +6,25 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ssafy11.api.dto.JwtResponse;
 import com.ssafy11.api.dto.MailRequest;
 import com.ssafy11.api.dto.MailVerificationRequest;
 import com.ssafy11.api.dto.PhoneNumberRequest;
 import com.ssafy11.api.dto.SmsVerificationRequest;
 import com.ssafy11.api.dto.UserJoinRequest;
+import com.ssafy11.api.dto.UserLoginRequest;
 import com.ssafy11.api.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
 	private final AuthService authService;
@@ -34,7 +37,7 @@ public class AuthController {
 	}
 
 	@PutMapping("/phone")
-	public ResponseEntity<?> authenticationPhone(@RequestBody SmsVerificationRequest verification) {
+	public ResponseEntity<?> authenticatePhone(@RequestBody SmsVerificationRequest verification) {
 		Assert.notNull(verification, "verification must not be null");
 		boolean verified = this.authService.verifySmsCode(verification.phoneNumber(), verification.verificationCode());
 		if (verified) {
@@ -46,7 +49,7 @@ public class AuthController {
 	@PostMapping("/email")
 	public ResponseEntity<?> authenticateMail(@RequestBody MailRequest mailRequest) {
 		Assert.notNull(mailRequest, "mailRequest must not be null");
-		this.authService.sendEmail(mailRequest.email());
+		this.authService.sendJoinEmail(mailRequest.email());
 		return ResponseEntity.ok().build();
 	}
 
@@ -81,4 +84,21 @@ public class AuthController {
 		Integer join = this.authService.join(joinRequest);
 		return ResponseEntity.ok(join);
 	}
+
+	// TODO : 비밀번호 복호화 구현해야함
+	@PostMapping("/login")
+	public ResponseEntity<JwtResponse> login(@RequestBody UserLoginRequest loginRequest) {
+		Assert.notNull(loginRequest, "loginRequest must not be null");
+		JwtResponse jwtResponse  = this.authService.login(loginRequest);
+		return ResponseEntity.ok(jwtResponse);
+	}
+
+	@PostMapping("/accessToken")
+	public ResponseEntity<JwtResponse> getAccessToken(@RequestHeader("Authorization") String refreshToken) {
+		Assert.notNull(refreshToken, "refreshToken must not be null");
+		JwtResponse jwtResponse = this.authService.getAccessToken(refreshToken);
+		return ResponseEntity.ok(jwtResponse);
+	}
+
+
 }

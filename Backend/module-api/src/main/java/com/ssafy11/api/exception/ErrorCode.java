@@ -15,8 +15,10 @@ public enum ErrorCode {
 	ForbiddenError(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 	BadRequest(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
 	IllegalArgument(HttpStatus.BAD_REQUEST, "인자 값이 잘못되었습니다."),
-	Duplicated(HttpStatus.BAD_REQUEST, "이미 등록된 정보입니다."),
+	Duplicated(HttpStatus.CONFLICT, "이미 등록된 정보입니다."),
 	InternalServer(HttpStatus.INTERNAL_SERVER_ERROR, "잠시 후 다시 시도해주세요"),
+	InvalidToken(HttpStatus.UNAUTHORIZED, "토큰이 잘못되었습니다."),
+	RefreshTokenMismatch(HttpStatus.UNAUTHORIZED, "토큰이 일치하지 않습니다."),
 
 	// 회원
 	PasswordMismatch(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다.");

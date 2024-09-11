@@ -5,7 +5,6 @@ FROM alpine/java:21-jdk AS build
 WORKDIR /app
 
 # Gradle Wrapper 및 설정 파일 복사 (의존성 캐싱용)
-COPY .gradle/ .gradle/
 COPY gradle/ gradle/
 COPY gradlew ./
 COPY settings.gradle ./

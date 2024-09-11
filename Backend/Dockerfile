@@ -20,10 +20,10 @@ COPY module-common/ module-common/
 RUN chmod +x gradlew
 
 # Gradle 의존성 미리 설치
-RUN ./gradlew dependencies --no-daemon
+RUN ./gradlew dependencies --no-daemon --info
 
 # 전체 프로젝트 빌드 (module-common도 함께 빌드됨)
-RUN ./gradlew build --no-daemon
+RUN ./gradlew build --no-daemon --info
 
 # 2단계: 실제 실행 환경
 FROM alpine/java:21-jdk

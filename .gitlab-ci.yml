@@ -2,9 +2,9 @@ stages:
   - build
   - deploy
 
-build:
-  stage: build
+build_backend:
   script:
+    - cd Backend
     - docker build -t backend . \
       --build-arg MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD \
       --build-arg MYSQL_DATABASE=$MYSQL_DATABASE \

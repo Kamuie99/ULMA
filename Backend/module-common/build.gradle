@@ -24,15 +24,15 @@ jooq {
                 logging = Logging.WARN
                 jdbc {
                     driver = 'com.mysql.cj.jdbc.Driver'
-                    url = 'jdbc:mysql://localhost:3306/ulma'
-                    user = 'root'
-                    password = '1234'
+                    url = "jdbc:mysql://${System.getenv('DB_HOST_MASTER') ?: 'localhost'}:3306/${System.getenv('MYSQL_DATABASE') ?: 'ulma'}"
+                    user = System.getenv('MYSQL_USER') ?: 'root'
+                    password = System.getenv('MYSQL_PASSWORD') ?: '1234'
                 }
                 generator {
                     name = 'org.jooq.codegen.DefaultGenerator'
                     database {
                         name = 'org.jooq.meta.mysql.MySQLDatabase'
-                        inputSchema = 'ulma'
+                        inputSchema = System.getenv('MYSQL_DATABASE') ?: 'ulma'
                         forcedTypes {
                             forcedType {
                                 name = 'varchar'

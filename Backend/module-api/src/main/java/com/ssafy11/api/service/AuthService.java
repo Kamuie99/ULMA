@@ -148,9 +148,7 @@ public class AuthService {
 		var authenticationToken = new UsernamePasswordAuthenticationToken(request.loginId(),
 			request.password());
 		Authentication authenticate = this.authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-		if (!authenticate.isAuthenticated()) {
-			throw new ErrorException(ErrorCode.PasswordMismatch);
-		}
+
 		SecurityContextHolder.getContext().setAuthentication(authenticate);
 		String accessToken = this.jwtProvider.createToken(authenticate);
 		String refreshToken = this.jwtProvider.refreshToken(authenticate);

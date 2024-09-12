@@ -10,6 +10,7 @@ dependencies {
     runtimeOnly 'com.mysql:mysql-connector-j'
     jooqGenerator 'com.mysql:mysql-connector-j'
     runtimeOnly 'com.h2database:h2'
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 }
 
 jooq {
@@ -23,6 +24,10 @@ jooq {
             generationTool {
                 logging = Logging.WARN
                 jdbc {
+//                    driver = 'com.mysql.cj.jdbc.Driver'
+//                    url = 'jdbc:mysql://localhost:3306/ulma'
+//                    user = 'root'
+//                    password = '1234'
                     driver = 'com.mysql.cj.jdbc.Driver'
                     url = 'jdbc:mysql://j11e204.p.ssafy.io:3306/contest'
                     user = 'testuser'

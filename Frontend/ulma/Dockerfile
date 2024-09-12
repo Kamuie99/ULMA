@@ -1,6 +1,13 @@
 # 빌드 환경
 FROM node:16-buster AS build
 
+# Java 설치
+RUN apt-get update && apt-get install -y openjdk-21-jdk
+
+# JAVA_HOME 환경 변수 설정
+ENV JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
+ENV PATH=$JAVA_HOME/bin:$PATH
+
 # 작업 디렉토리 설정
 WORKDIR /app
 

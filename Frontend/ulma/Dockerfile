@@ -15,15 +15,3 @@ COPY . .
 
 # React Native Web 빌드
 RUN npm start run-android
-
-# Nginx 사용해 웹 서버로 배포
-FROM nginx:alpine
-
-# 빌드된 웹 파일을 Nginx로 복사
-COPY --from=build /app/build /usr/share/nginx/html
-
-# Nginx 포트 노출
-EXPOSE 80
-
-# Nginx 실행
-CMD ["nginx", "-g", "daemon off;"]

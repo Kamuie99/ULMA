@@ -20,7 +20,7 @@ FROM alpine/java:21-jdk
 WORKDIR /app
 
 # 1단계에서 생성된 JAR 파일 복사 (module-api의 실행 가능한 JAR 파일)
-COPY --from=build /app/module-api/build/libs/module-api.jar /app/module-api.jar
+COPY --from=build /app/module-api/build/libs/module-api-0.0.1-SNAPSHOT-plain.jar /app/module-api.jar
 
 # 애플리케이션 실행 포트 설정
 EXPOSE 8000

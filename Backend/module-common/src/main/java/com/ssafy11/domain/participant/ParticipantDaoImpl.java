@@ -2,6 +2,7 @@ package com.ssafy11.domain.participant;
 
 import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.common.PaginatedResponse;
+import com.ssafy11.domain.participant.dto.Participant;
 import com.ssafy11.domain.participant.dto.Transaction;
 import com.ssafy11.domain.participant.dto.UserRelation;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +48,7 @@ public class ParticipantDaoImpl implements ParticipantDao {
         Integer count = dsl.selectCount()
                 .from(PARTICIPATION)
                 .join(EVENT)
-                .on(EVENT.ID.eq(PARTICIPATION.GUEST_ID))
+                .on(EVENT.ID.eq(PARTICIPATION.EVENT_ID))
                 .where(PARTICIPATION.GUEST_ID.eq(guestId))
                 .and(EVENT.USERS_ID.eq(userId))
                 .fetchOne(0, Integer.class);
@@ -70,17 +71,16 @@ public class ParticipantDaoImpl implements ParticipantDao {
         return new PaginatedResponse<>(result, page, totalItems, totalPages);
     }
 
-//    @Transactional(readOnly = false)
-//    @Override
-//    public Record1<Integer> addGuests( ) {
-//        Record1<Integer> result = dsl.insertInto(GUEST, GUEST.NAME, GUEST.CATEGORY, GUEST.CREATE_AT)
-//                .values(participant.getName(), participant.getCategory(), LocalDateTime.now())
-//                .returningResult(GUEST.ID)
-//                .fetchOne();
-//        Assert.notNull(result.getValue(GUEST.ID), "GUEST_ID 에 null 값은 허용되지 않음");
-//
-//        return result;
-//    }
+    @Transactional(readOnly = false)
+    @Override
+    public Integer addParticipant(Participant participant) {
+        Integer result = dsl.insertInto(PARTICIPATION, PARTICIPATION.EVENT_ID, PARTICIPATION.GUEST_ID, PARTICIPATION.AMOUNT, PARTICIPATION.CREATE_AT)
+                .values(participant.getEventId(), participant.getGuestId(), participant.getAmount(), LocalDateTime.now())
+                .execute();
+        return result;
+    }
+
+
 
     @Transactional(readOnly = false)
     @Override

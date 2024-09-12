@@ -24,6 +24,10 @@ jooq {
             generationTool {
                 logging = Logging.WARN
                 jdbc {
+//                    driver = 'com.mysql.cj.jdbc.Driver'
+//                    url = 'jdbc:mysql://localhost:3306/ulma'
+//                    user = 'root'
+//                    password = '1234'
                     driver = 'com.mysql.cj.jdbc.Driver'
                     url = 'jdbc:mysql://j11e204.p.ssafy.io:3306/contest'
                     user = 'testuser'
@@ -33,7 +37,7 @@ jooq {
                     name = 'org.jooq.codegen.DefaultGenerator'
                     database {
                         name = 'org.jooq.meta.mysql.MySQLDatabase'
-                        inputSchema = 'ulma'
+                        inputSchema = 'contest'
                         forcedTypes {
                             forcedType {
                                 name = 'varchar'

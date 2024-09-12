@@ -34,6 +34,8 @@ RUN echo "Building with MySQL root password: ${MYSQL_ROOT_PASSWORD}" && \
 # gradlew 실행 권한 부여
 RUN chmod +x gradlew
 
+RUN ./gradlew generateJooq
+
 # 빌드
 RUN ./gradlew build --no-daemon
 

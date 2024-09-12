@@ -37,7 +37,7 @@ RUN chmod +x gradlew
 RUN ./gradlew generateJooq
 
 # 빌드
-RUN ./gradlew build --no-daemon
+RUN ./gradlew build --no-daemon --info
 
 # 2단계: 실제 실행 환경
 FROM alpine/java:21-jdk

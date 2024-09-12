@@ -2,6 +2,7 @@ package com.ssafy11.api.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -29,6 +30,12 @@ public class ExceptionController {
 	public ResponseEntity<?> handleIllegalArgumentException(IllegalArgumentException ex) {
 		log.warn(ex.getMessage());
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+	}
+
+	@ExceptionHandler(BadCredentialsException.class)
+	public ResponseEntity<?> handleBadCredentialsException(BadCredentialsException ex) {
+		log.warn(ex.getMessage());
+		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("아이디 또는 비밀번호가 일치하지 않습니다.");
 	}
 
 }

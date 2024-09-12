@@ -1,15 +1,15 @@
 package com.ssafy11.domain.participant.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
-@Builder
 @Getter
-public class Participant { //이벤트에 대한 참가자의 경조사비 여부
-    Integer guestId;
-    String guestName;
-    String category;
-    Integer amount;
+@AllArgsConstructor
+@NoArgsConstructor
+public class Participant {
+    private Integer eventId;
+    private Integer guestId;
+    private Integer amount;
 }

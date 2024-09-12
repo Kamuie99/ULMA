@@ -1,8 +1,12 @@
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 
 function App() {
-  return <View style={styles.container}></View>;
+  return (
+    <View style={styles.container}>
+      <Text>안녕</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

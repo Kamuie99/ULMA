@@ -1,35 +1,11 @@
 # 1단계: 빌드 환경
 FROM alpine/java:21-jdk AS build
 
-# Build-time arguments (MySQL 정보)
-ARG MYSQL_ROOT_PASSWORD
-ARG MYSQL_DATABASE
-ARG MYSQL_USER
-ARG MYSQL_PASSWORD
-ARG MYSQL_REPLICATION_USER
-ARG MYSQL_REPLICATION_PASSWORD
-
-# Run-time environment variables (optional)
-ENV MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-ENV MYSQL_DATABASE=${MYSQL_DATABASE}
-ENV MYSQL_USER=${MYSQL_USER}
-ENV MYSQL_PASSWORD=${MYSQL_PASSWORD}
-ENV MYSQL_REPLICATION_USER=${MYSQL_REPLICATION_USER}
-ENV MYSQL_REPLICATION_PASSWORD=${MYSQL_REPLICATION_PASSWORD}
-
 # 컨테이너 내 작업 디렉토리 설정
 WORKDIR /app
 
 # 빌드에 필요한 파일 복사
 COPY . .
-
-# MySQL 환경 변수들을 빌드에서 사용
-RUN echo "Building with MySQL root password: ${MYSQL_ROOT_PASSWORD}" && \
-    echo "MySQL Database: ${MYSQL_DATABASE}" && \
-    echo "MySQL User: ${MYSQL_USER}" && \
-    echo "MySQL Password: ${MYSQL_PASSWORD}" && \
-    echo "MySQL Replication User: ${MYSQL_REPLICATION_USER}" && \
-    echo "MySQL Replication Password: ${MYSQL_REPLICATION_PASSWORD}"
 
 # gradlew 실행 권한 부여
 RUN chmod +x gradlew

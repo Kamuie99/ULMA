@@ -1,8 +1,6 @@
 # 1단계: 빌드 환경
 FROM alpine/java:21-jdk AS build
 
-
-
 # 컨테이너 내 작업 디렉토리 설정
 WORKDIR /app
 
@@ -13,7 +11,7 @@ COPY . .
 RUN chmod +x gradlew
 
 # 빌드
-RUN ./gradlew build --no-daemon --info
+RUN ./gradlew build --no-daemon
 
 # 2단계: 실제 실행 환경
 FROM alpine/java:21-jdk

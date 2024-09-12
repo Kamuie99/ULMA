@@ -10,8 +10,6 @@ dependencies {
     runtimeOnly 'com.mysql:mysql-connector-j'
     jooqGenerator 'com.mysql:mysql-connector-j'
     runtimeOnly 'com.h2database:h2'
-
-    // Jakarta Validation API 의존성 추가
     implementation 'jakarta.validation:jakarta.validation-api:3.0.2'
 }
 }

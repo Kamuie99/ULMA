@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # React Native Web 빌드
-RUN npm run build
+RUN npm start build
 
 # Nginx 사용해 웹 서버로 배포
 FROM nginx:alpine

@@ -58,7 +58,7 @@ class AuthServiceTest {
 		// given
 		String refreshToken = "refresh_token";
 		Users users = Users.builder()
-			.userId("test")
+			.loginId("test")
 			.name("test")
 			.password("test")
 			.refreshToken(refreshToken)
@@ -87,7 +87,7 @@ class AuthServiceTest {
 		// given
 		String refreshToken = "refresh_token";
 		Users users = Users.builder()
-			.userId("test")
+			.loginId("test")
 			.name("test")
 			.password("test")
 			.refreshToken("different")

@@ -6,6 +6,9 @@ plugins {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jooq'
+    implementation 'org.jooq:jooq:3.19.11'
+    implementation 'org.jooq:jooq-codegen:3.19.11'
+    jooqGenerator 'org.jooq:jooq-meta:3.19.11'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     runtimeOnly 'com.mysql:mysql-connector-j'
     jooqGenerator 'com.mysql:mysql-connector-j'
@@ -62,3 +65,7 @@ jooq {
         }
     }
 }
+
+bootJar.enabled = false
+
+jar.enabled = true

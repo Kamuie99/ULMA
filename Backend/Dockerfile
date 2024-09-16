@@ -5,7 +5,7 @@ FROM alpine/java:21-jdk
 WORKDIR /app
 
 # JAR 파일 복사
-COPY module-api/build/libs/module-api-0.0.1-SNAPSHOT-plain.jar /app/module-api.jar
+COPY module-api/build/libs/*.jar /app/module-api.jar
 
 # 애플리케이션 실행
 CMD ["java", "-jar", "/app/module-api.jar"]

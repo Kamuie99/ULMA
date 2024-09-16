@@ -17,12 +17,5 @@ public class AppRunner implements ApplicationRunner {
 
 	@Override
 	public void run(ApplicationArguments args) throws Exception {
-		UserCommand userCommand = UserCommand.builder()
-			.email("test1@test.com")
-			.password("test")
-			.name("daeho")
-			.build();
-		Integer save = this.userDao.save(userCommand);
-		System.out.println(save);
 	}
 }

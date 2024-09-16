@@ -20,5 +20,6 @@ dependencies {
 
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    testImplementation 'org.springframework.security:spring-security-test'
     implementation 'com.github.codemonstur:embedded-redis:1.4.3'
 }

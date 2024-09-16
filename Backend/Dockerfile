@@ -1,6 +1,9 @@
 # Java 21 이미지 사용
 FROM alpine/java:21-jdk
 
+# 컨테이너 내 작업 디렉토리 설정
+WORKDIR /app
+
 # JAR 파일 복사
 COPY module-api/build/libs/module-api-0.0.1-SNAPSHOT-plain.jar /app/module-api.jar
 

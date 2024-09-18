@@ -1,5 +1,7 @@
-import React, {ForwardedRef, forwardRef, useRef} from 'react';
+/* eslint-disable prettier/prettier */
+import React, {ForwardedRef, forwardRef, useRef, useState} from 'react';
 import {
+  Dimensions,
   Pressable,
   StyleSheet,
   Text,
@@ -16,11 +18,12 @@ interface InputFieldProps extends TextInputProps {
   touched?: boolean;
 }
 
+const deviceHeight = Dimensions.get('screen').height;
+
+const [text, onChangeText] = useState('');
+
 const InputField = forwardRef(
-  (
-    {disabled = false, error, touched, ...props}: InputFieldProps,
-    ref?: ForwardedRef<TextInput>,
-  ) => {
+  ({disabled = false, ...props}: InputFieldProps) => {
     const innerRef = useRef<TextInput | null>(null);
 
     const handlePressInput = () => {
@@ -28,17 +31,37 @@ const InputField = forwardRef(
     };
 
     return (
-      <Pressable>
-        <View>
-          {touched && Boolean(error) && (
-            <Text style={styles.error}>{error}</Text>
-          )}
+      <Pressable onPress={handlePressInput}>
+        <View style={styles.container}>
+          <TextInput
+            style={[styles.input, disabled && styles.disabled]}
+            placeholderTextColor={colors.GRAY}
+            value={text}
+            onChangeText={onChangeText}
+            spellCheck={false}
+            autoCorrect={false}
+          />
         </View>
       </Pressable>
     );
   },
 );
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: {
+    borderWidth: 1,
+    borderColor: colors.GREEN_700,
+    height: 20,
+  },
+  input: {
+    color: 'black',
+    padding: 10,
+    fontSize: 15,
+  },
+  disabled: {
+    backgroundColor: colors.GRAY,
+    color: colors.GRAY,
+  },
+});
 
 export default InputField;

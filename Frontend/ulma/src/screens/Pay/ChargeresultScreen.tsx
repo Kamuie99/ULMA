@@ -1,60 +1,45 @@
-// 충전결과 페이지
-import React, {useState} from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+//충전결과확인
+import React from 'react';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 
-const PayRechargePage = () => {
-  const [amount, setAmount] = useState<string>(''); // 충전 금액
+const RechargeResult = () => {
   const navigation = useNavigation();
-
-  // 금액 입력 핸들러 (숫자만 입력 가능)
-  const handleAmountChange = (text: string) => {
-    const numericValue = text.replace(/[^0-9]/g, ''); // 숫자 이외의 문자 제거
-    setAmount(numericValue);
-  };
-
-  // 충전하기 버튼 클릭 핸들러
-  const handleRecharge = () => {
-    // 충전 로직 구현
-    console.log(`충전 금액: ${amount}`);
-  };
+  const route = useRoute();
+  const {amount} = route.params as {amount: string};
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-        <Text style={styles.backText}>뒤로가기</Text>
-      </TouchableOpacity>
-
-      <Text style={styles.title}>Pay 충전하기</Text>
-
-      <View style={styles.rechargeBox}>
-        <View style={styles.amountRow}>
-          <Text style={styles.label}>충전 금액</Text>
-          <View style={styles.amountInputContainer}>
-            <TextInput
-              style={styles.amountInput}
-              placeholder="0"
-              placeholderTextColor="#BDBDBD"
-              value={amount}
-              keyboardType="numeric"
-              onChangeText={handleAmountChange}
-            />
-            <Text style={styles.currencyText}>원</Text>
-          </View>
-        </View>
-
-        <Text style={styles.infoText}>충전 계좌: 000-1111-00-1111</Text>
-        <Text style={styles.infoText}>충전 후 잔액: 354,000 원</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Pay 충전하기</Text>
       </View>
 
-      <TouchableOpacity style={styles.rechargeButton} onPress={handleRecharge}>
-        <Text style={styles.rechargeButtonText}>충전하기</Text>
+      <View style={styles.content}>
+        <Text style={styles.label}>충전 결과</Text>
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoText}>충전 계좌</Text>
+          <Text style={styles.infoText}>000-1111-00-1111</Text>
+        </View>
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoText}>충전 금액</Text>
+          <Text style={styles.infoText}>
+            {Number(amount).toLocaleString()} 원
+          </Text>
+        </View>
+        <View style={styles.infoContainer}>
+          <Text style={styles.infoText}>충전 후 잔액</Text>
+          <Text style={styles.infoText}>354,000 원</Text>
+        </View>
+
+        <Text style={styles.successText}>
+          충전이 성공적으로 완료되었습니다.
+        </Text>
+      </View>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => navigation.goBack()}>
+        <Text style={styles.buttonText}>확인</Text>
       </TouchableOpacity>
     </View>
   );
@@ -63,72 +48,53 @@ const PayRechargePage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: '#fff',
-  },
-  backButton: {
-    marginBottom: 20,
-  },
-  backText: {
-    fontSize: 16,
-    color: '#00C77F',
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 30,
-  },
-  rechargeBox: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 10,
-    padding: 20,
-    marginBottom: 30,
-  },
-  amountRow: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
+    paddingHorizontal: 20,
+  },
+  header: {
+    marginTop: 50,
     alignItems: 'center',
-    marginBottom: 20,
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  content: {
+    padding: 20,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 10,
   },
   label: {
     fontSize: 16,
-    color: '#333',
-  },
-  amountInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#00C77F',
-  },
-  amountInput: {
-    fontSize: 24,
-    color: '#000',
-    paddingVertical: 5,
-    textAlign: 'right',
-    width: 120, // 금액 입력 필드의 너비
-  },
-  currencyText: {
-    fontSize: 18,
-    color: '#000',
-    marginLeft: 5,
-  },
-  infoText: {
-    fontSize: 14,
-    color: '#555',
+    color: '#666',
     marginBottom: 10,
   },
-  rechargeButton: {
+  infoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginVertical: 10,
+  },
+  infoText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  successText: {
+    marginTop: 20,
+    fontSize: 16,
+    color: '#FF6F61',
+    textAlign: 'center',
+  },
+  button: {
     backgroundColor: '#00C77F',
     paddingVertical: 15,
-    borderRadius: 5,
     alignItems: 'center',
+    borderRadius: 5,
   },
-  rechargeButtonText: {
+  buttonText: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    fontSize: 18,
   },
 });
 
-export default PayRechargePage;
+export default RechargeResult;

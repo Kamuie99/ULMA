@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
@@ -19,6 +18,7 @@ import java.util.List;
 import static com.ssafy11.ulma.generated.Tables.*;
 
 @Repository
+@Transactional
 @RequiredArgsConstructor
 public class ParticipantDaoImpl implements ParticipantDao {
 
@@ -41,9 +41,9 @@ public class ParticipantDaoImpl implements ParticipantDao {
 
     @Transactional(readOnly = true)
     @Override
-    public PaginatedResponse<Transaction> getTransactions(Integer userId, Integer guestId, PageDto pagedto) {
-        int size = pagedto.getSize();
-        int page = pagedto.getPage();
+    public PaginatedResponse<Transaction> getTransactions(Integer userId, Integer guestId, PageDto pageDto) {
+        int size = pageDto.getSize();
+        int page = pageDto.getPage();
 
         Integer count = dsl.selectCount()
                 .from(PARTICIPATION)
@@ -71,7 +71,6 @@ public class ParticipantDaoImpl implements ParticipantDao {
         return new PaginatedResponse<>(result, page, totalItems, totalPages);
     }
 
-    @Transactional(readOnly = false)
     @Override
     public Integer addParticipant(Participant participant) {
         Integer result = dsl.insertInto(PARTICIPATION, PARTICIPATION.EVENT_ID, PARTICIPATION.GUEST_ID, PARTICIPATION.AMOUNT, PARTICIPATION.CREATE_AT)
@@ -80,18 +79,55 @@ public class ParticipantDaoImpl implements ParticipantDao {
         return result;
     }
 
-
-
-    @Transactional(readOnly = false)
     @Override
-    public Record1<Integer> addFriends(Integer userId, Integer guestId) {
-        Record1<Integer> result = dsl.insertInto(USERS_RELATION, USERS_RELATION.USERS_ID, USERS_RELATION.GUEST_ID, USERS_RELATION.CREATE_AT)
-                .values(userId, guestId, LocalDateTime.now())
-                .returningResult(USERS_RELATION.GUEST_ID) //차후 수정하기
+    public Integer addGuests(String name, String category) {
+        Record1<Integer> saveGuest = dsl.insertInto(GUEST, GUEST.NAME, GUEST.CATEGORY, GUEST.CREATE_AT)
+                .values(name, category, LocalDateTime.now())
+                .returningResult(GUEST.ID)
                 .fetchOne();
-        Assert.notNull(result, "Insert operation failed, no result returned");
-        return result;
 
+        Assert.notNull(saveGuest.getValue(GUEST.ID), "EVENT_ID 에 null 값은 허용되지 않음");
+        return saveGuest.getValue(GUEST.ID);
     }
+
+    @Override
+    public Integer addUserRelation(Integer guestId, Integer userId) {
+        Integer result = dsl.insertInto(USERS_RELATION, USERS_RELATION.USERS_ID, USERS_RELATION.GUEST_ID, USERS_RELATION.CREATE_AT)
+                .values(userId, guestId, LocalDateTime.now())
+                .execute();
+        return result;
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public PaginatedResponse<UserRelation> getUserRelations(Integer userId, PageDto pageDto) {
+        int size = pageDto.getSize();
+        int page = pageDto.getPage();
+
+        Integer count = dsl.selectCount()
+                .from(USERS_RELATION)
+                .join(GUEST)
+                .on(USERS_RELATION.GUEST_ID.eq(GUEST.ID))
+                .where(USERS_RELATION.USERS_ID.eq(userId))
+                .fetchOne(0, Integer.class);
+
+        int totalItems = (count != null) ? count : 0;
+        int totalPages = (int) Math.ceil((double) totalItems/size);
+
+        int offset = (page-1) * size;
+
+        List<UserRelation> result = dsl.select(USERS_RELATION.GUEST_ID, GUEST.NAME, GUEST.CATEGORY)
+                .from(USERS_RELATION)
+                .join(GUEST)
+                .on(USERS_RELATION.GUEST_ID.eq(GUEST.ID))
+                .where(USERS_RELATION.USERS_ID.eq(userId))
+                .limit(size)
+                .offset(offset)
+                .fetchInto(UserRelation.class);
+
+        return new PaginatedResponse<>(result, page, totalItems, totalPages);
+    }
+
+
 
 }

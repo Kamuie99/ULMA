@@ -4,13 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
-public class Participant {
-    private Integer eventId;
-    private Integer guestId;
-    private Integer amount;
-    private Integer userId;
+@AllArgsConstructor
+public class AddGuestResponse {
+    String name;
+    String category;
+    Integer userId;
 }

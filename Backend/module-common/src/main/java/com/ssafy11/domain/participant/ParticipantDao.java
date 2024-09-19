@@ -13,5 +13,7 @@ public interface ParticipantDao {
     List<UserRelation> sameName(Integer userId, String name);
     PaginatedResponse<Transaction> getTransactions(Integer userId, Integer guestId, PageDto pageDto);
     Integer addParticipant(Participant participant);
-    Record1<Integer> addFriends(Integer userId, Integer guestId);
+    Integer addGuests(String name, String category);
+    Integer addUserRelation(Integer guestId, Integer userId);
+    PaginatedResponse<UserRelation> getUserRelations(Integer userId, PageDto pageDto);
 }

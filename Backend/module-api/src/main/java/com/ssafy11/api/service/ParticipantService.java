@@ -3,12 +3,11 @@ package com.ssafy11.api.service;
 import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.common.PaginatedResponse;
 import com.ssafy11.domain.participant.ParticipantDao;
+import com.ssafy11.domain.participant.dto.AddGuestResponse;
 import com.ssafy11.domain.participant.dto.Participant;
 import com.ssafy11.domain.participant.dto.Transaction;
 import com.ssafy11.domain.participant.dto.UserRelation;
 import lombok.RequiredArgsConstructor;
-import org.jooq.Record1;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -42,5 +41,19 @@ public class ParticipantService {
         return participantDao.addParticipant(participant);
     }
 
+    public Integer addGuestAndUserRelation(AddGuestResponse addGuestResponse){
+        Assert.notNull(addGuestResponse, "addGuestResponse is required");
+        Integer guestId = participantDao.addGuests(addGuestResponse.getName(), addGuestResponse.getCategory());
+        Assert.notNull(guestId, "guestId is required");
+        return participantDao.addUserRelation(guestId, addGuestResponse.getUserId());
+
+    }
+
+    @Transactional(readOnly = false)
+    public PaginatedResponse<UserRelation> getUserRelation(Integer userId, PageDto pagedto) {
+        Assert.notNull(userId, "userId is required");
+        PaginatedResponse<UserRelation> userRelationList = participantDao.getUserRelations(userId, pagedto);
+        return userRelationList;
+    }
 
 }

@@ -1,4 +1,5 @@
 plugins {
+    id "org.sonarqube" version "5.0.0.4638"
     id 'java'
     id 'org.springframework.boot' version '3.3.3' apply false
     id 'io.spring.dependency-management' version '1.1.6' apply false
@@ -53,5 +54,13 @@ subprojects {
 
     test {
         useJUnitPlatform()
+    }
+}
+
+
+sonar {
+    properties {
+        property "sonar.projectKey", "s11-fintech-finance-sub1_S11P21E204_bcdede1e-ca0a-452b-9519-bb727bd39561"
+        property "sonar.projectName", "S11P21E204"
     }
 }

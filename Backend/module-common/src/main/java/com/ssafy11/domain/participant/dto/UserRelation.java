@@ -7,6 +7,6 @@ import lombok.Getter;
 @Getter
 public class UserRelation { //사용자의 지인
     Integer guestId;
-    String guestName;
+    String name;
     String category;
 }

@@ -12,7 +12,7 @@ import ChangeresultScreen from '@/screens/Pay/ChargeresultScreen';
 import FriendshipselectScreen from '@/screens/Pay/FriendshipselectScreen';
 import SendresultScreen from '@/screens/Pay/SendresultScreen';
 import PaylistScreen from '@/screens/Pay/PaylistScreen';
-import PayrechargingScreen from '@/screens/Pay/PayrecharginScreen';
+import PayrechargingScreen from '@/screens/Pay/PayrechargingScreen';
 import RecommendOptionScreen from '@/screens/Pay/RecommendOptionScreen';
 import SendingScreen from '@/screens/Pay/SendingScreen';
 
@@ -65,14 +65,14 @@ function PayStackNavigator() {
           headerShown: false,
         }}
       /> */}
-      {/* <Stack.Screen
+      <Stack.Screen
         name={payNavigations.PAY_RECHARGE}
         component={PayrechargingScreen}
         options={{
           headerTitle: ' ',
           headerShown: false,
         }}
-      /> */}
+      />
       {/* <Stack.Screen
         name={payNavigations.RECOMMEND_OPTION}
         component={RecommendOptionScreen}

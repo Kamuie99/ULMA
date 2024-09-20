@@ -6,9 +6,11 @@ import {StyleSheet, View} from 'react-native';
 import {colors} from '@/constants';
 import Icon from 'react-native-vector-icons/Entypo';
 import SettingHomeScreen from '@/screens/Setting/SettingHomeScreen';
+import UserDetailScreen from '@/screens/Setting/UserDetailScreen';
 
 export type settingStackParamList = {
   [settingNavigations.SETTING_HOME]: undefined;
+  [settingNavigations.USER_DETAIL]: undefined;
 };
 
 const Stack = createStackNavigator<settingStackParamList>();
@@ -38,6 +40,14 @@ function SettingStackNavigator() {
         options={{
           headerTitle: ' ',
           headerShown: false,
+        }}
+      />      
+      <Stack.Screen
+        name={settingNavigations.USER_DETAIL}
+        component={UserDetailScreen}
+        options={{
+          headerTitle: ' ',
+          headerShown: true,
         }}
       />
     </Stack.Navigator>

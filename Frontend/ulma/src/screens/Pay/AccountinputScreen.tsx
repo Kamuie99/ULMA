@@ -12,7 +12,7 @@ import {
 
 const BankOptions = ['국민은행', '신한은행', '하나은행', '우리은행'];
 
-const PayTransferScreen: React.FC = () => {
+const AccountinputScreen: React.FC = () => {
   const [selectedBank, setSelectedBank] = useState<string>(''); // 선택된 은행
   const [accountNumber, setAccountNumber] = useState<string>(''); // 계좌번호 입력값
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false); // 모달 가시성
@@ -201,4 +201,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PayTransferScreen;
+export default AccountinputScreen;

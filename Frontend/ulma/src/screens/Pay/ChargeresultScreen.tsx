@@ -3,7 +3,7 @@ import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 
-const RechargeResult = () => {
+const ChangeresultScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const {amount} = route.params as {amount: string};
@@ -97,4 +97,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RechargeResult;
+export default ChangeresultScreen;

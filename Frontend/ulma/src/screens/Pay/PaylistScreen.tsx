@@ -20,7 +20,7 @@ interface Transaction {
   type: 'send' | 'receive';
 }
 
-const PayPage = () => {
+const PaylistScreen = () => {
   const [searchMode, setSearchMode] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [transactions] = useState<Transaction[]>([
@@ -124,7 +124,7 @@ const PayPage = () => {
       <FlatList
         data={transactions}
         renderItem={renderTransaction}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         style={styles.transactionList}
       />
 
@@ -230,4 +230,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PayPage;
+export default PaylistScreen;

@@ -2,7 +2,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Alert} from 'react-native';
 
-export default function EventDetails() {
+export default function AddhistoryScreen() {
   return (
     <View style={styles.container}>
       {/* 상단 이벤트 제목 */}

@@ -9,7 +9,7 @@ import {
   Button,
 } from 'react-native';
 
-const EventScreen = () => {
+const FriendshipselectScreen = () => {
   // 선택된 이모지 인덱스를 관리
   const [selectedEmoji, setSelectedEmoji] = useState<number | null>(null);
 
@@ -138,4 +138,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EventScreen;
+export default FriendshipselectScreen;

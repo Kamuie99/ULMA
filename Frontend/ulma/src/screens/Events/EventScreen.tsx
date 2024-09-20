@@ -2,7 +2,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
 import {NavigationProp} from '@react-navigation/native';
-import BottomBar from 'src/components/common/BottomBar'; // 하단바 컴포넌트 임포트
+import BottomBar from '@/components/common/BottomBar'; // 하단바 컴포넌트 임포트
 
 interface Event {
   id: string;
@@ -36,7 +36,7 @@ const events: Event[] = [
   },
 ];
 
-const EventPage = ({navigation}: {navigation: NavigationProp<any>}) => {
+const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
   const renderItem = ({item}: {item: Event}) => (
     <TouchableOpacity
       style={styles.eventBox}
@@ -117,4 +117,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EventPage;
+export default EventScreen;

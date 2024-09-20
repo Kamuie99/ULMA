@@ -14,7 +14,7 @@ import BottomBar from '../../components/common/BottomBar'; // 하단 바 컴포�
 const EventDateScreen = () => {
   const [date, setDate] = useState('');
   const route = useRoute();
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
 
   // 이전 페이지에서 입력받은 이벤트 제목
   const {eventTitle} = route.params as {eventTitle: string};
@@ -25,7 +25,7 @@ const EventDateScreen = () => {
       Alert.alert('날짜를 입력하세요.');
       return;
     }
-    navigation.navigate('다음페이지'); // 다음 페이지로 이동-내비게이션나중에설정
+    // navigation.navigate('다음페이지'); // 다음 페이지로 이동-내비게이션나중에설정
   };
 
   return (

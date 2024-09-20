@@ -70,9 +70,6 @@ const EventAddScreen = () => {
       <TouchableOpacity style={styles.saveButton} onPress={handleSaveEvent}>
         <Text style={styles.saveButtonText}>확인</Text>
       </TouchableOpacity>
-
-      {/* 하단 바 추가 */}
-      <BottomBar />
     </View>
   );
 };

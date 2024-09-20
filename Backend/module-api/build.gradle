@@ -1,6 +1,10 @@
 bootJar.enabled = true
 jar.enabled = false
 
+plugins {
+    id "org.sonarqube" version "5.0.0.4638"
+}
+
 dependencies {
     implementation project(':module-common')
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -22,10 +26,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     testImplementation 'org.springframework.security:spring-security-test'
     implementation 'com.github.codemonstur:embedded-redis:1.4.3'
-}
-
-plugins {
-    id "org.sonarqube" version "5.0.0.4638"
 }
 
 sonar {

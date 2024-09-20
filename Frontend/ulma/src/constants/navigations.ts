@@ -16,7 +16,7 @@ const payNavigations = {
   ADD_HISTORY: 'Addhistory',
   CHANGE_RESULT: 'Changeresult',
   PAY_LIST: 'Paylist',
-  PAY_RECHARGE: 'Payrecharging',
+  PAY_RECHARGE: 'Payrecharge',
   FRIENDHSHIP_SECLECT: 'Friendshipselect',
   RECOMMEND_OPTION: 'RecommendOption',
   SENDING: 'Sending',
@@ -25,6 +25,7 @@ const payNavigations = {
 
 const settingNavigations = {
   SETTING_HOME: 'SettingHome',
+  USER_DETAIL: 'UserDetail'
 } as const;
 
 export {authNavigations, eventNavigations, payNavigations, settingNavigations};

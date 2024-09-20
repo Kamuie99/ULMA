@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 
-const TransferResultScreen = () => {
+const SendresultScreen = () => {
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -112,4 +112,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TransferResultScreen;
+export default SendresultScreen;

@@ -2,7 +2,7 @@ import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
-const RecommendationScreen: React.FC = () => {
+const RecommendOptionScreen: React.FC = () => {
   const navigation = useNavigation();
 
   // 네비게이션 이동을 처리하는 함수
@@ -92,4 +92,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RecommendationScreen;
+export default RecommendOptionScreen;

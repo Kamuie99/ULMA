@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
-const RechargeScreen = () => {
+const PayrechargingScreen = () => {
   const [amount, setAmount] = useState<string>('300000'); // 초기값 300,000원 (사용자가 입력 가능)
 
   // <any>를 사용하여 navigate의 파라미터 문제를 해결
@@ -122,4 +122,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default RechargeScreen;
+export default PayrechargingScreen;

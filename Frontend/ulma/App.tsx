@@ -1,17 +1,17 @@
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
 
+import {NavigationContainer} from '@react-navigation/native';
+import RootNavigator from '@/navigations/root/RootNavigator';
+
 function App() {
   return (
-    <View style={styles.container}>
-    </View>
+    <NavigationContainer>
+      <RootNavigator />
+    </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+const styles = StyleSheet.create({});
 
 export default App;

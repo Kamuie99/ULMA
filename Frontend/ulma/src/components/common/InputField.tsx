@@ -1,10 +1,8 @@
-/* eslint-disable prettier/prettier */
 import React, {ForwardedRef, forwardRef, useRef, useState} from 'react';
 import {
   Dimensions,
   Pressable,
   StyleSheet,
-  Text,
   TextInput,
   TextInputProps,
   View,
@@ -14,17 +12,14 @@ import {colors} from '@/constants';
 
 interface InputFieldProps extends TextInputProps {
   disabled?: boolean;
-  error?: string;
-  touched?: boolean;
 }
 
 const deviceHeight = Dimensions.get('screen').height;
 
-const [text, onChangeText] = useState('');
-
 const InputField = forwardRef(
   ({disabled = false, ...props}: InputFieldProps) => {
     const innerRef = useRef<TextInput | null>(null);
+    const [text, onChangeText] = useState(''); // useState 컴포넌트 내부로 이동
 
     const handlePressInput = () => {
       innerRef.current?.focus();
@@ -34,12 +29,14 @@ const InputField = forwardRef(
       <Pressable onPress={handlePressInput}>
         <View style={styles.container}>
           <TextInput
+            ref={innerRef}
             style={[styles.input, disabled && styles.disabled]}
             placeholderTextColor={colors.GRAY}
             value={text}
             onChangeText={onChangeText}
             spellCheck={false}
             autoCorrect={false}
+            {...props}
           />
         </View>
       </Pressable>
@@ -51,10 +48,11 @@ const styles = StyleSheet.create({
   container: {
     borderWidth: 1,
     borderColor: colors.GREEN_700,
-    height: 20,
+    height: 40,
   },
   input: {
-    color: 'black',
+    color: colors.BLACK,
+    backgroundColor: colors.WHITE,
     padding: 10,
     fontSize: 15,
   },

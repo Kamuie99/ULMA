@@ -36,14 +36,14 @@ function EventStackNavigator() {
           return <Icon name="chevron-left" size={24} color={colors.BLACK} />;
         },
       }}>
-      {/* <Stack.Screen
+      <Stack.Screen
         name={eventNavigations.EVENT}
         component={EventScreen}
         options={{
           headerTitle: ' ',
           headerShown: false,
         }}
-      /> */}
+      />
       {/* <Stack.Screen
         name={eventNavigations.EVENT_DATE}
         component={EventDateScreen}
@@ -52,14 +52,14 @@ function EventStackNavigator() {
           headerShown: false,
         }}
       /> */}
-      <Stack.Screen
+      {/* <Stack.Screen
         name={eventNavigations.EVENT_ADD}
         component={EventAddScreen}
         options={{
           headerTitle: ' ',
           headerShown: false,
         }}
-      />
+      /> */}
     </Stack.Navigator>
   );
 }

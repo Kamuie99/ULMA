@@ -62,7 +62,6 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
         keyExtractor={item => item.id}
         renderItem={renderItem}
       />
-      <BottomBar /> {/* 하단 바 컴포넌트 사용 */}
     </View>
   );
 };

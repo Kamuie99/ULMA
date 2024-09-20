@@ -43,9 +43,6 @@ const EventDateScreen = () => {
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>저장</Text>
       </TouchableOpacity>
-
-      {/* 하단 바 추가 */}
-      <BottomBar />
     </View>
   );
 };

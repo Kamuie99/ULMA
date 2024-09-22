@@ -1,7 +1,7 @@
 package com.ssafy11.api.controller;
 
 import com.ssafy11.domain.common.PageDto;
-import com.ssafy11.domain.common.PaginatedResponse;
+import com.ssafy11.domain.common.PageResponse;
 import com.ssafy11.api.service.ParticipantService;
 import com.ssafy11.domain.participant.dto.AddGuestResponse;
 import com.ssafy11.domain.participant.dto.Participant;
@@ -47,16 +47,16 @@ public class ParticipantController {
         Assert.notNull(guestId, "guestID must not be null");
         Assert.isTrue(user.getUsername().equals(String.valueOf(userId)), "User ID does not match");
 
-        PaginatedResponse<Transaction> transactions = participantService.getTransactions(userId, guestId, pagedto);
+        PageResponse<Transaction> transactions = participantService.getTransactions(userId, guestId, pagedto);
         return ResponseEntity.ok(transactions);
     }
 
-    //경조사비 추가
-    @PostMapping("/money") //중복 에러 추가하기
+    //경조사비 추가(직접)
+    @PostMapping("/money")
     public ResponseEntity<?> addParticipant(@AuthenticationPrincipal User user,
                                             @RequestBody Participant participant) {
         Assert.notNull(participant, "participant must not be null");
-        Assert.isTrue(user.getUsername().equals(String.valueOf(participant.getUserId())), "User ID does not match");
+        Assert.isTrue(user.getUsername().equals(String.valueOf(participant.userId())), "User ID does not match");
 
         Integer resultId = participantService.addParticipant(participant);
         return ResponseEntity.ok(resultId);
@@ -67,20 +67,20 @@ public class ParticipantController {
     public ResponseEntity<?> addGuestAndUserRelation(@AuthenticationPrincipal User user,
                                                      @RequestBody AddGuestResponse addGuestResponse) {
         Assert.notNull(addGuestResponse, "addGuestResponse must not be null");
-        Assert.isTrue(user.getUsername().equals(String.valueOf(addGuestResponse.getUserId())), "User ID does not match");
+        Assert.isTrue(user.getUsername().equals(String.valueOf(addGuestResponse.userId())), "User ID does not match");
 
         Integer resultId = participantService.addGuestAndUserRelation(addGuestResponse);
         return ResponseEntity.ok(resultId);
     }
 
-    //등록된 지인 정보 /api/participant/{user_id}
+    //등록된 지인 정보
     @GetMapping("/{userId}")
     public ResponseEntity<?> getParticipants(@AuthenticationPrincipal User user,
                                              @PathVariable("userId") Integer userId,
                                              @ModelAttribute PageDto pagedto) {
         Assert.notNull(userId, "userId must not be null");
         Assert.isTrue(user.getUsername().equals(String.valueOf(userId)), "User ID does not match");
-        PaginatedResponse<UserRelation> transactions = participantService.getUserRelation(userId, pagedto);
+        PageResponse<UserRelation> transactions = participantService.getUserRelation(userId, pagedto);
         return ResponseEntity.ok(transactions);
     }
 

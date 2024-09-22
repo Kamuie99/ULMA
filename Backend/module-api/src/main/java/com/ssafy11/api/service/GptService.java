@@ -1,4 +1,5 @@
 package com.ssafy11.api.service;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,15 +18,26 @@ import java.util.regex.Pattern;
 
 
 @Service
+@Slf4j
 //@Profile("real")
-public class GptService {
+public class GptService implements ChatService{
 
     private static final String API_URL = "https://api.openai.com/v1/chat/completions";
 
     @Value("${openai.api-key}")
     private String apiKey;
 
+    @Value("${openai.api-amount}")
+    private String apiAmount;
+
+    @Value("${openai.api-message}")
+    private String apiMessage;
+
+    @Override
     public String getChatResponse(String prompt, Integer num) {
+        if( num==1 ){ prompt += apiAmount; }
+        else if( num==0 ){ prompt += apiMessage; }
+
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders headers = new HttpHeaders();
@@ -33,7 +45,7 @@ public class GptService {
         headers.set("Content-Type", "application/json");
 
         JSONObject requestBody = new JSONObject();
-        requestBody.put("model", "gpt-3.5-turbo"); // 또는 사용하려는 모델
+        requestBody.put("model", "gpt-3.5-turbo");
         requestBody.put("max_tokens", 500);
         requestBody.put("temperature", 1.0);
         requestBody.put("messages", new JSONArray()
@@ -53,7 +65,8 @@ public class GptService {
             String content = choices.getJSONObject(0).getJSONObject("message").getString("content");
             Assert.notNull(content, "Content is null");
 
-            System.out.println(content);
+            log.info("gpt 답변 : {}", content);
+
             if(num==1) {
                 String amount = extractAmount(content);
                 return amount != null ? amount : "금액을 찾을 수 없습니다.";
@@ -66,13 +79,13 @@ public class GptService {
         }
     }
 
-    private String extractAmount(String content) { //00만원만 파싱
+    private String extractAmount(String content) { //00만원 형식으로 파싱
         Pattern pattern = Pattern.compile("(\\d+)(만원)");
         Matcher matcher = pattern.matcher(content);
 
         if (matcher.find()) {
             return matcher.group();
         }
-        return null; //반환값이 없는 경우 null
+        return null;
     }
 }

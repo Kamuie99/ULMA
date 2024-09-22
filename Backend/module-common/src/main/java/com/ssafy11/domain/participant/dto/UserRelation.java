@@ -4,9 +4,9 @@ import lombok.Builder;
 import lombok.Getter;
 
 @Builder
-@Getter
-public class UserRelation { //사용자의 지인
-    Integer guestId;
-    String name;
-    String category;
+public record UserRelation(
+        Integer guestId,
+        String name,
+        String category) { //사용자의 지인
+
 }

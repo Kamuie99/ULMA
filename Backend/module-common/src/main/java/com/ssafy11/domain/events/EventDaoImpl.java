@@ -2,7 +2,7 @@ package com.ssafy11.domain.events;
 
 import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.events.dto.Event;
-import com.ssafy11.domain.common.PaginatedResponse;
+import com.ssafy11.domain.common.PageResponse;
 import com.ssafy11.domain.participant.dto.EventParticipant;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
@@ -37,7 +37,7 @@ public class EventDaoImpl implements EventDao{
 
     @Transactional(readOnly = true)
     @Override
-    public PaginatedResponse<Event> getEvents(Integer userId, PageDto pageDto) {
+    public PageResponse<Event> getEvents(Integer userId, PageDto pageDto) {
         int size = pageDto.getSize();
         int page = pageDto.getPage();
 
@@ -53,12 +53,12 @@ public class EventDaoImpl implements EventDao{
                 .offset(offset)
                 .fetchInto(Event.class);
 
-        return new PaginatedResponse<>(result, page, totalItems, totalPages);
+        return new PageResponse<>(result, page, totalItems, totalPages);
     }
 
     @Transactional(readOnly = true)
     @Override
-    public PaginatedResponse<EventParticipant> getEvent(Integer eventId, PageDto pageDto) {
+    public PageResponse<EventParticipant> getEvent(Integer eventId, PageDto pageDto) {
 
         int size = pageDto.getSize();
         int page = pageDto.getPage();
@@ -84,6 +84,15 @@ public class EventDaoImpl implements EventDao{
                 .offset(offset)
                 .fetchInto(EventParticipant.class);
 
-        return new PaginatedResponse<>(result, page, totalItems, totalPages);
+        return new PageResponse<>(result, page, totalItems, totalPages);
+    }
+
+    @Override
+    public Integer getEventByUserId(Integer eventId) {
+        Record1<Integer> eventUserId = dsl.select(EVENT.USERS_ID)
+                .from(EVENT)
+                .where(EVENT.ID.eq(eventId))
+                .fetchOne();
+        return eventId;
     }
 }

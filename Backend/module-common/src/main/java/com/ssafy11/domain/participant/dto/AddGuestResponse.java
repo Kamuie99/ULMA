@@ -6,11 +6,5 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-public class AddGuestResponse {
-    String name;
-    String category;
-    Integer userId;
+public record AddGuestResponse (String name, String category, Integer userId){
 }

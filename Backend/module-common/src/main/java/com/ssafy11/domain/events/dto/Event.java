@@ -4,12 +4,10 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-
 @Builder
-@Getter
-public class Event {
-    private Integer id;
-    private String category;
-    private String name;
-    private LocalDateTime eventTime;
-}
+public record Event (
+        Integer id,
+        String category,
+        String name,
+        LocalDateTime eventTime
+){ }

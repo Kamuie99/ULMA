@@ -5,12 +5,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
-public class Participant {
-    private Integer eventId;
-    private Integer guestId;
-    private Integer amount;
-    private Integer userId;
+@Builder
+public record Participant(
+        Integer eventId,
+        Integer guestId,
+        Integer amount,
+        Integer userId
+) {
+
 }

@@ -1,7 +1,7 @@
 package com.ssafy11.domain.participant;
 
 import com.ssafy11.domain.common.PageDto;
-import com.ssafy11.domain.common.PaginatedResponse;
+import com.ssafy11.domain.common.PageResponse;
 import com.ssafy11.domain.participant.dto.Participant;
 import com.ssafy11.domain.participant.dto.Transaction;
 import com.ssafy11.domain.participant.dto.UserRelation;
@@ -41,7 +41,7 @@ public class ParticipantDaoImpl implements ParticipantDao {
 
     @Transactional(readOnly = true)
     @Override
-    public PaginatedResponse<Transaction> getTransactions(Integer userId, Integer guestId, PageDto pageDto) {
+    public PageResponse<Transaction> getTransactions(Integer userId, Integer guestId, PageDto pageDto) {
         int size = pageDto.getSize();
         int page = pageDto.getPage();
 
@@ -68,13 +68,23 @@ public class ParticipantDaoImpl implements ParticipantDao {
                 .offset(offset)
                 .fetchInto(Transaction.class);
 
-        return new PaginatedResponse<>(result, page, totalItems, totalPages);
+        return new PageResponse<>(result, page, totalItems, totalPages);
+    }
+
+    @Override
+    public Boolean isParticipant(Integer eventId, Integer participantId) {
+        return dsl.fetchExists(
+                dsl.selectOne()
+                        .from(PARTICIPATION)
+                        .where(PARTICIPATION.EVENT_ID.eq(eventId))
+                        .and(PARTICIPATION.GUEST_ID.eq(participantId))
+        );
     }
 
     @Override
     public Integer addParticipant(Participant participant) {
         Integer result = dsl.insertInto(PARTICIPATION, PARTICIPATION.EVENT_ID, PARTICIPATION.GUEST_ID, PARTICIPATION.AMOUNT, PARTICIPATION.CREATE_AT)
-                .values(participant.getEventId(), participant.getGuestId(), participant.getAmount(), LocalDateTime.now())
+                .values(participant.eventId(), participant.guestId(), participant.amount(), LocalDateTime.now())
                 .execute();
         return result;
     }
@@ -100,7 +110,7 @@ public class ParticipantDaoImpl implements ParticipantDao {
 
     @Transactional(readOnly = true)
     @Override
-    public PaginatedResponse<UserRelation> getUserRelations(Integer userId, PageDto pageDto) {
+    public PageResponse<UserRelation> getUserRelations(Integer userId, PageDto pageDto) {
         int size = pageDto.getSize();
         int page = pageDto.getPage();
 
@@ -125,9 +135,7 @@ public class ParticipantDaoImpl implements ParticipantDao {
                 .offset(offset)
                 .fetchInto(UserRelation.class);
 
-        return new PaginatedResponse<>(result, page, totalItems, totalPages);
+        return new PageResponse<>(result, page, totalItems, totalPages);
     }
-
-
 
 }

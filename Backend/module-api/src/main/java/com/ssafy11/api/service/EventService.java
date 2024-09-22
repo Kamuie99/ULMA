@@ -4,7 +4,7 @@ import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.events.EventCommand;
 import com.ssafy11.domain.events.EventDao;
 import com.ssafy11.domain.events.dto.Event;
-import com.ssafy11.domain.common.PaginatedResponse;
+import com.ssafy11.domain.common.PageResponse;
 import com.ssafy11.domain.participant.dto.EventParticipant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,22 +19,29 @@ public class EventService {
 
     public Integer addEvent(EventCommand event) {
         Assert.notNull(event, "Event must not be null");
-        return eventDao.addEvent(event);
+        Integer eventId = eventDao.addEvent(event);
+        Assert.notNull(eventId, "Event id must not be null");
+        return eventId;
     }
 
     @Transactional(readOnly = true)
-    public PaginatedResponse<Event> getEvents(Integer userId, PageDto pageDto) {
+    public PageResponse<Event> getEvents(Integer userId, PageDto pageDto) {
         Assert.notNull(userId, "User must not be null");
-        PaginatedResponse<Event> EventsList = eventDao.getEvents(userId, pageDto);
+
+        PageResponse<Event> EventsList = eventDao.getEvents(userId, pageDto);
+        Assert.notNull(EventsList, "Events list must not be null");
         return EventsList;
 
     }
 
     @Transactional(readOnly = true)
-    public PaginatedResponse<EventParticipant> getEvent(Integer eventId, PageDto pageDto) {
+    public PageResponse<EventParticipant> getEvent(Integer userId, Integer eventId, PageDto pageDto) {
         Assert.notNull(eventId, "Event must not be null");
 
-        PaginatedResponse<EventParticipant> guestsList = eventDao.getEvent(eventId, pageDto);
+        Assert.isTrue(userId.equals(eventDao.getEventByUserId(eventId)), "유저가 만든 이벤트가 아닙니다.");
+
+        PageResponse<EventParticipant> guestsList = eventDao.getEvent(eventId, pageDto);
+        Assert.notNull(guestsList, "Guests list must not be null");
         return guestsList;
     }
 

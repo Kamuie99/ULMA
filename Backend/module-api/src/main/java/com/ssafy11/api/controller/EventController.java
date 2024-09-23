@@ -3,7 +3,7 @@ package com.ssafy11.api.controller;
 //import com.ssafy11.api.service.GptService;
 import com.ssafy11.api.service.GptService;
 import com.ssafy11.domain.common.PageDto;
-import com.ssafy11.domain.events.EventCommand;
+import com.ssafy11.domain.events.dto.EventCommand;
 import com.ssafy11.api.service.EventService;
 import com.ssafy11.domain.events.dto.Event;
 import com.ssafy11.domain.common.PageResponse;

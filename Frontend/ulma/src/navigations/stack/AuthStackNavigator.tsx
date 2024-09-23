@@ -6,13 +6,11 @@ import {colors} from '@/constants';
 import LoginScreen from '@/screens/Auth/LoginScreen';
 import LoginHomeScreen from '@/screens/Auth/LoginHomeScreen';
 import SignupScreen from '@/screens/Auth/SignupScreen';
-import SignupHomeScreen from '@/screens/Auth/SignupHomeScreen';
 import Icon from 'react-native-vector-icons/Entypo';
 
 export type AuthStackParamList = {
   [authNavigations.LOGIN_HOME]: undefined;
   [authNavigations.LOGIN]: undefined;
-  [authNavigations.SIGNUP_HOME]: undefined;
   [authNavigations.SIGNUP]: undefined;
 };
 
@@ -40,14 +38,6 @@ function AuthStackNavigator() {
       <Stack.Screen
         name={authNavigations.LOGIN_HOME}
         component={LoginHomeScreen}
-        options={{
-          headerTitle: ' ',
-          headerShown: false,
-        }}
-      />
-      <Stack.Screen
-        name={authNavigations.SIGNUP_HOME}
-        component={SignupHomeScreen}
         options={{
           headerTitle: ' ',
           headerShown: false,

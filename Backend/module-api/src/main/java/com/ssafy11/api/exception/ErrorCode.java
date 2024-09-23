@@ -24,8 +24,14 @@ public enum ErrorCode {
 	PasswordMismatch(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
 
 	// GPT
-	GptApiRequestFailed(HttpStatus.SERVICE_UNAVAILABLE, "Gpt Api를 호출에 실패했습니다.");
+	GptApiRequestFailed(HttpStatus.SERVICE_UNAVAILABLE, "Gpt Api를 호출에 실패했습니다."),
+
+	// Excel
+	ExcelParsingFailed(HttpStatus.BAD_REQUEST,"엑셀 파싱에 실패했습니다."),
+	NotExcel(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "파일 형식을 확인해주세요"),
+	NoContent(HttpStatus.NO_CONTENT, "파일 내용을 확인해주세요");
 
 	private final HttpStatus status;
 	private final String message;
+
 }

@@ -46,15 +46,20 @@ const InputField = forwardRef(
 
 const styles = StyleSheet.create({
   container: {
-    borderWidth: 1,
-    borderColor: colors.GREEN_700,
     height: 40,
+    marginVertical: 10,
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   input: {
     color: colors.BLACK,
-    backgroundColor: colors.WHITE,
+    backgroundColor: 'transparent',
     padding: 10,
-    fontSize: 15,
+    fontSize: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.GREEN_700,
+    width: '90%',
   },
   disabled: {
     backgroundColor: colors.GRAY,

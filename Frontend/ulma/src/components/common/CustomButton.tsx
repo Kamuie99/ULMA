@@ -21,7 +21,7 @@ const deviceHeight = Dimensions.get('screen').height;
 
 function CustomButton({
   label,
-  variant = 'outlined',
+  variant = 'filled',
   size = 'large',
   inValid = false,
   ...props
@@ -47,6 +47,8 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     flexDirection: 'row',
     justifyContent: 'center',
+    display: 'flex',
+    alignItems: 'center',
   },
   inValid: {
     opacity: 0.5,

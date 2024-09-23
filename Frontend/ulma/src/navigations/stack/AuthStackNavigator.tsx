@@ -40,7 +40,9 @@ function AuthStackNavigator() {
         component={LoginHomeScreen}
         options={{
           headerTitle: ' ',
-          headerShown: false,
+          headerBackImage: () => {
+            return <Icon name="cross" size={24} color={colors.BLACK} />;
+          },
         }}
       />
       <Stack.Screen

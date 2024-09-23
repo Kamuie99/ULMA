@@ -1,6 +1,3 @@
-bootJar.enabled = true
-jar.enabled = false
-
 plugins {
     id "org.sonarqube" version "5.0.0.4638"
 }
@@ -34,3 +31,6 @@ sonar {
         property "sonar.projectName", "S11P21E204"
     }
 }
+
+bootJar.enabled = true
+jar.enabled = false

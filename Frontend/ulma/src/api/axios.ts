@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios, { AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
 
-const baseURL = process.env.VITE_API_URL || 'https://example.com/api';
+const baseURL = process.env.VITE_API_URL || 'http://j11e204.p.ssafy.io/api';
 
 const axiosInstance = axios.create({
   baseURL,

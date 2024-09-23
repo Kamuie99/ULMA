@@ -10,7 +10,10 @@ const Tab = createBottomTabNavigator();
 
 function RootNavigator() {
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}>
       <Tab.Screen name="Auth" component={AuthStackNavigator} />
       <Tab.Screen name="Pay" component={PayStackNavigator} />
       <Tab.Screen name="Event" component={EventStackNavigator} />

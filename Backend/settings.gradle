@@ -1,4 +1,0 @@
-rootProject.name = 'multi-module-ulma'
-include 'module-common'
-include 'module-api'
-

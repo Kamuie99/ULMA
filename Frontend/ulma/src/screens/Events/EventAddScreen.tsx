@@ -8,15 +8,18 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-// import {NavigationProp} from '@react-navigation/native';
 import BottomBar from '../../components/common/BottomBar'; // 하단 바 컴포넌트 경로에 맞게 수정
 import {colors} from '@/constants';
+import {useNavigation} from '@react-navigation/native';
+import {eventNavigations} from '@/constants/navigations';
+import {StackNavigationProp} from '@react-navigation/stack';
 
-// interface EventAddScreenProps {
-//   navigation: NavigationProp<any>;
-// }
+type EventStackParamList = {
+  [eventNavigations.EVENT_DATE]: undefined;
+};
+const navigation =
+  useNavigation<StackNavigationProp<EventStackParamList, 'EventDate'>>();
 
-// const EventAddScreen: React.FC<EventAddScreenProps> = ({navigation}) => {
 const EventAddScreen = () => {
   const [eventTitle, setEventTitle] = useState<string>('');
   const [selectedEventType, setSelectedEventType] = useState<string | null>(
@@ -31,7 +34,7 @@ const EventAddScreen = () => {
 
     // 이벤트 저장 처리 후 다음 화면으로 이동
     console.log('성공', '이벤트가 저장되었습니다.');
-    // navigation.navigate('다음페이지'); // 여기에 다음 페이지의 경로를 추가하세요.
+    navigation.navigate(eventNavigations.EVENT_DATE, {eventTitle});
   };
 
   const eventTypes = ['결혼', '돌잔치', '장례식', '생일', '기타'];

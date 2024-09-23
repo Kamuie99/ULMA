@@ -5,6 +5,7 @@ import EventStackNavigator from '../stack/EventStackNavigator';
 import PayStackNavigator from '../stack/PayStackNavigator';
 import {NavigationContainer} from '@react-navigation/native';
 import SettingStackNavigator from '../stack/SettingStackNavigator';
+import HomeStackNavigator from '../stack/HomeStackNavigator';
 
 const Tab = createBottomTabNavigator();
 
@@ -14,6 +15,7 @@ function RootNavigator() {
       screenOptions={{
         headerShown: false,
       }}>
+      <Tab.Screen name="Home" component={HomeStackNavigator} />
       <Tab.Screen name="Auth" component={AuthStackNavigator} />
       <Tab.Screen name="Pay" component={PayStackNavigator} />
       <Tab.Screen name="Event" component={EventStackNavigator} />

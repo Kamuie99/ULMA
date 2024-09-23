@@ -9,7 +9,6 @@ import {
   Alert,
 } from 'react-native';
 import {useRoute, useNavigation} from '@react-navigation/native';
-import BottomBar from '../../components/common/BottomBar'; // 하단 바 컴포넌트 import
 
 const EventDateScreen = () => {
   const [date, setDate] = useState('');

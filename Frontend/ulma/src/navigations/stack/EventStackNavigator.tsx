@@ -44,22 +44,23 @@ function EventStackNavigator() {
           headerShown: false,
         }}
       />
-      {/* <Stack.Screen
-        name={eventNavigations.EVENT_DATE}
-        component={EventDateScreen}
-        options={{
-          headerTitle: ' ',
-          headerShown: false,
-        }}
-      /> */}
-      {/* <Stack.Screen
+      <Stack.Screen
         name={eventNavigations.EVENT_ADD}
         component={EventAddScreen}
         options={{
-          headerTitle: ' ',
-          headerShown: false,
+          headerTitle: '이벤트 추가하기',
+          headerBackImage: () => {
+            return <Icon name="cross" size={24} color={colors.BLACK} />;
+          },
         }}
-      /> */}
+      />
+      <Stack.Screen
+        name={eventNavigations.EVENT_DATE}
+        component={EventDateScreen}
+        options={{
+          headerTitle: '이벤트 추가하기',
+        }}
+      />
     </Stack.Navigator>
   );
 }

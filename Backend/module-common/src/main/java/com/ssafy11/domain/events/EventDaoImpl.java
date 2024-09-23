@@ -3,6 +3,7 @@ package com.ssafy11.domain.events;
 import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.events.dto.Event;
 import com.ssafy11.domain.common.PageResponse;
+import com.ssafy11.domain.events.dto.EventCommand;
 import com.ssafy11.domain.participant.dto.EventParticipant;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
@@ -22,7 +23,6 @@ public class EventDaoImpl implements EventDao{
 
     private final DSLContext dsl;
 
-    @Transactional(readOnly = false)
     @Override
     public Integer addEvent(EventCommand event) {
         Record1<Integer> saveEvent = dsl.insertInto(EVENT, EVENT.NAME, EVENT.CATEGORY, EVENT.DATE, EVENT.USERS_ID, EVENT.CREATE_AT)
@@ -32,7 +32,6 @@ public class EventDaoImpl implements EventDao{
 
         Assert.notNull(saveEvent.getValue(EVENT.ID), "EVENT_ID 에 null 값은 허용되지 않음");
         return saveEvent.getValue(EVENT.ID);
-
     }
 
     @Transactional(readOnly = true)
@@ -93,6 +92,6 @@ public class EventDaoImpl implements EventDao{
                 .from(EVENT)
                 .where(EVENT.ID.eq(eventId))
                 .fetchOne();
-        return eventId;
+        return eventUserId != null ? eventUserId.value1() : null;
     }
 }

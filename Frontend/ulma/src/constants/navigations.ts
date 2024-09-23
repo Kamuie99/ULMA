@@ -1,3 +1,8 @@
+const homeNavigations = {
+  HOME: 'Home',
+  LANDING: 'Landing',
+} as const;
+
 const authNavigations = {
   LOGIN_HOME: 'LoginHome',
   LOGIN: 'Login',
@@ -25,7 +30,13 @@ const payNavigations = {
 
 const settingNavigations = {
   SETTING_HOME: 'SettingHome',
-  USER_DETAIL: 'UserDetail'
+  USER_DETAIL: 'UserDetail',
 } as const;
 
-export {authNavigations, eventNavigations, payNavigations, settingNavigations};
+export {
+  homeNavigations,
+  authNavigations,
+  eventNavigations,
+  payNavigations,
+  settingNavigations,
+};

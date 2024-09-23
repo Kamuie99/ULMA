@@ -8,16 +8,21 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-// import {NavigationProp} from '@react-navigation/native';
-import BottomBar from '../../components/common/BottomBar'; // 하단 바 컴포넌트 경로에 맞게 수정
 import {colors} from '@/constants';
+import {useNavigation} from '@react-navigation/native';
+import {eventNavigations} from '@/constants/navigations';
+import {StackNavigationProp} from '@react-navigation/stack';
+import TitleTextField from '@/components/common/TitleTextField';
+import CustomButton from '@/components/common/CustomButton';
+import InputField from '@/components/common/InputField';
 
-// interface EventAddScreenProps {
-//   navigation: NavigationProp<any>;
-// }
+type EventStackParamList = {
+  [eventNavigations.EVENT_DATE]: undefined;
+};
 
-// const EventAddScreen: React.FC<EventAddScreenProps> = ({navigation}) => {
 const EventAddScreen = () => {
+  const navigation =
+    useNavigation<StackNavigationProp<EventStackParamList, 'EventDate'>>();
   const [eventTitle, setEventTitle] = useState<string>('');
   const [selectedEventType, setSelectedEventType] = useState<string | null>(
     null,
@@ -30,17 +35,18 @@ const EventAddScreen = () => {
     }
 
     // 이벤트 저장 처리 후 다음 화면으로 이동
-    console.log('성공', '이벤트가 저장되었습니다.');
-    // navigation.navigate('다음페이지'); // 여기에 다음 페이지의 경로를 추가하세요.
+    // console.log('성공', '이벤트가 저장되었습니다.');
+    navigation.navigate(eventNavigations.EVENT_DATE, {
+      eventTitle: eventTitle, // 전달할 이벤트 제목
+    });
   };
 
   const eventTypes = ['결혼', '돌잔치', '장례식', '생일', '기타'];
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>어떤 경조사인가요?</Text>
-      <TextInput
-        style={styles.input}
+      <TitleTextField frontLabel="어떤 경조사인가요?" />
+      <InputField
         placeholder="이벤트 제목을 입력하세요"
         value={eventTitle}
         onChangeText={setEventTitle}
@@ -67,9 +73,7 @@ const EventAddScreen = () => {
         ))}
       </View>
 
-      <TouchableOpacity style={styles.saveButton} onPress={handleSaveEvent}>
-        <Text style={styles.saveButtonText}>확인</Text>
-      </TouchableOpacity>
+      <CustomButton label="확인" variant="outlined" onPress={handleSaveEvent} />
     </View>
   );
 };
@@ -77,22 +81,8 @@ const EventAddScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#fff',
-    justifyContent: 'space-between', // 상단 내용과 하단 바 사이에 간격을 유지
   },
-  label: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  input: {
-    borderBottomWidth: 1,
-    borderBottomColor: colors.GREEN_700,
-    paddingVertical: 8,
-    marginBottom: 16,
-    fontSize: 16,
-  },
+
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -113,16 +103,6 @@ const styles = StyleSheet.create({
   },
   selectedButtonText: {
     color: '#fff',
-  },
-  saveButton: {
-    backgroundColor: '#00C77F',
-    paddingVertical: 12,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
   },
 });
 

@@ -2,7 +2,3 @@ spring:
   profiles:
     include: auth
     active: local
-
-# 서버 포트 설정
-server:
-  port: 8000

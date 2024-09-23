@@ -103,7 +103,7 @@ function SignupScreen({}: SignupScreenProps) {
     }
 
     if (!validateIdLastDigit(idLastDigit)) {
-      newErrors.idLastDigit = '주민번호 뒷자리는 1, 2, 3, 4 중 하나여야 합니다.';
+      newErrors.idLastDigit = '주민번호 뒷자리가 올바르지 않습니다.';
       isValid = false;
     }
 

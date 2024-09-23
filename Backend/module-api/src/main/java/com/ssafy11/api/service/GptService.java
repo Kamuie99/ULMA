@@ -1,4 +1,6 @@
 package com.ssafy11.api.service;
+import com.ssafy11.api.exception.ErrorCode;
+import com.ssafy11.api.exception.ErrorException;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -54,29 +56,38 @@ public class GptService implements ChatService{
 
         HttpEntity<String> entity = new HttpEntity<>(requestBody.toString(), headers);
 
-        // API 호출
-        ResponseEntity<String> response = restTemplate.exchange(API_URL, HttpMethod.POST, entity, String.class);
+        try {
+            // API 호출
+            ResponseEntity<String> response = restTemplate.exchange(API_URL, HttpMethod.POST, entity, String.class);
 
+            System.out.println(response.getStatusCode());
 
-        if (response.getStatusCode() == HttpStatus.OK) {
-            // JSON 파싱
-            JSONObject responseBody = new JSONObject(response.getBody());
-            JSONArray choices = responseBody.getJSONArray("choices");
-            String content = choices.getJSONObject(0).getJSONObject("message").getString("content");
-            Assert.notNull(content, "Content is null");
+            if (response.getStatusCode() == HttpStatus.OK) {
+                // JSON 파싱
+                JSONObject responseBody = new JSONObject(response.getBody());
+                JSONArray choices = responseBody.getJSONArray("choices");
+                String content = choices.getJSONObject(0).getJSONObject("message").getString("content");
+                Assert.notNull(content, "Content is null");
 
-            log.info("gpt 답변 : {}", content);
+                log.info("gpt 답변 : {}", content);
 
-            if(num==1) {
-                String amount = extractAmount(content);
-                return amount != null ? amount : "금액을 찾을 수 없습니다.";
-            }else if(num==0){
+                if(num==1) {
+                    String amount = extractAmount(content);
+                    return amount != null ? amount : "금액을 찾을 수 없습니다.";
+                }else if(num==0){
+                    return content;
+                }
                 return content;
+            } else {
+                throw new ErrorException(ErrorCode.GptApiRequestFailed);
             }
-            return content;
-        } else {
-            throw new RuntimeException("Failed to get response: " + response.getStatusCode());
+        }catch (Exception e) {
+            log.error("API 호출 중 예기치 않은 오류 발생: {}", e.getMessage());
+            throw new ErrorException(ErrorCode.GptApiRequestFailed);
         }
+
+
+
     }
 
     private String extractAmount(String content) { //00만원 형식으로 파싱

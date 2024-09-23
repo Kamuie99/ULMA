@@ -3,6 +3,7 @@ package com.ssafy11.domain.events;
 import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.events.dto.Event;
 import com.ssafy11.domain.common.PageResponse;
+import com.ssafy11.domain.events.dto.EventCommand;
 import com.ssafy11.domain.participant.dto.EventParticipant;
 
 public interface EventDao {

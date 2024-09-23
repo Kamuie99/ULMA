@@ -16,40 +16,34 @@ export type homeStackParamList = {
 const Stack = createStackNavigator<homeStackParamList>();
 
 function HomeStackNavigator() {
-  <Stack.Navigator
-    screenOptions={{
-      cardStyle: {
-        backgroundColor: colors.WHITE,
-      },
-      headerStyle: {
-        backgroundColor: colors.WHITE,
-      },
-      headerTitleAlign: 'center',
-      headerTitleStyle: {
-        fontSize: 15,
-      },
-      headerTintColor: colors.BLACK,
-      headerBackImage: () => {
-        return <Icon name="chevron-left" size={24} color={colors.BLACK} />;
-      },
-    }}>
-    <Stack.Screen
-      name={homeNavigations.HOME}
-      component={HomeScreen}
-      options={{
-        headerTitle: ' ',
-        headerShown: false,
-      }}
-    />
-    {/* <Stack.Screen
-      name={homeNavigations.LANDING}
-      component={LandingPage}
-      options={{
-        headerTitle: ' ',
-        headerShown: false,
-      }}
-    /> */}
-  </Stack.Navigator>;
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        cardStyle: {
+          backgroundColor: colors.WHITE,
+        },
+        headerStyle: {
+          backgroundColor: colors.WHITE,
+        },
+        headerTitleAlign: 'center',
+        headerTitleStyle: {
+          fontSize: 15,
+        },
+        headerTintColor: colors.BLACK,
+        headerBackImage: () => {
+          return <Icon name="chevron-left" size={24} color={colors.BLACK} />;
+        },
+      }}>
+      <Stack.Screen
+        name={homeNavigations.HOME}
+        component={HomeScreen}
+        options={{
+          headerTitle: ' ',
+          headerShown: false,
+        }}
+      />
+    </Stack.Navigator>
+  );
 }
 
 const styles = StyleSheet.create({});

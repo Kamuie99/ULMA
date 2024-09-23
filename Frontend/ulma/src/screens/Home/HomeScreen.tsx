@@ -1,5 +1,8 @@
 //메인페이지 - 슬라이드 넘어가지게
 
+import {authNavigations} from '@/constants/navigations';
+import {useNavigation} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
 import React, {useRef, useState} from 'react';
 import {
   View,
@@ -95,7 +98,14 @@ const Pagination: React.FC<PaginationProps> = ({data, scrollX}) => {
   );
 };
 
+type RootStackParamList = {
+  auth: {screen: keyof AuthStackParamList}; // 'auth' 스택에 AuthStackParamList의 스크린들이 포함됨
+};
+type AuthStackParamList = {
+  LoginHome: undefined;
+};
 const HomeScreen: React.FC = () => {
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const scrollX = useRef(new Animated.Value(0)).current;
   const [, setCurrentSlideIndex] = useState(0);
 
@@ -122,7 +132,11 @@ const HomeScreen: React.FC = () => {
         onMomentumScrollEnd={updateCurrentSlideIndex}
       />
       <Pagination data={slides} scrollX={scrollX} />
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() =>
+          navigation.navigate('Auth', {screen: authNavigations.LOGIN_HOME})
+        }>
         <Text style={styles.buttonText}>시작하기</Text>
       </TouchableOpacity>
     </View>

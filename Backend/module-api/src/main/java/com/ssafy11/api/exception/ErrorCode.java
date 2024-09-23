@@ -21,8 +21,10 @@ public enum ErrorCode {
 	RefreshTokenMismatch(HttpStatus.UNAUTHORIZED, "토큰이 일치하지 않습니다."),
 
 	// 회원
-	PasswordMismatch(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다.");
+	PasswordMismatch(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
 
+	// GPT
+	GptApiRequestFailed(HttpStatus.SERVICE_UNAVAILABLE, "Gpt Api를 호출에 실패했습니다.");
 
 	private final HttpStatus status;
 	private final String message;

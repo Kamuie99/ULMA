@@ -3,6 +3,7 @@ import React from 'react';
 import {View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
 import {NavigationProp} from '@react-navigation/native';
 import BottomBar from '@/components/common/BottomBar'; // 하단바 컴포넌트 임포트
+import {eventNavigations} from '@/constants/navigations';
 
 interface Event {
   id: string;
@@ -54,7 +55,7 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     <View style={styles.container}>
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate('++다음페이지++')}>
+        onPress={() => navigation.navigate(eventNavigations.EVENT_ADD)}>
         <Text style={styles.addButtonText}>이벤트 추가하기</Text>
       </TouchableOpacity>
       <FlatList

@@ -35,19 +35,19 @@ interface SlideItemProps {
 const slides: Slide[] = [
   {
     id: '1',
-    image: require('./첫번째사진주소'),
+    image: require('@/assets/Home/home1.gif'),
     title: '결혼식 축의금 장부 정리',
     description: '사진 촬영만으로 한 번에!',
   },
   {
     id: '2',
-    image: require('./두번째사진주소'),
+    image: require('@/assets/Home/home2.gif'),
     title: '복잡한 경조사 일정 자동으로 정리',
     description: '쉽고 편하게',
   },
   {
     id: '3',
-    image: require('./세번째사진주소'),
+    image: require('@/assets/Home/home3.gif'),
     title: '애매한 경조사비 분석',
     description: '소비 패턴 분석 후 추천드려요!',
   },
@@ -95,7 +95,7 @@ const Pagination: React.FC<PaginationProps> = ({data, scrollX}) => {
   );
 };
 
-const Carousel: React.FC = () => {
+const HomeScreen: React.FC = () => {
   const scrollX = useRef(new Animated.Value(0)).current;
   const [, setCurrentSlideIndex] = useState(0);
 
@@ -179,4 +179,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Carousel;
+export default HomeScreen;

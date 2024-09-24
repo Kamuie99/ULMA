@@ -53,16 +53,20 @@ function PayStackNavigator() {
         name={payNavigations.ACCOUNT_INPUT}
         component={AccountinputScreen}
         options={{
-          headerTitle: ' ',
-          headerShown: false,
+          headerTitle: '계좌 입력',
+          headerBackImage: () => {
+            return <Icon name="cross" size={24} color={colors.BLACK} />;
+          },
         }}
       />
       <Stack.Screen
         name={payNavigations.SEND_RESULT}
         component={SendresultScreen}
         options={{
-          headerTitle: ' ',
-          headerShown: false,
+          headerTitle: '송금 결과',
+          headerBackImage: () => {
+            return <Icon name="cross" size={24} color={colors.BLACK} />;
+          },
         }}
       />
       {/* <Stack.Screen

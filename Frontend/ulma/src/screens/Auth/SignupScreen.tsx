@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TextInput, Text, TouchableOpacity, ScrollView, Animated } from 'react-native';
+import { StyleSheet, View, TextInput, Text, TouchableOpacity, ScrollView, Animated, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import axiosInstance from '@/api/axios'; // axiosInstance 가져오기
 
@@ -10,6 +10,7 @@ interface ErrorState {
   birthDate: string;
   idLastDigit: string;
   phoneNumber: string;
+  verificationCode: string;
 }
 
 function SignupScreen({}: SignupScreenProps) {
@@ -22,7 +23,7 @@ function SignupScreen({}: SignupScreenProps) {
   const [isVerified, setIsVerified] = useState(false);
   const [verificationError, setVerificationError] = useState('');
   const [resendText, setResendText] = useState('인증번호 전송');
-  const [errors, setErrors] = useState<ErrorState>({ name: '', birthDate: '', idLastDigit: '', phoneNumber: '' });
+  const [errors, setErrors] = useState<ErrorState>({ name: '', birthDate: '', idLastDigit: '', phoneNumber: '',  verificationCode: '' });
 
   const fadeAnim = {
     birthDate: useState(new Animated.Value(0))[0],
@@ -89,7 +90,7 @@ function SignupScreen({}: SignupScreenProps) {
   };
 
   const validateInputs = () => {
-    let newErrors: ErrorState = { name: '', birthDate: '', idLastDigit: '', phoneNumber: '' };
+    let newErrors: ErrorState = { name: '', birthDate: '', idLastDigit: '', phoneNumber: '', verificationCode: '', };
     let isValid = true;
 
     if (!validateName(name)) {
@@ -127,15 +128,15 @@ function SignupScreen({}: SignupScreenProps) {
           setShowVerificationCode(true);
           setResendText('재전송');
           fadeIn(fadeAnim.verificationCode);
-          alert('인증번호가 전송되었습니다.');
+          Alert.alert('인증번호가 전송되었습니다.');
         }
       } catch (error) {
         console.error('인증번호 전송 오류:', error);
-        alert('인증번호 전송에 실패했습니다. 다시 시도해주세요.');
+        Alert.alert('인증번호 전송에 실패했습니다. 다시 시도해주세요.');
       }
     } else {
       // 경고 메시지 표시
-      alert('올바른 값을 입력하세요.');
+      Alert.alert('올바른 값을 입력하세요.');
     }
   };
 

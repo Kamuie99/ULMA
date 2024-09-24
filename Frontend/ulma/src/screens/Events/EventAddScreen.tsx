@@ -17,7 +17,9 @@ interface EventAddScreenProps {
 
 const EventAddScreen: React.FC<EventAddScreenProps> = ({navigation}) => {
   const [eventTitle, setEventTitle] = useState<string>('');
-  const [selectedEventType, setSelectedEventType] = useState<string | null>(null);
+  const [selectedEventType, setSelectedEventType] = useState<string | null>(
+    null,
+  );
 
   const handleSaveEvent = () => {
     if (!eventTitle || !selectedEventType) {
@@ -43,7 +45,7 @@ const EventAddScreen: React.FC<EventAddScreenProps> = ({navigation}) => {
       />
 
       <View style={styles.buttonContainer}>
-        {eventTypes.map((type) => (
+        {eventTypes.map(type => (
           <TouchableOpacity
             key={type}
             style={[

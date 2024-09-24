@@ -3,8 +3,10 @@ package com.ssafy11.domain.users;
 import static com.ssafy11.ulma.generated.Tables.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
+import com.ssafy11.domain.accounts.Account;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
 import org.springframework.stereotype.Repository;
@@ -81,4 +83,27 @@ public class UserDaoImpl implements UserDao {
 			.where(USERS.LOGIN_ID.eq(loginId))
 			.execute();
 	}
+
+	@Override
+	public List<Account> findAccounts(Integer userId, String bankCode) {
+		return dsl.selectFrom(ACCOUNT)
+				.where(ACCOUNT.USER_ID.eq(userId))
+				.and(ACCOUNT.BANK_CODE.eq(bankCode))
+				.fetchInto(Account.class);
+	}
+
+	@Override
+	@Transactional
+	public Account chooseAccount(Integer userId, String accountNumber) {
+		dsl.update(USERS)
+				.set(USERS.ACCOUNT_NUMBER, accountNumber)
+				.where(USERS.ID.eq(userId))
+				.execute();
+
+		return dsl.select(ACCOUNT)
+				.from(ACCOUNT)
+				.where(ACCOUNT.ACCOUNT_NUMBER.eq(accountNumber))
+				.fetchOneInto(Account.class);
+	}
+
 }

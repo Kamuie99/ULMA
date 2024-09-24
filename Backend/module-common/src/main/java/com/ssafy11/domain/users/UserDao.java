@@ -1,5 +1,8 @@
 package com.ssafy11.domain.users;
 
+import com.ssafy11.domain.accounts.Account;
+
+import java.util.List;
 import java.util.Optional;
 
 public interface UserDao {
@@ -9,4 +12,6 @@ public interface UserDao {
 	boolean existsByLoginId(String loginId);
 	Optional<Users> findByLoginId(String loginId);
 	void updateRefreshToken(String loginId, String refreshToken);
+	List<Account> findAccounts(Integer userId, String bankCode);
+	Account chooseAccount(Integer userId, String accountNumber);
 }

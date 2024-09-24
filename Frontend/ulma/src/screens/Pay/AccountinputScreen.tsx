@@ -1,7 +1,11 @@
 import CustomButton from '@/components/common/CustomButton';
 import TitleTextField from '@/components/common/TitleTextField';
 import {colors} from '@/constants';
-import React, {useState} from 'react';
+import {payNavigations} from '@/constants/navigations';
+import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
+import {useFocusEffect} from '@react-navigation/native';
+import {StackScreenProps} from '@react-navigation/stack';
+import React, {useCallback, useState} from 'react';
 import {
   View,
   Text,
@@ -15,7 +19,20 @@ import {
 
 const BankOptions = ['', '국민은행', '신한은행', '하나은행', '우리은행'];
 
-const AccountinputScreen: React.FC = () => {
+type AccountInputScreenProps = StackScreenProps<
+  payStackParamList,
+  typeof payNavigations.ACCOUNT_INPUT
+>;
+
+const AccountinputScreen = ({navigation}: AccountInputScreenProps) => {
+  useFocusEffect(
+    useCallback(() => {
+      navigation.getParent()?.setOptions({
+        tabBarStyle: undefined,
+      });
+      return;
+    }, [navigation]),
+  );
   const [selectedBank, setSelectedBank] = useState<string>(''); // 선택된 은행
   const [accountNumber, setAccountNumber] = useState<string>(''); // 계좌번호 입력값
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false); // 모달 가시성
@@ -54,7 +71,10 @@ const AccountinputScreen: React.FC = () => {
             maxLength={14}
           />
         </View>
-        <CustomButton label="송금하기" />
+        <CustomButton
+          label="송금하기"
+          onPress={() => navigation.navigate(payNavigations.SEND_RESULT)}
+        />
 
         {/* 은행 선택 모달 */}
         <Modal

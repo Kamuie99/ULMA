@@ -5,13 +5,15 @@ import {authNavigations} from '@/constants/navigations';
 import {colors} from '@/constants';
 import LoginScreen from '@/screens/Auth/LoginScreen';
 import LoginHomeScreen from '@/screens/Auth/LoginHomeScreen';
-import SignupScreen from '@/screens/Auth/SignupScreen';
+import SignupScreen1 from '@/screens/Auth/SignupScreen1';
+import SignupScreen2 from '@/screens/Auth/SignupScreen2';
 import Icon from 'react-native-vector-icons/Entypo';
 
 export type AuthStackParamList = {
   [authNavigations.LOGIN_HOME]: undefined;
   [authNavigations.LOGIN]: undefined;
-  [authNavigations.SIGNUP]: undefined;
+  [authNavigations.SIGNUP1]: undefined;
+  [authNavigations.SIGNUP2]: undefined;
 };
 
 const Stack = createStackNavigator<AuthStackParamList>();
@@ -51,8 +53,15 @@ function AuthStackNavigator() {
         }}
       />
       <Stack.Screen
-        name={authNavigations.SIGNUP}
-        component={SignupScreen}
+        name={authNavigations.SIGNUP1}
+        component={SignupScreen1}
+        options={{
+          headerTitle: '회원가입',
+        }}
+      />
+      <Stack.Screen
+        name={authNavigations.SIGNUP2}
+        component={SignupScreen2}
         options={{
           headerTitle: '회원가입',
         }}

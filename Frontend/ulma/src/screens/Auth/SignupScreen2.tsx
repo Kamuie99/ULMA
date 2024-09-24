@@ -1,50 +1,158 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, TextInput, Text, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, TextInput, Text, TouchableOpacity, ScrollView, Alert, Animated, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import axios from 'axios';
 import useAuthStore from '@/store/useAuthStore';
 
 function SignupScreen2() {
   const { signupData, setSignupData } = useAuthStore();
   const [errors, setErrors] = useState({ loginId: '', password: '', passwordConfirm: '', email: '' });
+  const [isLoginIdEditable, setLoginIdEditable] = useState(true);  // 아이디 입력창 수정 가능 여부
+  const [isDuplicateCheckDisabled, setDuplicateCheckDisabled] = useState(false);  // 중복체크 버튼 비활성화 여부
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordConfirmError, setPasswordConfirmError] = useState('');
+  const [isDuplicateChecked, setIsDuplicateChecked] = useState(false); // 중복 체크 완료 여부
+  const [isEmailSent, setIsEmailSent] = useState(false);  // 이메일 인증 여부
+  const [isSendingEmail, setIsSendingEmail] = useState(false); // 이메일 발송 중 여부
+  const [emailVerificationCode, setEmailVerificationCode] = useState('');  // 인증번호 상태
+  const [emailVerificationError, setEmailVerificationError] = useState('');  // 이메일 관련 오류 상태
+  const [resendText, setResendText] = useState('인증메일 발송'); // 인증메일 발송 버튼 텍스트
+  const [isEmailVerified, setIsEmailVerified] = useState(false); // 이메일 인증 완료 여부
+  const [isVerifyingCode, setIsVerifyingCode] = useState(false); // 인증번호 확인 중 여부
+
+  const fadeAnimSignupButton = useState(new Animated.Value(0))[0]; // 회원가입 버튼 애니메이션
+
+  const fadeIn = (animatedValue: Animated.Value) => {
+    Animated.timing(animatedValue, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const isId = (asValue: string) => {
+    const regExp = /^[a-z]+[a-z0-9]{5,19}$/g;
+    return regExp.test(asValue);
+  };
+
+  const isPassword = (asValue: string) => {
+    const regExp = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+]).{8,16}$/;
+    return regExp.test(asValue);
+  };
+
+  const isEmail = (asValue: string) => {
+    const regExp = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
+    return regExp.test(asValue);
+  };
+
+  const handleDuplicateCheck = async () => {
+    if (!isId(signupData.loginId)) {
+      setErrors(prev => ({ ...prev, loginId: '영문자로 시작하는 영문자 또는 숫자 6~20자 아이디를 입력해주세요.' }));
+      return;
+    }
+
+    try {
+      const response = await axios.get('http://j11e204.p.ssafy.io/api/auth/loginId', {
+        params: { loginId: signupData.loginId },
+      });
+
+      if (response.status === 200) {
+        Alert.alert(
+          '아이디 중복 확인',
+          '사용 가능한 아이디입니다. 이 아이디를 사용하시겠습니까?',
+          [
+            {
+              text: '아니오',
+              onPress: () => {
+                setSignupData({ loginId: '' }); // 아이디 입력 초기화
+                setLoginIdEditable(true); // 다시 아이디 입력 가능하도록
+              },
+              style: 'cancel',
+            },
+            {
+              text: '예',
+              onPress: () => {
+                setLoginIdEditable(false); // 아이디 수정 불가
+                setDuplicateCheckDisabled(true); // 중복체크 버튼 비활성화
+                setIsDuplicateChecked(true); // 중복 체크 완료
+              },
+            },
+          ]
+        );
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 409) {
+        Alert.alert('중복된 아이디', '중복되는 아이디가 존재합니다.');
+      } else {
+        Alert.alert('중복체크 오류', '아이디 중복체크 중 오류가 발생했습니다. 다시 시도해주세요.');
+      }
+    }
+  };
+
+  const handleEmailVerification = async () => {
+    if (!isEmail(signupData.email)) {
+      setErrors(prev => ({ ...prev, email: '정확한 이메일 주소를 입력해주세요.' }));
+      return;
+    }
+
+    setIsSendingEmail(true); // 로딩 시작
+
+    try {
+      const response = await axios.post('http://j11e204.p.ssafy.io/api/auth/email', {
+        email: signupData.email,
+      });
+
+      if (response.status === 200) {
+        Alert.alert('이메일 인증', '인증 메일이 발송되었습니다. 인증번호를 입력해주세요.');
+        setIsEmailSent(true);  // 이메일 인증번호 입력창을 띄우기 위한 상태 변경
+        setEmailVerificationError('');
+        setResendText('재전송'); // 버튼 텍스트를 재전송으로 변경
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 409) {
+        Alert.alert('중복된 이메일', '이미 사용중인 이메일입니다.');
+      } else {
+        Alert.alert('이메일 발송 오류', '이메일 발송 중 오류가 발생했습니다. 다시 시도해주세요.');
+      }
+    } finally {
+      setIsSendingEmail(false); // 로딩 종료
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    setIsVerifyingCode(true); // 로딩 시작
+
+    try {
+      const response = await axios.put('http://j11e204.p.ssafy.io/api/auth/email', {
+        email: signupData.email,
+        verificationCode: emailVerificationCode,
+      });
+
+      if (response.status === 200) {
+        setIsEmailVerified(true); // 이메일 인증 완료
+        setEmailVerificationError('');
+        fadeIn(fadeAnimSignupButton); // 회원가입 버튼 보이기
+        Alert.alert('인증 완료', '이메일 인증이 완료되었습니다.');
+      }
+    } catch (error) {
+      if (error.response && error.response.status === 400) {
+        setEmailVerificationError('인증번호가 일치하지 않습니다.');
+      } else {
+        setEmailVerificationError('인증을 다시 시도해주세요.');
+      }
+    } finally {
+      setIsVerifyingCode(false); // 로딩 종료
+    }
+  };
 
   const handleInputChange = (field: keyof typeof signupData, value: string) => {
     setSignupData({ [field]: value });
     setErrors(prev => ({ ...prev, [field]: '' }));
   };
 
-  const validateInputs = () => {
-    let isValid = true;
-    const newErrors = { ...errors };
-
-    if (!signupData.loginId) {
-      newErrors.loginId = '아이디를 입력해주세요.';
-      isValid = false;
-    }
-
-    if (!signupData.password) {
-      newErrors.password = '비밀번호를 입력해주세요.';
-      isValid = false;
-    }
-
-    if (signupData.password !== signupData.passwordConfirm) {
-      newErrors.passwordConfirm = '비밀번호가 일치하지 않습니다.';
-      isValid = false;
-    }
-
-    if (!signupData.email) {
-      newErrors.email = '이메일을 입력해주세요.';
-      isValid = false;
-    }
-
-    setErrors(newErrors);
-    return isValid;
-  };
-
   const handleSignup = () => {
-    if (validateInputs()) {
-      // Implement signup logic here
-      console.log('Signup data:', signupData);
-    }
+    // 회원가입 로직을 여기에 추가
+    Alert.alert('회원가입', '회원가입이 완료되었습니다.');
   };
 
   return (
@@ -52,56 +160,136 @@ function SignupScreen2() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>회원가입 (2/2)</Text>
 
+        {/* 아이디 입력 및 중복체크 */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>아이디</Text>
-          <TextInput
-            placeholder="아이디를 입력하세요"
-            value={signupData.loginId}
-            onChangeText={(text) => handleInputChange('loginId', text)}
-            style={styles.input}
-          />
+          <View style={styles.row}>
+            <TextInput
+              placeholder="사용할 아이디를 입력하세요"
+              value={signupData.loginId}
+              onChangeText={(text) => handleInputChange('loginId', text)}
+              style={styles.input}
+              editable={isLoginIdEditable}
+            />
+            <TouchableOpacity
+              style={[styles.button, isDuplicateCheckDisabled && { backgroundColor: '#DDD' }]}
+              onPress={handleDuplicateCheck}
+              disabled={isDuplicateCheckDisabled}
+            >
+              <Text style={styles.buttonText}>중복체크</Text>
+            </TouchableOpacity>
+          </View>
           {errors.loginId ? <Text style={styles.errorText}>{errors.loginId}</Text> : null}
         </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>비밀번호</Text>
-          <TextInput
-            placeholder="비밀번호를 입력하세요"
-            value={signupData.password}
-            onChangeText={(text) => handleInputChange('password', text)}
-            style={styles.input}
-            secureTextEntry
-          />
-          {errors.password ? <Text style={styles.errorText}>{errors.password}</Text> : null}
-        </View>
+        {/* 비밀번호 입력 */}
+        {isDuplicateChecked && (
+          <>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>비밀번호</Text>
+              <TextInput
+                placeholder="비밀번호를 입력하세요"
+                value={signupData.password}
+                onChangeText={(text) => handleInputChange('password', text)}
+                style={styles.input}
+                secureTextEntry
+              />
+              {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+            </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>비밀번호 확인</Text>
-          <TextInput
-            placeholder="비밀번호를 다시 입력하세요"
-            value={signupData.passwordConfirm}
-            onChangeText={(text) => handleInputChange('passwordConfirm', text)}
-            style={styles.input}
-            secureTextEntry
-          />
-          {errors.passwordConfirm ? <Text style={styles.errorText}>{errors.passwordConfirm}</Text> : null}
-        </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>비밀번호 확인</Text>
+              <TextInput
+                placeholder="비밀번호를 다시 입력하세요"
+                value={signupData.passwordConfirm}
+                onChangeText={(text) => handleInputChange('passwordConfirm', text)}
+                style={styles.input}
+                secureTextEntry
+              />
+              {passwordConfirmError ? <Text style={styles.errorText}>{passwordConfirmError}</Text> : null}
+            </View>
+          </>
+        )}
 
+        {/* 이메일 입력 */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>이메일</Text>
-          <TextInput
-            placeholder="이메일을 입력하세요"
-            value={signupData.email}
-            onChangeText={(text) => handleInputChange('email', text)}
-            style={styles.input}
-            keyboardType="email-address"
-          />
+          {isEmailVerified ? (
+            // 이메일 인증이 완료된 경우, 이메일 필드를 수정할 수 없도록 함
+            <TextInput
+              placeholder="이메일을 입력하세요"
+              value={signupData.email}
+              style={styles.input}
+              editable={false} // 수정 불가 설정
+            />
+          ) : (
+            // 이메일 인증 전에는 수정 가능하고, 인증메일 발송 버튼 표시
+            <View style={styles.row}>
+              <TextInput
+                placeholder="이메일을 입력하세요"
+                value={signupData.email}
+                onChangeText={(text) => handleInputChange('email', text)}
+                style={styles.input}
+                keyboardType="email-address"
+              />
+              <TouchableOpacity
+                style={[styles.button, isSendingEmail && { backgroundColor: '#DDD' }]}
+                onPress={handleEmailVerification}
+                disabled={isSendingEmail}
+              >
+                {isSendingEmail ? (
+                  <ActivityIndicator size="small" color="#FFF" />
+                ) : (
+                  <Text style={styles.buttonText}>{resendText}</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          )}
           {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
         </View>
 
-        <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
-          <Text style={styles.signupButtonText}>회원가입 완료</Text>
-        </TouchableOpacity>
+        {/* 이메일 인증번호 입력 및 인증 */}
+        {isEmailSent && !isEmailVerified && (
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>인증번호</Text>
+            <TextInput
+              placeholder="8자리 인증번호를 입력하세요"
+              value={emailVerificationCode}
+              onChangeText={setEmailVerificationCode}
+              style={styles.input}
+              maxLength={8}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleVerifyCode}
+              disabled={isVerifyingCode}
+            >
+              {isVerifyingCode ? (
+                <ActivityIndicator size="small" color="#FFF" />
+              ) : (
+                <Text style={styles.buttonText}>인증하기</Text>
+              )}
+            </TouchableOpacity>
+            {emailVerificationError ? (
+              <Text style={styles.errorText}>{emailVerificationError}</Text>
+            ) : null}
+          </View>
+        )}
+
+        {/* 이메일 인증 완료 메시지 */}
+        {isEmailVerified && (
+          <Text style={styles.successText}>이메일 인증이 완료되었습니다.</Text>
+        )}
+
+        {/* 회원가입 버튼 */}
+        {isEmailVerified && (
+          <Animated.View style={{ opacity: fadeAnimSignupButton }}>
+            <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
+              <Text style={styles.signupButtonText}>회원가입 완료</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -137,11 +325,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     fontSize: 16,
     backgroundColor: '#FFF',
+    flex: 1,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  button: {
+    backgroundColor: '#007AFF',
+    padding: 15,
+    borderRadius: 8,
+    marginLeft: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  buttonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
   errorText: {
     color: 'red',
     fontSize: 12,
     marginTop: 5,
+  },
+  successText: {
+    color: 'green',
+    fontSize: 14,
+    marginTop: 5,
+    fontWeight: 'bold',
   },
   signupButton: {
     backgroundColor: '#34C759',

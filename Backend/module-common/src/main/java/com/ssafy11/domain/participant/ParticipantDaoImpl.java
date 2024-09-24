@@ -96,7 +96,6 @@ public class ParticipantDaoImpl implements ParticipantDao {
     @Override
     public Integer updateParticipant(Participant participant) {
 
-        Assert.notNull(participant.amount(),"수정할 데이터가 없습니다.");
         int result = dsl.update(PARTICIPATION)
                 .set(PARTICIPATION.AMOUNT, participant.amount())
                 .where(PARTICIPATION.GUEST_ID.eq(participant.guestId()))
@@ -125,7 +124,6 @@ public class ParticipantDaoImpl implements ParticipantDao {
                 .returningResult(GUEST.ID)
                 .fetchOne();
 
-        Assert.notNull(saveGuest.getValue(GUEST.ID), "EVENT_ID 에 null 값은 허용되지 않음");
         return saveGuest.getValue(GUEST.ID);
     }
 

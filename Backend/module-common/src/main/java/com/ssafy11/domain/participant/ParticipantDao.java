@@ -13,6 +13,8 @@ public interface ParticipantDao {
     PageResponse<Transaction> getTransactions(Integer userId, Integer guestId, PageDto pageDto);
     Boolean isParticipant(Integer eventId, Integer participantId);
     Integer addParticipant(Participant participant);
+    Integer updateParticipant(Participant participant);
+    Integer deleteParticipant(Participant participant);
     Integer addGuests(String name, String category);
     Integer addUserRelation(Integer guestId, Integer userId);
     PageResponse<UserRelation> getUserRelations(Integer userId, PageDto pageDto);

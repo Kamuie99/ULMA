@@ -2,9 +2,7 @@ package com.ssafy11.domain.accounts;
 
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
-import org.jooq.Record1;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -13,13 +11,11 @@ import static com.ssafy11.ulma.generated.Tables.TRANSACTION;
 
 @RequiredArgsConstructor
 @Repository
-@Transactional(readOnly = true)
-public class TransactionImpl implements TransactionDao{
+public class TransactionDaoImpl implements TransactionDao{
 
     private final DSLContext dsl;
 
     @Override
-    @Transactional
     public Integer save(Transaction transaction) {
         return dsl.insertInto(TRANSACTION)
                 .set(TRANSACTION.ACCOUNT_ID, transaction.accountId())

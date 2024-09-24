@@ -17,6 +17,7 @@ const eventNavigations = {
 } as const;
 
 const payNavigations = {
+  ACCOUNT_HISTORY: 'Accounthistory',
   ACCOUNT_INPUT: 'Accountinput',
   ADD_HISTORY: 'Addhistory',
   CHANGE_RESULT: 'Changeresult',

@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TextInput, Text, TouchableOpacity, ScrollView, Animated, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import useAuthStore from '@/store/useAuthStore'; // Zustand store import
 import { authNavigations } from '@/constants/navigations';
+import useAuthStore from '@/store/useAuthStore'; // Zustand store import
+import axiosInstance from '@/api/axios'; // axiosInstance import
 
 interface SignupScreenProps {}
 
@@ -86,8 +87,11 @@ function SignupScreen1({}: SignupScreenProps) {
   };
 
   const handlePhoneNumberChange = (text: string) => {
-    setPhoneNumber(formatPhoneNumber(text));
-    setErrors(prev => ({ ...prev, phoneNumber: '' }));
+    const formattedPhoneNumber = formatPhoneNumber(text);
+    if (formattedPhoneNumber.replace(/[^0-9]/g, '').length <= 11) {
+      setPhoneNumber(formattedPhoneNumber);
+      setErrors(prev => ({ ...prev, phoneNumber: '' }));
+    }
   };
 
   const handleNumberInput = (text: string, setter: React.Dispatch<React.SetStateAction<string>>, field: keyof ErrorState) => {
@@ -214,7 +218,7 @@ function SignupScreen1({}: SignupScreenProps) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>휴대폰 본인 확인</Text>
+        <Text style={styles.title}>회원가입 (1/2)</Text>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>이름</Text>
           <TextInput
@@ -261,14 +265,15 @@ function SignupScreen1({}: SignupScreenProps) {
         <Animated.View style={[styles.inputContainer, { opacity: fadeAnim.phoneNumber }]}>
           <Text style={styles.label}>휴대폰번호</Text>
           <View style={styles.row}>
-            <TextInput
-              placeholder="010-0000-0000"
-              value={phoneNumber}
-              onChangeText={handlePhoneNumberChange}
-              style={[getInputStyle('phoneNumber'), styles.phoneInput]}
-              keyboardType="phone-pad"
-              editable={!isVerified} // 인증 완료 시 수정 불가
-            />
+          <TextInput
+            placeholder="010-0000-0000"
+            value={phoneNumber}
+            onChangeText={handlePhoneNumberChange}
+            style={[getInputStyle('phoneNumber'), styles.phoneInput]}
+            keyboardType="phone-pad"
+            editable={!isVerified} // 인증 완료 시 수정 불가
+            maxLength={13} // 하이픈 포함 최대 13자
+          />
             {!isVerified && (
               <TouchableOpacity style={styles.button} onPress={handleSendVerification}>
                 <Text style={styles.buttonText}>{resendText}</Text>

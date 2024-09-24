@@ -1,5 +1,7 @@
 package com.ssafy11.api.service;
 
+import com.ssafy11.api.exception.ErrorCode;
+import com.ssafy11.api.exception.ErrorException;
 import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.events.dto.EventCommand;
 import com.ssafy11.domain.events.EventDao;
@@ -22,6 +24,23 @@ public class EventService {
         Integer eventId = eventDao.addEvent(event);
         Assert.notNull(eventId, "Event id must not be null");
         return eventId;
+    }
+
+    public boolean isUserEventCreated(final Integer eventId, final Integer userId) {
+        Assert.notNull(eventId, "eventId is required");
+        Assert.notNull(userId, "userId is required");
+        return eventDao.isUserEventCreated(eventId, userId);
+    }
+
+    public Integer updateEvent(EventCommand event, Integer eventId) {
+        Assert.notNull(event, "Event must not be null");
+        Assert.notNull(eventId, "EventId must not be null");
+
+        Assert.isTrue(isUserEventCreated(eventId, event.userId()), "사용자가 만든 이벤트가 아닙니다.");
+
+        Integer resultId = eventDao.updateEvent(event, eventId);
+        Assert.notNull(eventId, "Event id must not be null");
+        return resultId;
     }
 
     @Transactional(readOnly = true)

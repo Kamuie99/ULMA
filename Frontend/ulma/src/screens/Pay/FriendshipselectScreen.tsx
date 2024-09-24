@@ -1,140 +1,96 @@
 //친밀도 이모지 선택 페이지
-import React, {useState} from 'react';
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  StyleSheet,
-  Button,
-} from 'react-native';
+import CustomButton from '@/components/common/CustomButton';
+import TitleTextField from '@/components/common/TitleTextField';
+import {colors} from '@/constants';
+import Slider from '@react-native-community/slider';
+import React, {useEffect, useState} from 'react';
+import {View, Text, StyleSheet} from 'react-native';
 
-const FriendshipselectScreen = () => {
-  // 선택된 이모지 인덱스를 관리
-  const [selectedEmoji, setSelectedEmoji] = useState<number | null>(null);
+function FriendshipselectScreen({navigation}) {
+  useEffect(() => {
+    // 페이지에 들어올 때 탭바 숨기기
+    navigation.getParent()?.setOptions({
+      tabBarStyle: {display: 'none'},
+    });
+  }, [navigation]);
+  const [sliderValue, setSliderValue] = useState<number>(0); // 슬라이드 값 상태 관리
 
   // 이모지 데이터
+  // 이모지 이미지 넣을 때 50% size 축소해서 넣어야 함
   const emojis = [
     {
       id: 1,
-      src: 'https://via.placeholder.com/51x51',
+      src: require('@/assets/Pay/relationship1.png'),
       label: '가까운 사이는 아니에요',
     },
     {
       id: 2,
-      src: 'https://via.placeholder.com/51x51',
-      label: '',
+      src: require('@/assets/Pay/relationship2.png'),
+      label: '그냥 그래요.',
     },
     {
       id: 3,
-      src: 'https://via.placeholder.com/51x51',
+      src: require('@/assets/Pay/relationship3.png'),
       label: '매우 가까워요',
     },
   ];
 
-  // 이모지 선택 처리
-  const handleEmojiSelect = (id: number) => {
-    setSelectedEmoji(id);
+  // 슬라이더 값에 따라 적절한 이모지 선택
+  const getEmojiForSliderValue = () => {
+    if (sliderValue == 0) {
+      return emojis[0].src; // 첫 번째 이모지
+    } else if (sliderValue == 1) {
+      return emojis[1].src; // 두 번째 이모지
+    } else {
+      return emojis[2].src; // 세 번째 이모지
+    }
   };
 
   return (
     <View style={styles.container}>
-      {/* AI 추천 금액 */}
-      <Text style={styles.title}>AI 추천 금액</Text>
+      <TitleTextField frontLabel="" emphMsg="이유찬" backLabel="님과" />
+      <TitleTextField frontLabel="얼마나 가까운 사이인가요?" />
 
-      {/* 사용자와의 관계 질문 */}
-      <Text style={styles.question}>
-        <Text style={styles.highlight}>이유찬</Text>
-        님과 {'\n'} 얼마나 가까운 사이인가요?
-      </Text>
-
-      {/* 이모지 선택 */}
-      <View style={styles.emojiContainer}>
-        {emojis.map(emoji => (
-          <TouchableOpacity
-            key={emoji.id}
-            onPress={() => handleEmojiSelect(emoji.id)}
-            style={[
-              styles.emojiWrapper,
-              selectedEmoji === emoji.id && styles.selectedEmoji, // 선택된 이모지의 스타일 변경
-            ]}>
-            <Image source={{uri: emoji.src}} style={styles.emojiImage} />
-            <Text style={styles.emojiLabel}>{emoji.label}</Text>
-          </TouchableOpacity>
-        ))}
+      <Slider
+        style={{height: 100, marginHorizontal: 30, marginTop: 40}}
+        minimumValue={0}
+        maximumValue={2}
+        step={1}
+        minimumTrackTintColor={colors.GREEN_300}
+        maximumTrackTintColor={colors.GRAY_300}
+        value={sliderValue}
+        onValueChange={setSliderValue} // 슬라이드 값이 변경될 때 상태 업데이트
+        thumbImage={getEmojiForSliderValue()} // 슬라이드 값에 따라 이모지 변경
+      />
+      <View style={styles.labelContainer}>
+        <Text style={styles.emojiLabel}>가까운 사이는 아니에요.</Text>
+        <Text style={styles.emojiLabel}>매우 가까워요.</Text>
       </View>
 
       {/* 확인 버튼 */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => console.log('확인 버튼 눌림')}>
-        <Text style={styles.buttonText}>확인</Text>
-      </TouchableOpacity>
+      <CustomButton label="확인" variant="outlined" />
     </View>
   );
-};
+}
 
 // 스타일 정의
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
-    padding: 20,
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 14,
-    fontFamily: 'SamsungGothicCondensed',
-    fontWeight: '400',
-    color: 'black',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  question: {
-    fontSize: 22,
-    fontFamily: 'SamsungGothicCondensed',
-    fontWeight: '400',
-    color: 'black',
-    textAlign: 'center',
-    marginBottom: 30,
-  },
-  highlight: {
-    color: '#3FC89E',
-  },
-  emojiContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    marginBottom: 50,
+    paddingVertical: 30,
   },
   emojiWrapper: {
     alignItems: 'center',
   },
-  emojiImage: {
-    width: 51,
-    height: 51,
+  labelContainer: {
+    marginHorizontal: 35,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: -20,
   },
   emojiLabel: {
-    fontSize: 12,
-    fontFamily: 'SamsungGothicCondensed',
-    fontWeight: '400',
-    color: '#A7A7A7',
-    marginTop: 8,
-  },
-  selectedEmoji: {
-    opacity: 1, // 선택되면 진해지도록
-  },
-  button: {
-    backgroundColor: '#C2EADF',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#3FC89E',
-    fontSize: 14,
-    fontFamily: 'SamsungGothicCondensed',
-    fontWeight: '400',
+    fontSize: 13,
+    color: colors.GRAY_700,
   },
 });
 

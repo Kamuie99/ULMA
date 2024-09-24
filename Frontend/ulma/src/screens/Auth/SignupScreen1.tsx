@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TextInput, Text, TouchableOpacity, ScrollView, Animated, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import useAuthStore from '@/store/useAuthStore'; // Zustand store import
 import { authNavigations } from '@/constants/navigations';
-import axiosInstance from '@/api/axios';
 
 interface SignupScreenProps {}
 
@@ -15,9 +15,12 @@ interface ErrorState {
   verificationCode: string;
 }
 
-function SignupScreen({}: SignupScreenProps) {
+function SignupScreen1({}: SignupScreenProps) {
   const navigation = useNavigation();
-  const [name, setName] = useState('');
+  
+  const { setSignupData } = useAuthStore(); // Zustand action for storing data
+  
+  const [name, setName] = useState(''); // Input fields
   const [birthDate, setBirthDate] = useState('');
   const [idLastDigit, setIdLastDigit] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -141,7 +144,7 @@ function SignupScreen({}: SignupScreenProps) {
   const handleSendVerification = async () => {
     if (validateInputs()) {
       try {
-        // 실제 인증 요청을 전송하는 부분을 주석 처리
+        // 인증 요청 부분을 주석 처리
         // const response = await axiosInstance.post('/auth/phone', {
         //   phoneNumber: phoneNumber.replace(/-/g, ''),
         // });
@@ -190,6 +193,23 @@ function SignupScreen({}: SignupScreenProps) {
     styles.input,
     errors[field] ? styles.inputError : {}
   ];
+
+  const handleNext = () => {
+    if (isVerified) {
+      // 입력값들을 저장 (zustand 사용)
+      setSignupData({
+        name,
+        birthDate,
+        genderDigit: idLastDigit,
+        phoneNumber: phoneNumber.replace(/-/g, ''), // 하이픈 제거하여 저장
+      });
+
+      // 다음 화면으로 이동
+      navigation.navigate(authNavigations.SIGNUP2);
+    } else {
+      Alert.alert('인증을 완료해주세요.');
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -288,7 +308,7 @@ function SignupScreen({}: SignupScreenProps) {
           <Animated.View style={{ opacity: fadeAnim.signup }}>
             <TouchableOpacity 
               style={styles.signupButton} 
-              onPress={() => navigation.navigate(authNavigations.SIGNUP2)}
+              onPress={handleNext}
             >
               <Text style={styles.signupButtonText}>다음</Text>
             </TouchableOpacity>
@@ -406,4 +426,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SignupScreen;
+export default SignupScreen1;

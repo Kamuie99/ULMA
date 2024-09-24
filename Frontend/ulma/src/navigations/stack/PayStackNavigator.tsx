@@ -49,7 +49,7 @@ function PayStackNavigator() {
           return <Icon name="chevron-left" size={24} color={colors.BLACK} />;
         },
       }}>
-      <Stack.Screen
+      {/* <Stack.Screen
         name={payNavigations.ACCOUNT_INPUT}
         component={AccountinputScreen}
         options={{
@@ -68,15 +68,14 @@ function PayStackNavigator() {
             return <Icon name="cross" size={24} color={colors.BLACK} />;
           },
         }}
-      />
-      {/* <Stack.Screen
+      /> */}
+      <Stack.Screen
         name={payNavigations.FRIENDHSHIP_SECLECT}
         component={FriendshipselectScreen}
         options={{
-          headerTitle: ' ',
-          headerShown: false,
+          headerTitle: 'AI 금액 추천',
         }}
-      /> */}
+      />
       <Stack.Screen
         name={payNavigations.PAY_RECHARGE}
         component={PayrechargingScreen}

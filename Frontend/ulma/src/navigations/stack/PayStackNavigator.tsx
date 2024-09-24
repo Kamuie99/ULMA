@@ -15,8 +15,10 @@ import PaylistScreen from '@/screens/Pay/PaylistScreen';
 import PayrechargingScreen from '@/screens/Pay/PayrechargingScreen';
 import RecommendOptionScreen from '@/screens/Pay/RecommendOptionScreen';
 import SendingScreen from '@/screens/Pay/SendingScreen';
+import AccounthistoryScreen from '@/screens/Pay/AccounthistoryScreen';
 
 export type payStackParamList = {
+  [payNavigations.ACCOUNT_HISTORY]: undefined;
   [payNavigations.ACCOUNT_INPUT]: undefined;
   [payNavigations.ADD_HISTORY]: undefined;
   [payNavigations.CHANGE_RESULT]: undefined;
@@ -49,6 +51,14 @@ function PayStackNavigator() {
           return <Icon name="chevron-left" size={24} color={colors.BLACK} />;
         },
       }}>
+      <Stack.Screen
+        name={payNavigations.ACCOUNT_HISTORY}
+        component={AccounthistoryScreen}
+        options={{
+          headerTitle: ' ',
+          headerShown: false,
+        }}
+      />
       {/* <Stack.Screen
         name={payNavigations.ACCOUNT_INPUT}
         component={AccountinputScreen}
@@ -69,21 +79,21 @@ function PayStackNavigator() {
           },
         }}
       /> */}
-      <Stack.Screen
+      {/* <Stack.Screen
         name={payNavigations.FRIENDHSHIP_SECLECT}
         component={FriendshipselectScreen}
         options={{
           headerTitle: 'AI 금액 추천',
         }}
-      />
+      /> */}
+      {/* 
       <Stack.Screen
         name={payNavigations.PAY_RECHARGE}
         component={PayrechargingScreen}
         options={{
-          headerTitle: ' ',
-          headerShown: false,
+          headerTitle: '계좌 내역 확인하기',
         }}
-      />
+      /> */}
       {/* <Stack.Screen
         name={payNavigations.RECOMMEND_OPTION}
         component={RecommendOptionScreen}

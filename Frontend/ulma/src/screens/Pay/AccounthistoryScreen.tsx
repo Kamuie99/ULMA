@@ -1,4 +1,6 @@
 //입출금 내역 선택 페이지
+import CustomButton from '@/components/common/CustomButton';
+import {colors} from '@/constants';
 import React, {useState} from 'react';
 import {
   View,
@@ -8,6 +10,7 @@ import {
   StyleSheet,
   Button,
 } from 'react-native';
+import symbolicateStackTrace from 'react-native/Libraries/Core/Devtools/symbolicateStackTrace';
 
 interface Transaction {
   id: string;
@@ -37,23 +40,34 @@ const AccounthistoryScreen = () => {
     <TouchableOpacity
       style={[styles.item, item.selected && styles.selectedItem]}
       onPress={() => toggleSelect(item.id)}>
-      <Text style={styles.name}>{item.name}</Text>
-      <Text style={styles.amount}>{item.amount}</Text>
-      {item.selected && <Text style={styles.checkmark}>✔️</Text>}
+      <Text>
+        {item.selected ? (
+          <Text style={styles.check}>√</Text>
+        ) : (
+          <Text style={styles.noCheck}>▢</Text>
+        )}
+      </Text>
+      <View style={styles.textContainer}>
+        <Text style={styles.name}>{item.name}</Text>
+        <Text style={styles.amount}>{item.amount}</Text>
+      </View>
     </TouchableOpacity>
   );
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>계좌 내역 확인하기</Text>
-      <FlatList
-        data={data}
-        renderItem={renderItem}
-        keyExtractor={item => item.id}
-        style={styles.list}
-      />
-      <View style={styles.buttonContainer}>
-        <Button title="확인" onPress={() => console.log('확인 버튼 눌림')} />
+      <View style={styles.cardContiner}>
+        <View style={styles.accountInfoContainer}>
+          <Text style={styles.accountInfo}>싸피은행</Text>
+          <Text style={styles.accountInfo}>000-1111-000-1111</Text>
+        </View>
+        <FlatList
+          data={data}
+          renderItem={renderItem}
+          keyExtractor={item => item.id}
+          style={styles.list}
+        />
+        <CustomButton label="확인" variant="outlined" />
       </View>
     </View>
   );
@@ -62,42 +76,67 @@ const AccounthistoryScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: colors.LIGHTGRAY,
   },
-  header: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 20,
+  accountInfoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginHorizontal: 25,
+    marginBottom: 10,
+  },
+  accountInfo: {
+    color: colors.GRAY_700,
+    fontSize: 16,
+  },
+  cardContiner: {
+    flex: 1,
+    backgroundColor: colors.WHITE,
+    margin: 20,
+    paddingTop: 20,
+    borderRadius: 15,
+    borderColor: colors.GRAY_300,
+    borderWidth: 1,
+    shadowColor: colors.BLACK,
+    shadowOpacity: 0.25, // 그림자의 투명도
+    shadowRadius: 20, // 그림자의 흐림 정도
+    elevation: 4,
+  },
+  textContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '90%',
   },
   list: {
     flexGrow: 0,
+    paddingHorizontal: 20,
   },
   item: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 15,
-    borderWidth: 1,
-    borderColor: '#eee',
-    marginBottom: 10,
-    borderRadius: 10,
+    padding: 10,
+    paddingVertical: 10,
+    // borderRadius: 10,
+    marginVertical: 2,
   },
   selectedItem: {
     backgroundColor: '#FDEDEC', // 선택된 항목 배경색
   },
   name: {
     fontSize: 16,
+    width: '50%',
+    alignItems: 'flex-start',
   },
   amount: {
     fontSize: 16,
   },
-  checkmark: {
+  noCheck: {
     fontSize: 18,
-    color: '#FF5E5E', // 체크표시 색상
+    fontWeight: '800',
   },
-  buttonContainer: {
-    marginTop: 20,
-    alignItems: 'center',
+  check: {
+    fontSize: 18,
+    color: colors.PINK,
+    fontWeight: '800',
   },
 });
 

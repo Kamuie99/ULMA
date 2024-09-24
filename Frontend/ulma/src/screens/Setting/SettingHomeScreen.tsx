@@ -51,7 +51,7 @@ function SettingHomeScreen({navigation}: SettingHomeScreenProps) {
 
       <TouchableOpacity
         style={styles.option}
-        onPress={() => navigation.navigate(payNavigations.SEND_RESULT)}>
+        onPress={() => navigation.navigate(payNavigations.PAY_LIST)}>
         <Text style={styles.optionText}>Pay 이력보기</Text>
         <Icon name="chevron-forward" size={24} color="#000" />
       </TouchableOpacity>

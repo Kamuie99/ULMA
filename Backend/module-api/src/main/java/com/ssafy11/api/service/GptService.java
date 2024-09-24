@@ -60,8 +60,6 @@ public class GptService implements ChatService{
             // API 호출
             ResponseEntity<String> response = restTemplate.exchange(API_URL, HttpMethod.POST, entity, String.class);
 
-            System.out.println(response.getStatusCode());
-
             if (response.getStatusCode() == HttpStatus.OK) {
                 // JSON 파싱
                 JSONObject responseBody = new JSONObject(response.getBody());

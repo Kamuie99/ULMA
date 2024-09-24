@@ -38,7 +38,6 @@ public class UserDaoImpl implements UserDao {
 			.returningResult(USERS.ID)
 			.fetchOne();
 
-		Assert.notNull(one.getValue(USERS.ID), "ID 에 null 값은 허용되지 않음");
 		return one.getValue(USERS.ID);
 	}
 

@@ -16,7 +16,7 @@ function RootNavigator() {
         headerShown: false,
         tabBarActiveTintColor: colors.GREEN_700,
       }}>
-      <Tab.Screen name="Home" component={HomeStackNavigator} />
+      <Tab.Screen name="Main" component={HomeStackNavigator} />
       <Tab.Screen name="Auth" component={AuthStackNavigator} />
       <Tab.Screen name="Pay" component={PayStackNavigator} />
       <Tab.Screen name="Event" component={EventStackNavigator} />

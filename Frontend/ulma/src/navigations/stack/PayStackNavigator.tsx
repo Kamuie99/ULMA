@@ -51,14 +51,14 @@ function PayStackNavigator() {
           return <Icon name="chevron-left" size={24} color={colors.BLACK} />;
         },
       }}>
-      <Stack.Screen
+      {/* <Stack.Screen
         name={payNavigations.ACCOUNT_HISTORY}
         component={AccounthistoryScreen}
         options={{
           headerTitle: ' ',
           headerShown: false,
         }}
-      />
+      /> */}
       {/* <Stack.Screen
         name={payNavigations.ACCOUNT_INPUT}
         component={AccountinputScreen}
@@ -68,8 +68,16 @@ function PayStackNavigator() {
             return <Icon name="cross" size={24} color={colors.BLACK} />;
           },
         }}
-      />
+      /> */}
       <Stack.Screen
+        name={payNavigations.ADD_HISTORY}
+        component={AddhistoryScreen}
+        options={{
+          headerTitle: '이벤트 자세히 보기',
+          headerStyle: {backgroundColor: colors.LIGHTGRAY},
+        }}
+      />
+      {/* <Stack.Screen
         name={payNavigations.SEND_RESULT}
         component={SendresultScreen}
         options={{

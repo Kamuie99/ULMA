@@ -124,7 +124,7 @@ const PayPage = () => {
       <FlatList
         data={transactions}
         renderItem={renderTransaction}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         style={styles.transactionList}
       />
 

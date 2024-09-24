@@ -272,7 +272,7 @@ class AuthControllerTest {
 			.phoneNumber("01012345678")
 			.loginId("test")
 			.birthDate("010706")
-			.genderDigit("1")
+			.genderDigit("4")
 			.build();
 		doReturn(1).when(this.authService).join(any());
 

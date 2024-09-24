@@ -7,13 +7,17 @@ import com.ssafy11.domain.events.dto.EventCommand;
 import com.ssafy11.domain.participant.dto.EventParticipant;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.Record1;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static com.ssafy11.ulma.generated.Tables.*;
 
@@ -32,6 +36,36 @@ public class EventDaoImpl implements EventDao{
 
         Assert.notNull(saveEvent.getValue(EVENT.ID), "EVENT_ID 에 null 값은 허용되지 않음");
         return saveEvent.getValue(EVENT.ID);
+    }
+
+    @Override
+    public Integer updateEvent(EventCommand event, Integer eventId) {
+
+        Map<Field<?>, Object> updateMap = new HashMap<>();
+
+        if(event.name()!=null) updateMap.put(EVENT.NAME, event.name());
+        if(event.category()!=null) updateMap.put(EVENT.CATEGORY, event.category());
+        if(event.date()!=null) updateMap.put(EVENT.DATE, event.date());
+
+        int result = -1;
+        if(!updateMap.isEmpty()){
+            result = dsl.update(EVENT)
+                    .set(updateMap)
+                    .where(EVENT.ID.eq(eventId))
+                    .execute();
+        }
+        Assert.isTrue(result==1, "이벤트 업데이트 실패 데이터 정보를 확인해주세요");
+        return result;
+    }
+
+    @Override
+    public Boolean isUserEventCreated(Integer eventId, Integer userId) {
+        return dsl.fetchExists(
+                dsl.selectOne()
+                        .from(EVENT)
+                        .where(EVENT.ID.eq(eventId))
+                        .and(EVENT.USERS_ID.eq(userId))
+        );
     }
 
     @Transactional(readOnly = true)

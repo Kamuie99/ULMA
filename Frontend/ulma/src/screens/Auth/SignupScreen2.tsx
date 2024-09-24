@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TextInput, Text, TouchableOpacity, ScrollView, Alert, Animated, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import axios from 'axios';
+import axios, {AxiosError} from 'axios';
 import useAuthStore from '@/store/useAuthStore';
 
 function SignupScreen2() {
@@ -30,6 +30,11 @@ function SignupScreen2() {
     }).start();
   };
 
+  // handleInputChange 함수 정의
+  const handleInputChange = (field: keyof typeof signupData, value: string) => {
+    setSignupData({ [field]: value });
+  };
+
   const isId = (asValue: string) => {
     const regExp = /^[a-z]+[a-z0-9]{5,19}$/g;
     return regExp.test(asValue);
@@ -37,12 +42,41 @@ function SignupScreen2() {
 
   const isPassword = (asValue: string) => {
     const regExp = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+]).{8,16}$/;
-    return regExp.test(asValue);
+    return regExp.test(asValue); // 비밀번호 유효성 검사
   };
 
   const isEmail = (asValue: string) => {
     const regExp = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
     return regExp.test(asValue);
+  };
+
+  const handlePasswordChange = (text: string) => {
+    setSignupData({ password: text });
+
+    // 비밀번호 유효성 검사
+    if (!isPassword(text)) {
+      setPasswordError('8 ~ 16자 영문, 숫자, 특수문자를 최소 한가지씩 조합해주세요.');
+    } else {
+      setPasswordError('');
+    }
+
+    // 비밀번호가 바뀌면 비밀번호 확인 초기화 및 에러 검사
+    if (text !== signupData.passwordConfirm) {
+      setPasswordConfirmError('비밀번호가 일치하지 않습니다.');
+    } else {
+      setPasswordConfirmError('');
+    }
+  };
+
+  const handlePasswordConfirmChange = (text: string) => {
+    setSignupData({ passwordConfirm: text });
+
+    // 비밀번호 확인 일치 여부 검사
+    if (text !== signupData.password) {
+      setPasswordConfirmError('비밀번호가 일치하지 않습니다.');
+    } else {
+      setPasswordConfirmError('');
+    }
   };
 
   const handleDuplicateCheck = async () => {
@@ -81,7 +115,8 @@ function SignupScreen2() {
         );
       }
     } catch (error) {
-      if (error.response && error.response.status === 409) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response && axiosError.response.status === 409) {
         Alert.alert('중복된 아이디', '중복되는 아이디가 존재합니다.');
       } else {
         Alert.alert('중복체크 오류', '아이디 중복체크 중 오류가 발생했습니다. 다시 시도해주세요.');
@@ -109,7 +144,8 @@ function SignupScreen2() {
         setResendText('재전송'); // 버튼 텍스트를 재전송으로 변경
       }
     } catch (error) {
-      if (error.response && error.response.status === 409) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response && axiosError.response.status === 409) {
         Alert.alert('중복된 이메일', '이미 사용중인 이메일입니다.');
       } else {
         Alert.alert('이메일 발송 오류', '이메일 발송 중 오류가 발생했습니다. 다시 시도해주세요.');
@@ -135,7 +171,8 @@ function SignupScreen2() {
         Alert.alert('인증 완료', '이메일 인증이 완료되었습니다.');
       }
     } catch (error) {
-      if (error.response && error.response.status === 400) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response && axiosError.response.status === 400) {
         setEmailVerificationError('인증번호가 일치하지 않습니다.');
       } else {
         setEmailVerificationError('인증을 다시 시도해주세요.');
@@ -145,14 +182,14 @@ function SignupScreen2() {
     }
   };
 
-  const handleInputChange = (field: keyof typeof signupData, value: string) => {
-    setSignupData({ [field]: value });
-    setErrors(prev => ({ ...prev, [field]: '' }));
-  };
-
   const handleSignup = () => {
     // 회원가입 로직을 여기에 추가
+    if (passwordError || passwordConfirmError) {
+      Alert.alert('오류', '비밀번호를 올바르게 입력해주세요.');
+      return;
+    }
     Alert.alert('회원가입', '회원가입이 완료되었습니다.');
+    console.log('Signup data:', signupData); // 모든 값이 저장된 상태 출력
   };
 
   return (
@@ -167,7 +204,7 @@ function SignupScreen2() {
             <TextInput
               placeholder="사용할 아이디를 입력하세요"
               value={signupData.loginId}
-              onChangeText={(text) => handleInputChange('loginId', text)}
+              onChangeText={(text) => handleInputChange('loginId', text)} // handleInputChange 사용
               style={styles.input}
               editable={isLoginIdEditable}
             />
@@ -190,9 +227,10 @@ function SignupScreen2() {
               <TextInput
                 placeholder="비밀번호를 입력하세요"
                 value={signupData.password}
-                onChangeText={(text) => handleInputChange('password', text)}
+                onChangeText={handlePasswordChange} // 비밀번호 유효성 검사 추가
                 style={styles.input}
                 secureTextEntry
+                editable={!isEmailVerified} // 이메일 인증 완료 후 수정 불가
               />
               {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
             </View>
@@ -202,9 +240,10 @@ function SignupScreen2() {
               <TextInput
                 placeholder="비밀번호를 다시 입력하세요"
                 value={signupData.passwordConfirm}
-                onChangeText={(text) => handleInputChange('passwordConfirm', text)}
+                onChangeText={handlePasswordConfirmChange} // 비밀번호 확인 일치 여부 추가
                 style={styles.input}
                 secureTextEntry
+                editable={!isEmailVerified} // 이메일 인증 완료 후 수정 불가
               />
               {passwordConfirmError ? <Text style={styles.errorText}>{passwordConfirmError}</Text> : null}
             </View>
@@ -215,20 +254,18 @@ function SignupScreen2() {
         <View style={styles.inputContainer}>
           <Text style={styles.label}>이메일</Text>
           {isEmailVerified ? (
-            // 이메일 인증이 완료된 경우, 이메일 필드를 수정할 수 없도록 함
             <TextInput
               placeholder="이메일을 입력하세요"
               value={signupData.email}
               style={styles.input}
-              editable={false} // 수정 불가 설정
+              editable={false} // 이메일 인증 완료 후 수정 불가
             />
           ) : (
-            // 이메일 인증 전에는 수정 가능하고, 인증메일 발송 버튼 표시
             <View style={styles.row}>
               <TextInput
                 placeholder="이메일을 입력하세요"
                 value={signupData.email}
-                onChangeText={(text) => handleInputChange('email', text)}
+                onChangeText={(text) => handleInputChange('email', text)} // handleInputChange 사용
                 style={styles.input}
                 keyboardType="email-address"
               />

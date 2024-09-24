@@ -50,6 +50,14 @@ function PayStackNavigator() {
         },
       }}>
       <Stack.Screen
+        name={payNavigations.ACCOUNT_INPUT}
+        component={AccountinputScreen}
+        options={{
+          headerTitle: ' ',
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name={payNavigations.SEND_RESULT}
         component={SendresultScreen}
         options={{

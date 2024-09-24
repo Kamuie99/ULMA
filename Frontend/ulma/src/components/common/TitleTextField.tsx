@@ -23,8 +23,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     marginLeft: '5%',
-    marginTop: 50,
-    marginBottom: 20,
   },
   text: {
     fontSize: 22,

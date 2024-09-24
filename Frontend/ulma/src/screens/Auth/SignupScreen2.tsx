@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TextInput, Text, TouchableOpacity, ScrollView, Alert, Animated, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, TextInput, Text, TouchableOpacity, ScrollView, Animated, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import axios, {AxiosError} from 'axios';
+import axiosInstance from '@/api/axios'; // axiosInstance import
 import useAuthStore from '@/store/useAuthStore';
+import { AxiosError } from 'axios';
 
 function SignupScreen2() {
   const { signupData, setSignupData } = useAuthStore();
@@ -86,7 +87,7 @@ function SignupScreen2() {
     }
 
     try {
-      const response = await axios.get('http://j11e204.p.ssafy.io/api/auth/loginId', {
+      const response = await axiosInstance.get('/auth/loginId', {
         params: { loginId: signupData.loginId },
       });
 
@@ -133,7 +134,7 @@ function SignupScreen2() {
     setIsSendingEmail(true); // 로딩 시작
 
     try {
-      const response = await axios.post('http://j11e204.p.ssafy.io/api/auth/email', {
+      const response = await axiosInstance.post('/auth/email', {
         email: signupData.email,
       });
 
@@ -159,7 +160,7 @@ function SignupScreen2() {
     setIsVerifyingCode(true); // 로딩 시작
 
     try {
-      const response = await axios.put('http://j11e204.p.ssafy.io/api/auth/email', {
+      const response = await axiosInstance.put('/auth/email', {
         email: signupData.email,
         verificationCode: emailVerificationCode,
       });

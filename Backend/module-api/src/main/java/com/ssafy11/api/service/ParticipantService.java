@@ -1,11 +1,10 @@
 package com.ssafy11.api.service;
 
-import com.ssafy11.api.config.util.VerificationUtil;
-import com.ssafy11.api.dto.SmsVerification;
 import com.ssafy11.api.exception.ErrorCode;
 import com.ssafy11.api.exception.ErrorException;
 import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.common.PageResponse;
+import com.ssafy11.domain.events.EventDao;
 import com.ssafy11.domain.participant.ParticipantDao;
 import com.ssafy11.domain.participant.dto.AddGuestResponse;
 import com.ssafy11.domain.participant.dto.Participant;
@@ -23,6 +22,7 @@ import java.util.List;
 @Transactional
 public class ParticipantService {
     private final ParticipantDao participantDao;
+    private final EventDao eventDao;
 
     @Transactional(readOnly = true)
     public List<UserRelation> sameName(Integer userId, String name){
@@ -58,6 +58,24 @@ public class ParticipantService {
         Integer participantId = participantDao.addParticipant(participant);
         Assert.notNull(participantId, "participantId is required");
         return participantId;
+    }
+
+    public Integer updateParticipant(Participant participant) {
+        Assert.notNull(participant, "participant is required");
+        Assert.isTrue(eventDao.isUserEventCreated(participant.eventId(), participant.userId()), "사용자가 만든 이벤트가 아닙니다.");
+
+        Integer resultId = participantDao.updateParticipant(participant);
+        Assert.notNull(resultId, "resultId must not be null");
+        return resultId;
+    }
+
+    public Integer deleteParticipant(Participant participant) {
+        Assert.notNull(participant, "participant is required");
+        Assert.isTrue(eventDao.isUserEventCreated(participant.eventId(), participant.userId()), "사용자가 만든 이벤트가 아닙니다.");
+
+        Integer resultId = participantDao.deleteParticipant(participant);
+        Assert.notNull(resultId, "resultId must not be null");
+        return resultId;
     }
 
     public Integer addGuestAndUserRelation(AddGuestResponse addGuestResponse){

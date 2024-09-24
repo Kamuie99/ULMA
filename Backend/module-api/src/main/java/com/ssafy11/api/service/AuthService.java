@@ -29,6 +29,10 @@ import com.ssafy11.domain.users.Users;
 
 import lombok.RequiredArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
 @RequiredArgsConstructor
 @Transactional
 @Service
@@ -128,11 +132,31 @@ public class AuthService {
 		}
 
 		checkEmail(request);
-
 		checkPhoneNumber(request);
 
 		if(!request.password().equals(request.passwordConfirm())) {
 			throw new ErrorException(ErrorCode.PasswordMismatch);
+		}
+
+		String birthDate=null;
+		Character gender = null;
+
+		if(request.genderDigit().equals("3")||request.genderDigit().equals("4")){
+			birthDate = "20"+request.birthDate();
+		}else if(request.genderDigit().equals("1")||request.genderDigit().equals("2")){
+			birthDate = "19"+request.birthDate();
+		}
+
+		Assert.notNull(birthDate, "birthDate must not be null");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+		LocalDate date = LocalDate.parse(birthDate, formatter);
+
+		if(request.genderDigit().equals("2") || request.genderDigit().equals("4")) {
+			gender = 'F';
+		}else if(request.genderDigit().equals("1") || request.genderDigit().equals("3")) {
+			gender = 'M';
+		}else{
+			Assert.notNull(gender, "gender must not be null");
 		}
 
 		return this.userDao.save(UserCommand.builder()
@@ -141,6 +165,8 @@ public class AuthService {
 			.password(passwordEncoder.encode(request.password()))
 			.email(request.email())
 			.phoneNumber(request.phoneNumber())
+			.birthday(date)
+			.gender(gender)
 			.build());
 	}
 

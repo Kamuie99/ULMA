@@ -1,20 +1,25 @@
 import React from 'react';
-import {StyleSheet, Text, View, TouchableOpacity, ScrollView} from 'react-native';
-import { settingNavigations } from '@/constants/navigations';
-import { payNavigations } from '@/constants/navigations';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
+import {settingNavigations} from '@/constants/navigations';
+import {payNavigations} from '@/constants/navigations';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 interface SettingHomeScreenProps {
   navigation: any; // 실제 프로젝트에서는 더 구체적인 타입을 사용해야 합니다
 }
 
-function SettingHomeScreen({ navigation }: SettingHomeScreenProps) {
+function SettingHomeScreen({navigation}: SettingHomeScreenProps) {
   return (
     <ScrollView style={styles.container}>
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.userInfo}
-        onPress={() => navigation.navigate(settingNavigations.USER_DETAIL)}
-      >
+        onPress={() => navigation.navigate(settingNavigations.USER_DETAIL)}>
         <View>
           <Text style={styles.userName}>김싸피</Text>
           <Text style={styles.userEmail}>dakgoo02@naver.com</Text>
@@ -35,20 +40,25 @@ function SettingHomeScreen({ navigation }: SettingHomeScreenProps) {
         <Icon name="chevron-forward" size={24} color="#000" />
       </TouchableOpacity>
 
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.option}
-        onPress={() => navigation.navigate('Pay', { screen: payNavigations.PAY_RECHARGE })}
-      >
+        onPress={() =>
+          navigation.navigate('Pay', {screen: payNavigations.PAY_RECHARGE})
+        }>
         <Text style={styles.optionText}>Pay 충전하기</Text>
         <Icon name="chevron-forward" size={24} color="#000" />
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.option} onPress={() => navigation.navigate(payNavigations.SEND_RESULT)}>
+      <TouchableOpacity
+        style={styles.option}
+        onPress={() => navigation.navigate(payNavigations.PAY_LIST)}>
         <Text style={styles.optionText}>Pay 이력보기</Text>
         <Icon name="chevron-forward" size={24} color="#000" />
       </TouchableOpacity>
 
-      <Text style={[styles.sectionTitle, styles.contactManagement]}>지인 관리</Text>
+      <Text style={[styles.sectionTitle, styles.contactManagement]}>
+        지인 관리
+      </Text>
 
       <TouchableOpacity style={styles.option}>
         <Text style={styles.optionText}>지인 목록 보기</Text>

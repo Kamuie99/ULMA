@@ -1,17 +1,22 @@
-import React from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import CustomButton from '@/components/common/CustomButton';
+import {colors} from '@/constants';
+import {useFocusEffect} from '@react-navigation/native';
+import React, {useCallback, useEffect} from 'react';
+import {View, Text, StyleSheet} from 'react-native';
 
-const SendresultScreen = () => {
+function SendresultScreen({navigation}) {
+  useEffect(() => {
+    // 페이지에 들어올 때 탭바 숨기기
+    navigation.getParent()?.setOptions({
+      tabBarStyle: {display: 'none'},
+    });
+  }, [navigation]);
+
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Pay 송금하기</Text>
-      </View>
-
       {/* Transfer Details */}
       <View style={styles.resultContainer}>
-        <Text style={styles.resultTitle}>송금 결과</Text>
+        {/* <Text style={styles.resultTitle}>송금 결과</Text> */}
 
         <View style={styles.detailRow}>
           <Text style={styles.label}>송금 계좌</Text>
@@ -34,12 +39,10 @@ const SendresultScreen = () => {
       </View>
 
       {/* Confirm Button */}
-      <TouchableOpacity style={styles.confirmButton}>
-        <Text style={styles.confirmText}>확인</Text>
-      </TouchableOpacity>
+      <CustomButton variant="outlined" label="확인" />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -60,10 +63,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   resultContainer: {
-    backgroundColor: '#F7F8FA',
+    backgroundColor: colors.LIGHTGRAY,
     borderRadius: 10,
     padding: 20,
     marginHorizontal: 20,
+    marginVertical: 10,
   },
   resultTitle: {
     color: 'black',
@@ -78,7 +82,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   label: {
-    color: '#A7A7A7',
+    color: colors.GRAY_700,
     fontSize: 15,
     fontFamily: 'SamsungGothicCondensedOTF',
     fontWeight: '500',
@@ -91,24 +95,10 @@ const styles = StyleSheet.create({
   },
   successMessage: {
     textAlign: 'center',
-    color: '#F09AAA',
-    fontSize: 14,
-    fontFamily: 'SamsungGothicCondensed',
-    fontWeight: '400',
-    marginTop: 20,
-  },
-  confirmButton: {
-    backgroundColor: '#C2EADF',
-    borderRadius: 8,
-    paddingVertical: 15,
-    marginHorizontal: 20,
-    alignItems: 'center',
-  },
-  confirmText: {
-    color: '#3FC89E',
-    fontSize: 14,
-    fontFamily: 'SamsungGothicCondensed',
-    fontWeight: '400',
+    color: colors.PINK,
+    fontSize: 15,
+    fontWeight: '800',
+    marginTop: 10,
   },
 });
 

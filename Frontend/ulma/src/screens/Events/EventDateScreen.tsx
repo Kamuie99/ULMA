@@ -9,6 +9,9 @@ import {
   Alert,
 } from 'react-native';
 import {useRoute, useNavigation} from '@react-navigation/native';
+import TitleTextField from '@/components/common/TitleTextField';
+import CustomButton from '@/components/common/CustomButton';
+import InputField from '@/components/common/InputField';
 
 const EventDateScreen = () => {
   const [date, setDate] = useState('');
@@ -29,19 +32,19 @@ const EventDateScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{eventTitle}은 언제인가요?</Text>
+      <TitleTextField
+        frontLabel=""
+        emphMsg={eventTitle}
+        backLabel="은 언제인가요?"
+      />
 
-      <TextInput
-        style={styles.input}
+      <InputField
         placeholder="년 - 월 - 일"
-        placeholderTextColor="#BDBDBD"
         value={date}
         onChangeText={setDate}
       />
 
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>저장</Text>
-      </TouchableOpacity>
+      <CustomButton label="확인" onPress={handleSave} />
     </View>
   );
 };
@@ -49,34 +52,6 @@ const EventDateScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
-    justifyContent: 'space-between', // 상단 내용과 하단 바 사이 간격 유지
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    color: '#00C77F',
-  },
-  input: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#00C77F',
-    marginBottom: 30,
-    fontSize: 16,
-    paddingVertical: 5,
-    color: '#000', // 텍스트 색상
-  },
-  saveButton: {
-    backgroundColor: '#00C77F',
-    paddingVertical: 15,
-    borderRadius: 5,
-    alignItems: 'center',
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });
 

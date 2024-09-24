@@ -27,28 +27,37 @@ function CustomButton({
   ...props
 }: CustomButtonProps) {
   return (
-    <Pressable
-      disabled={inValid}
-      style={({pressed}) => [
-        styles.container,
-        pressed ? styles[`${variant}Pressed`] : styles[variant],
-        inValid && styles.inValid,
-      ]}
-      {...props}>
-      <View style={styles[size]}>
-        <Text style={[styles.text, styles[`${variant}Text`]]}>{label}</Text>
-      </View>
-    </Pressable>
+    <View style={styles.wrap}>
+      <Pressable
+        disabled={inValid}
+        style={({pressed}) => [
+          styles.container,
+          pressed ? styles[`${variant}Pressed`] : styles[variant],
+          inValid && styles.inValid,
+        ]}
+        {...props}>
+        <View style={styles[size]}>
+          <Text style={[styles.text, styles[`${variant}Text`]]}>{label}</Text>
+        </View>
+      </Pressable>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrap: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   container: {
     borderRadius: 6,
     flexDirection: 'row',
     justifyContent: 'center',
     display: 'flex',
     alignItems: 'center',
+    position: 'absolute',
+    bottom: 30,
   },
   inValid: {
     opacity: 0.5,

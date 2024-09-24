@@ -1,5 +1,7 @@
 //메인페이지 - 슬라이드 넘어가지게
 
+import CustomButton from '@/components/common/CustomButton';
+import {colors} from '@/constants';
 import {authNavigations} from '@/constants/navigations';
 import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
@@ -59,9 +61,9 @@ const slides: Slide[] = [
 const SlideItem: React.FC<SlideItemProps> = ({item}) => {
   return (
     <View style={styles.slide}>
-      <Image source={item.image} style={styles.image} />
       <Text style={styles.title}>{item.title}</Text>
       <Text style={styles.description}>{item.description}</Text>
+      <Image source={item.image} style={styles.image} />
     </View>
   );
 };
@@ -132,13 +134,13 @@ const HomeScreen: React.FC = () => {
         onMomentumScrollEnd={updateCurrentSlideIndex}
       />
       <Pagination data={slides} scrollX={scrollX} />
-      <TouchableOpacity
-        style={styles.button}
+
+      <CustomButton
+        label="시작하기"
         onPress={() =>
           navigation.navigate('Auth', {screen: authNavigations.LOGIN_HOME})
-        }>
-        <Text style={styles.buttonText}>시작하기</Text>
-      </TouchableOpacity>
+        }
+      />
     </View>
   );
 };
@@ -168,7 +170,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
-    color: '#888',
+    color: colors.GRAY,
     textAlign: 'center',
     marginHorizontal: 20,
     marginTop: 10,
@@ -176,20 +178,8 @@ const styles = StyleSheet.create({
   dot: {
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#00C77F',
-    marginHorizontal: 8,
-  },
-  button: {
-    backgroundColor: '#00C77F',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    position: 'absolute',
-    bottom: 30,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
+    backgroundColor: colors.GRAY,
+    marginHorizontal: 5,
   },
 });
 

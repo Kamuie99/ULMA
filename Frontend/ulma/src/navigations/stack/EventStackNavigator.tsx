@@ -49,6 +49,9 @@ function EventStackNavigator() {
         component={EventAddScreen}
         options={{
           headerTitle: '이벤트 추가하기',
+          headerBackImage: () => {
+            return <Icon name="cross" size={24} color={colors.BLACK} />;
+          },
         }}
       />
       <Stack.Screen
@@ -56,7 +59,6 @@ function EventStackNavigator() {
         component={EventDateScreen}
         options={{
           headerTitle: '이벤트 추가하기',
-          headerShown: false,
         }}
       />
     </Stack.Navigator>

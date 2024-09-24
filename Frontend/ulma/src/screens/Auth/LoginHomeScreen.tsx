@@ -18,7 +18,7 @@ function LoginHomeScreen({navigation}: LoginHomeScreenProps) {
         onPress={() => navigation.navigate(authNavigations.LOGIN)}
       />
       <Text>혹시 계정이 없으신가요?</Text>
-      <Text onPress={() => navigation.navigate(authNavigations.SIGNUP)}>
+      <Text onPress={() => navigation.navigate(authNavigations.SIGNUP1)}>
         회원가입 하러 가기
       </Text>
     </View>

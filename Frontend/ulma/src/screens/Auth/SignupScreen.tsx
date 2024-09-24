@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TextInput, Text, TouchableOpacity, ScrollView, Animated, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import axiosInstance from '@/api/axios'; // axiosInstance 가져오기
+import axiosInstance from '@/api/axios';
 
 interface SignupScreenProps {}
 
@@ -23,7 +23,10 @@ function SignupScreen({}: SignupScreenProps) {
   const [isVerified, setIsVerified] = useState(false);
   const [verificationError, setVerificationError] = useState('');
   const [resendText, setResendText] = useState('인증번호 전송');
-  const [errors, setErrors] = useState<ErrorState>({ name: '', birthDate: '', idLastDigit: '', phoneNumber: '',  verificationCode: '' });
+  const [errors, setErrors] = useState<ErrorState>({ name: '', birthDate: '', idLastDigit: '', phoneNumber: '', verificationCode: '' });
+
+  const [countdown, setCountdown] = useState(180);
+  const [timerExpired, setTimerExpired] = useState(false);
 
   const fadeAnim = {
     birthDate: useState(new Animated.Value(0))[0],
@@ -51,6 +54,21 @@ function SignupScreen({}: SignupScreenProps) {
   useEffect(() => {
     if (isVerified) fadeIn(fadeAnim.signup);
   }, [isVerified]);
+
+  const startTimer = () => {
+    setTimerExpired(false);
+    setCountdown(180);
+    const timerInterval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timerInterval);
+          setTimerExpired(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
 
   const formatPhoneNumber = (text: string) => {
     const cleaned = text.replace(/\D/g, '');
@@ -90,7 +108,7 @@ function SignupScreen({}: SignupScreenProps) {
   };
 
   const validateInputs = () => {
-    let newErrors: ErrorState = { name: '', birthDate: '', idLastDigit: '', phoneNumber: '', verificationCode: '', };
+    let newErrors: ErrorState = { name: '', birthDate: '', idLastDigit: '', phoneNumber: '', verificationCode: '' };
     let isValid = true;
 
     if (!validateName(name)) {
@@ -120,42 +138,49 @@ function SignupScreen({}: SignupScreenProps) {
   const handleSendVerification = async () => {
     if (validateInputs()) {
       try {
-        const response = await axiosInstance.post('/auth/phone', {
-          phoneNumber: phoneNumber.replace(/-/g, ''), // 하이픈 제거
-        });
+        // 실제 인증 요청을 전송하는 부분을 주석 처리
+        // const response = await axiosInstance.post('/auth/phone', {
+        //   phoneNumber: phoneNumber.replace(/-/g, ''),
+        // });
 
-        if (response.status === 200) {
+        // if (response.status === 200) {
           setShowVerificationCode(true);
           setResendText('재전송');
           fadeIn(fadeAnim.verificationCode);
-          Alert.alert('인증번호가 전송되었습니다.');
-        }
+          Alert.alert('인증번호가 전송되었습니다. (개발용: 000000)');
+          startTimer();
+          setIsVerified(false);
+          setVerificationError('');
+        // }
       } catch (error) {
         console.error('인증번호 전송 오류:', error);
         Alert.alert('인증번호 전송에 실패했습니다. 다시 시도해주세요.');
       }
     } else {
-      // 경고 메시지 표시
       Alert.alert('올바른 값을 입력하세요.');
     }
   };
 
   const handleVerifyCode = async () => {
-    try {
-      const response = await axiosInstance.put('/auth/phone', {
-        phoneNumber: phoneNumber.replace(/-/g, ''),
-        verificationCode: verificationCode,
-      });
-
-      if (response.status === 200) {
-        setIsVerified(true);
-        setVerificationError('');
-      }
-    } catch (error) {
-      setIsVerified(false);
-      setVerificationError('인증 실패');
-      console.error('인증 실패:', error);
+    if (timerExpired) {
+      Alert.alert('인증 실패', '요청 시간이 초과되었습니다.');
+      return;
     }
+
+    if (verificationCode === '000000') {
+      setIsVerified(true);
+      setVerificationError('');
+      setShowVerificationCode(false);
+    } else {
+      setIsVerified(false);
+      setVerificationError('인증번호가 일치하지 않습니다.');
+    }
+  };
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
   };
 
   const getInputStyle = (field: keyof ErrorState) => [
@@ -217,14 +242,17 @@ function SignupScreen({}: SignupScreenProps) {
               style={[getInputStyle('phoneNumber'), styles.phoneInput]}
               keyboardType="phone-pad"
             />
-            <TouchableOpacity style={styles.button} onPress={handleSendVerification}>
-              <Text style={styles.buttonText}>{resendText}</Text>
-            </TouchableOpacity>
+            {!isVerified && (
+              <TouchableOpacity style={styles.button} onPress={handleSendVerification}>
+                <Text style={styles.buttonText}>{resendText}</Text>
+              </TouchableOpacity>
+            )}
           </View>
           {errors.phoneNumber ? <Text style={styles.errorText}>{errors.phoneNumber}</Text> : null}
+          {isVerified && <Text style={styles.successText}>인증 성공</Text>}
         </Animated.View>
 
-        {showVerificationCode && (
+        {showVerificationCode && !isVerified && (
           <Animated.View style={[styles.inputContainer, { opacity: fadeAnim.verificationCode }]}>
             <Text style={styles.label}>인증번호</Text>
             <View style={styles.row}>
@@ -240,19 +268,19 @@ function SignupScreen({}: SignupScreenProps) {
                 <Text style={styles.buttonText}>확인</Text>
               </TouchableOpacity>
             </View>
-            {/* 인증 성공/실패 메시지 */}
-            {isVerified ? (
-              <Text style={styles.successText}>인증 성공</Text>
-            ) : (
-              verificationError && <Text style={styles.errorText}>{verificationError}</Text>
-            )}
+            <View style={styles.verificationResultContainer}>
+              {!timerExpired && (
+                <Text style={styles.timerText}>{formatTime(countdown)}</Text>
+              )}
+              {verificationError && <Text style={styles.errorText}>{verificationError}</Text>}
+            </View>
           </Animated.View>
         )}
 
         {isVerified && (
           <Animated.View style={{ opacity: fadeAnim.signup }}>
             <TouchableOpacity style={styles.signupButton} onPress={() => {}}>
-              <Text style={styles.signupButtonText}> 회원가입 (1/2) </Text>
+              <Text style={styles.signupButtonText}>회원가입 (1/2)</Text>
             </TouchableOpacity>
           </Animated.View>
         )}
@@ -353,7 +381,18 @@ const styles = StyleSheet.create({
   successText: {
     color: 'green',
     fontSize: 14,
-    marginTop: 10,
+    marginTop: 5,
+  },
+  timerText: {
+    fontSize: 14,
+    color: '#555',
+    marginTop: 5,
+  },
+  verificationResultContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 5,
   },
 });
 

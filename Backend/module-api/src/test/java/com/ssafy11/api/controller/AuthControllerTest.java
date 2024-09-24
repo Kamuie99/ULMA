@@ -271,6 +271,8 @@ class AuthControllerTest {
 			.passwordConfirm("password")
 			.phoneNumber("01012345678")
 			.loginId("test")
+			.birthDate("010706")
+			.genderDigit("1")
 			.build();
 		doReturn(1).when(this.authService).join(any());
 

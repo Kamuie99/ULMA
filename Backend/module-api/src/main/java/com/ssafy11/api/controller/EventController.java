@@ -35,6 +35,18 @@ public class EventController {
         return ResponseEntity.ok(eventId);
     }
 
+    @PatchMapping ("/{eventId}")//이벤트 수정
+    public ResponseEntity<Integer> updateEvent(@AuthenticationPrincipal User user,
+                                         @RequestBody EventCommand event,
+                                         @PathVariable ("eventId") Integer eventId) {
+        Assert.notNull(event, "Event must not be null");
+        Assert.notNull(eventId, "Event ID must not be null");
+        Assert.isTrue(user.getUsername().equals(String.valueOf(event.userId())), "User ID does not match");
+
+        int returnId = eventService.updateEvent(event, eventId);
+        return ResponseEntity.ok(returnId);
+    }
+
     @GetMapping("/{userId}") //이벤트 목록
     public ResponseEntity<?> getAllEvents(@AuthenticationPrincipal User user,
                                           @PathVariable("userId") Integer userId,

@@ -170,16 +170,6 @@ public class AuthService {
 			.build());
 	}
 
-	public static boolean isValidDate(String date) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-mm-dd");
-		try{
-			LocalDate.parse(date, formatter);
-			return true;
-		}catch(DateTimeParseException e){
-			return false;
-		}
-	}
-
 	public JwtResponse login(UserLoginRequest request) {
 		var authenticationToken = new UsernamePasswordAuthenticationToken(request.loginId(),
 			request.password());

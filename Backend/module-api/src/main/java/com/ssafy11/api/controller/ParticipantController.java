@@ -7,6 +7,7 @@ import com.ssafy11.api.service.ExcelService;
 import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.common.PageResponse;
 import com.ssafy11.api.service.ParticipantService;
+import com.ssafy11.domain.events.dto.EventCommand;
 import com.ssafy11.domain.participant.dto.AddGuestResponse;
 import com.ssafy11.domain.participant.dto.Participant;
 import com.ssafy11.domain.participant.dto.Transaction;
@@ -86,6 +87,30 @@ public class ParticipantController {
 
         List<ExcelParse> result = excelService.parseExcelFile(file);
         return ResponseEntity.ok(result);
+    }
+
+    //경조사비 수정
+    @PatchMapping //이벤트 수정
+    public ResponseEntity<Integer> updateParticipant(@AuthenticationPrincipal User user,
+                                               @RequestBody Participant participant) {
+        Assert.notNull(participant, "participant must not be null");
+        Assert.isTrue(user.getUsername().equals(String.valueOf(participant.userId())), "User ID does not match");
+
+        int returnId = participantService.updateParticipant(participant);
+        return ResponseEntity.ok(returnId);
+    }
+
+    //경조사비 삭제
+    @DeleteMapping
+    public ResponseEntity<Integer> deleteParticipant(@AuthenticationPrincipal User user,
+                                               @RequestBody Participant participant){
+        Assert.notNull(participant, "participant must not be null");
+        Assert.notNull(participant.eventId(), "participant.eventId must not be null");
+        Assert.notNull(participant.guestId(), "participant.guestId must not be null");
+        Assert.isTrue(user.getUsername().equals(String.valueOf(participant.userId())), "User ID does not match");
+
+        int resultId = participantService.deleteParticipant(participant);
+        return ResponseEntity.ok(resultId);
     }
 
     //지인 등록

@@ -2,18 +2,22 @@ package com.ssafy11.domain.participant;
 
 import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.common.PageResponse;
+import com.ssafy11.domain.events.dto.EventCommand;
 import com.ssafy11.domain.participant.dto.Participant;
 import com.ssafy11.domain.participant.dto.Transaction;
 import com.ssafy11.domain.participant.dto.UserRelation;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.Record1;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.ssafy11.ulma.generated.Tables.*;
 
@@ -86,6 +90,31 @@ public class ParticipantDaoImpl implements ParticipantDao {
         Integer result = dsl.insertInto(PARTICIPATION, PARTICIPATION.EVENT_ID, PARTICIPATION.GUEST_ID, PARTICIPATION.AMOUNT, PARTICIPATION.CREATE_AT)
                 .values(participant.eventId(), participant.guestId(), participant.amount(), LocalDateTime.now())
                 .execute();
+        return result;
+    }
+
+    @Override
+    public Integer updateParticipant(Participant participant) {
+
+        Assert.notNull(participant.amount(),"수정할 데이터가 없습니다.");
+        int result = dsl.update(PARTICIPATION)
+                .set(PARTICIPATION.AMOUNT, participant.amount())
+                .where(PARTICIPATION.GUEST_ID.eq(participant.guestId()))
+                .and(PARTICIPATION.EVENT_ID.eq(participant.eventId()))
+                .execute();
+
+        Assert.isTrue(result==1, "참가자 업데이트 실패");
+        return result;
+    }
+
+    @Override
+    public Integer deleteParticipant(Participant participant) {
+        int result=dsl.delete(PARTICIPATION)
+                .where(PARTICIPATION.EVENT_ID.eq(participant.eventId()))
+                .and(PARTICIPATION.GUEST_ID.eq(participant.guestId()))
+                .execute();
+
+        Assert.isTrue(result==1, "참가자 삭제 실패");
         return result;
     }
 

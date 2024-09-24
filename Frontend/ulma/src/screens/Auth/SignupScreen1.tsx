@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, TextInput, Text, TouchableOpacity, ScrollView, Animated, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import { authNavigations } from '@/constants/navigations';
 import axiosInstance from '@/api/axios';
 
 interface SignupScreenProps {}
@@ -14,6 +16,7 @@ interface ErrorState {
 }
 
 function SignupScreen({}: SignupScreenProps) {
+  const navigation = useNavigation();
   const [name, setName] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [idLastDigit, setIdLastDigit] = useState('');
@@ -91,7 +94,7 @@ function SignupScreen({}: SignupScreenProps) {
   };
 
   const validateName = (name: string) => {
-    const nameRegex = /^[가-힣a-zA-Z\s\d]{3,15}$/;
+    const nameRegex = /^[가-힣a-zA-Z\s\d]{2,15}$/;
     return nameRegex.test(name);
   };
 
@@ -112,7 +115,7 @@ function SignupScreen({}: SignupScreenProps) {
     let isValid = true;
 
     if (!validateName(name)) {
-      newErrors.name = '이름을 올바르게 입력해주세요. (3-15자, 한글, 영문, 숫자만 가능)';
+      newErrors.name = '이름을 올바르게 입력해주세요. (2-15자, 한글, 영어만 가능)';
       isValid = false;
     }
 
@@ -202,6 +205,7 @@ function SignupScreen({}: SignupScreenProps) {
               setErrors(prev => ({ ...prev, name: '' }));
             }}
             style={getInputStyle('name')}
+            editable={!isVerified} // 인증 성공 시 수정 불가
           />
           {errors.name ? <Text style={styles.errorText}>{errors.name}</Text> : null}
         </View>
@@ -216,6 +220,7 @@ function SignupScreen({}: SignupScreenProps) {
               style={[getInputStyle('birthDate'), styles.birthInput]}
               keyboardType="numeric"
               maxLength={6}
+              editable={!isVerified} // 인증 성공 시 수정 불가
             />
             <Text style={styles.dash}>-</Text>
             <TextInput
@@ -225,6 +230,7 @@ function SignupScreen({}: SignupScreenProps) {
               style={[getInputStyle('idLastDigit'), styles.idInput]}
               keyboardType="numeric"
               maxLength={1}
+              editable={!isVerified} // 인증 성공 시 수정 불가
             />
             <Text>*******</Text>
           </View>
@@ -241,6 +247,7 @@ function SignupScreen({}: SignupScreenProps) {
               onChangeText={handlePhoneNumberChange}
               style={[getInputStyle('phoneNumber'), styles.phoneInput]}
               keyboardType="phone-pad"
+              editable={!isVerified} // 인증 완료 시 수정 불가
             />
             {!isVerified && (
               <TouchableOpacity style={styles.button} onPress={handleSendVerification}>
@@ -279,8 +286,11 @@ function SignupScreen({}: SignupScreenProps) {
 
         {isVerified && (
           <Animated.View style={{ opacity: fadeAnim.signup }}>
-            <TouchableOpacity style={styles.signupButton} onPress={() => {}}>
-              <Text style={styles.signupButtonText}>회원가입 (1/2)</Text>
+            <TouchableOpacity 
+              style={styles.signupButton} 
+              onPress={() => navigation.navigate(authNavigations.SIGNUP2)}
+            >
+              <Text style={styles.signupButtonText}>다음</Text>
             </TouchableOpacity>
           </Animated.View>
         )}

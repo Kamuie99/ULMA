@@ -7,7 +7,8 @@ const authNavigations = {
   LOGIN_HOME: 'LoginHome',
   LOGIN: 'Login',
   SIGNUP_HOME: 'SignupHome',
-  SIGNUP: 'Signup',
+  SIGNUP1: 'Signup1',
+  SIGNUP2: 'Signup2',
 } as const;
 
 const eventNavigations = {

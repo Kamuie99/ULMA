@@ -31,12 +31,13 @@ public class UserDaoImpl implements UserDao {
 				USERS.PASSWORD,
 				USERS.NAME,
 				USERS.PHONE_NUMBER,
+				USERS.BIRTHDATE,
+				USERS.GENDER,
 				USERS.CREATED_AT)
-			.values(command.loginId(), command.email(), command.password(), command.name(), command.phoneNumber(), LocalDateTime.now())
+			.values(command.loginId(), command.email(), command.password(), command.name(), command.phoneNumber(), command.birthday(), String.valueOf(command.gender()), LocalDateTime.now())
 			.returningResult(USERS.ID)
 			.fetchOne();
 
-		Assert.notNull(one.getValue(USERS.ID), "ID 에 null 값은 허용되지 않음");
 		return one.getValue(USERS.ID);
 	}
 

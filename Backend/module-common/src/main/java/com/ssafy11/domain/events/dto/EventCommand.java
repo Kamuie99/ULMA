@@ -1,4 +1,4 @@
-package com.ssafy11.domain.events;
+package com.ssafy11.domain.events.dto;
 
 import lombok.Builder;
 

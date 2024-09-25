@@ -8,7 +8,7 @@ const RecommendOptionScreen: React.FC = () => {
   // 네비게이션 이동을 처리하는 함수
   const handleNavigation = (destination: string) => {
     // 실제 내비게이션 경로 설정
-    navigation.navigate(destination);
+    navigation.navigate('###');
   };
 
   return (

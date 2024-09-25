@@ -1,6 +1,9 @@
 //입출금 내역 선택 페이지
 import CustomButton from '@/components/common/CustomButton';
 import {colors} from '@/constants';
+import {payNavigations} from '@/constants/navigations';
+import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
+import {StackScreenProps} from '@react-navigation/stack';
 import React, {useState} from 'react';
 import {
   View,
@@ -10,7 +13,6 @@ import {
   StyleSheet,
   Button,
 } from 'react-native';
-import symbolicateStackTrace from 'react-native/Libraries/Core/Devtools/symbolicateStackTrace';
 
 interface Transaction {
   id: string;
@@ -19,7 +21,12 @@ interface Transaction {
   selected: boolean;
 }
 
-const AccounthistoryScreen = () => {
+type AccounthistoryScreenProps = StackScreenProps<
+  payStackParamList,
+  typeof payNavigations.ACCOUNT_HISTORY
+>;
+
+function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
   const [data, setData] = useState<Transaction[]>([
     {id: '1', name: '싸피은행환급', amount: '17 원', selected: false},
     {id: '2', name: '싸피이유찬', amount: '100,000 원', selected: false},
@@ -67,11 +74,15 @@ const AccounthistoryScreen = () => {
           keyExtractor={item => item.id}
           style={styles.list}
         />
-        <CustomButton label="확인" variant="outlined" />
+        <CustomButton
+          label="확인"
+          variant="outlined"
+          onPress={() => navigation.navigate(payNavigations.FRIEND_SEARCH)}
+        />
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

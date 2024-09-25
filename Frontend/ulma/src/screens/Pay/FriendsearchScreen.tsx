@@ -1,15 +1,11 @@
-//FriendsearchScreen
+// FriendsearchScreen
+import CustomButton from '@/components/common/CustomButton';
+import InputField from '@/components/common/InputField';
+import TitleTextField from '@/components/common/TitleTextField';
+import {colors} from '@/constants';
 import React, {useState} from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Button,
-} from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; // 변경된 부분
+import {View, Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
+import Icon from 'react-native-vector-icons/Entypo';
 
 interface Person {
   id: string;
@@ -19,8 +15,8 @@ interface Person {
 }
 
 const FriendsearchScreen = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
+  const [searchQuery, setSearchQuery] = useState('이유찬');
+  const [selectedPersonIds, setSelectedPersonIds] = useState<string[]>([]);
 
   const peopleData: Person[] = [
     {
@@ -41,38 +37,20 @@ const FriendsearchScreen = () => {
     // 다른 데이터 추가 가능
   ];
 
+  const handlePersonPress = (personId: string) => {
+    if (selectedPersonIds.includes(personId)) {
+      // 이미 선택된 경우 선택 해제
+      setSelectedPersonIds(selectedPersonIds.filter(id => id !== personId));
+    } else {
+      // 선택되지 않은 경우 배열에 추가
+      setSelectedPersonIds([...selectedPersonIds, personId]);
+    }
+  };
+
   const filteredPeople = peopleData.filter(person =>
     person.name.includes(searchQuery),
   );
 
-  const handlePersonSelect = (person: Person) => {
-    setSelectedPerson(person);
-  };
-
-  const renderPersonItem = ({item}: {item: Person}) => (
-    <TouchableOpacity
-      style={styles.personItem}
-      onPress={() => handlePersonSelect(item)}>
-      <View style={styles.personRow}>
-        <Text style={styles.personName}>{item.name}</Text>
-        <Text style={styles.personAffiliation}>{item.affiliation}</Text>
-        <MaterialIcons
-          name={selectedPerson?.id === item.id ? 'expand-less' : 'expand-more'}
-          size={24}
-          color="black"
-        />
-      </View>
-      {selectedPerson?.id === item.id &&
-        selectedPerson.transactions.length > 0 && (
-          <FlatList
-            data={selectedPerson.transactions}
-            renderItem={renderTransactionItem}
-            keyExtractor={(_, index) => index.toString()}
-            style={styles.transactionList}
-          />
-        )}
-    </TouchableOpacity>
-  );
   const renderTransactionItem = ({
     item,
   }: {
@@ -84,36 +62,55 @@ const FriendsearchScreen = () => {
     </View>
   );
 
+  const renderPersonItem = ({item}: {item: Person}) => (
+    <View>
+      <TouchableOpacity onPress={() => handlePersonPress(item.id)}>
+        <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
+          <Text style={styles.friendName}>{item.name}</Text>
+          <Text>{item.affiliation}</Text>
+        </View>
+        <Icon name="chevron-left" size={24} color={colors.BLACK} />
+      </TouchableOpacity>
+
+      {selectedPersonIds.includes(item.id) && (
+        <View style={styles.partyList}>
+          {item.transactions.length > 0 ? (
+            <FlatList
+              data={item.transactions}
+              renderItem={renderTransactionItem}
+              keyExtractor={(_, index) => index.toString()}
+            />
+          ) : (
+            <Text style={styles.partyItem}>함께 참여한 경조사가 없어요.</Text>
+          )}
+        </View>
+      )}
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>이름을 확인해주세요.</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="이름 입력"
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-      />
-      {!selectedPerson ? (
-        <>
-          <Text style={styles.subheader}>혹시 이 사람 아닌가요?</Text>
-          <FlatList
-            data={filteredPeople}
-            renderItem={renderPersonItem}
-            keyExtractor={item => item.id}
-          />
-        </>
-      ) : (
-        <>
-          <Text style={styles.subheader}>경조사비 내역</Text>
-          <FlatList
-            data={selectedPerson.transactions}
-            renderItem={renderTransactionItem}
-            keyExtractor={(_, index) => index.toString()}
-          />
-        </>
-      )}
-      <View style={styles.buttonContainer}>
-        <Button title="확인" onPress={() => console.log('확인 버튼 누름')} />
+      <View style={styles.cardContainer}>
+        <TitleTextField frontLabel="이름을 확인해주세요." />
+        <InputField
+          placeholder="이름"
+          value={searchQuery}
+          onChangeText={setSearchQuery} // 입력된 값이 상태로 반영됨
+        />
+
+        <Text style={styles.subheader}>혹시 이 사람 아닌가요?</Text>
+        <FlatList
+          data={filteredPeople}
+          renderItem={renderPersonItem}
+          keyExtractor={item => item.id}
+          style={styles.peopleList}
+        />
+
+        <CustomButton
+          label="확인"
+          variant="outlined"
+          onPress={() => console.log('확인 버튼 누름')}
+        />
       </View>
     </View>
   );
@@ -122,44 +119,42 @@ const FriendsearchScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: colors.LIGHTGRAY,
   },
-  header: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 10,
+  cardContainer: {
+    flex: 1,
+    backgroundColor: colors.WHITE,
+    margin: 20,
+    paddingTop: 20,
+    borderRadius: 15,
+    borderColor: colors.GRAY_300,
+    borderWidth: 1,
+    shadowColor: colors.BLACK,
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 4,
   },
   subheader: {
-    fontSize: 16,
+    fontSize: 14,
     marginVertical: 10,
+    marginHorizontal: 20,
   },
-  input: {
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
+  friendName: {
+    fontSize: 16,
+    color: colors.BLACK,
+    marginVertical: 10,
+    fontWeight: 'bold',
+  },
+  partyList: {
+    backgroundColor: colors.LIGHTGRAY,
     paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginBottom: 20,
-  },
-  personItem: {
-    borderBottomColor: '#eee',
-    borderBottomWidth: 1,
     paddingVertical: 10,
   },
-  personRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  partyItem: {
+    color: colors.BLACK,
   },
-  personName: {
-    fontSize: 16,
-  },
-  personAffiliation: {
-    fontSize: 14,
-    color: '#999',
-  },
-  transactionList: {
-    marginTop: 10,
+  peopleList: {
+    marginHorizontal: 20,
   },
   transactionItem: {
     flexDirection: 'row',
@@ -172,9 +167,6 @@ const styles = StyleSheet.create({
   transactionDate: {
     fontSize: 14,
     color: '#999',
-  },
-  buttonContainer: {
-    marginTop: 20,
   },
 });
 

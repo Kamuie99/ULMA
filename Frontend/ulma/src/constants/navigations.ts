@@ -24,6 +24,7 @@ const payNavigations = {
   CHARGER_RESULT: 'Chargerresult',
   PAY_LIST: 'Paylist',
   PAY_RECHARGE: 'Payrecharge',
+  FRIEND_SEARCH: 'Friendsearch',
   FRIENDHSHIP_SECLECT: 'Friendshipselect',
   RECOMMEND_OPTION: 'RecommendOption',
   SENDING: 'Sending',

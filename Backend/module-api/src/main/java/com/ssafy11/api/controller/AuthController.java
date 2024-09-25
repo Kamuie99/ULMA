@@ -64,17 +64,10 @@ public class AuthController {
 	}
 
 	@GetMapping("/loginId")
-	public ResponseEntity<?> existsByLoginId(@RequestParam("loginId") String loginId) {
+	public ResponseEntity<Boolean> existsByLoginId(@RequestParam("loginId") String loginId) {
 		Assert.notNull(loginId, "loginId must not be null");
 		boolean existsByLoginId = this.authService.isRegisterdLoginId(loginId);
-		String response;
-		if(existsByLoginId) {
-			response = "존재하는 아이디입니다.";
-		} else {
-			response = "존재하지 않는 아이디입니다.";
-		}
-
-		return ResponseEntity.ok().body(response);
+		return ResponseEntity.ok().body(existsByLoginId);
 	}
 
 	@PostMapping("/join")

@@ -26,4 +26,11 @@ public class AccountDaoImpl implements AccountDao{
         // 삽입된 계좌 정보를 포함한 Account 객체를 반환
         return new Account(accountId, account.userId(), account.accountNumber(), account.balance(), account.bankCode());
     }
+
+    @Override
+    public Account findById(Integer accountId) {
+        return dsl.selectFrom(ACCOUNT)
+                .where(ACCOUNT.ACCOUNT_ID.eq(accountId))
+                .fetchOneInto(Account.class);
+    }
 }

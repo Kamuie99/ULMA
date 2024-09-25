@@ -8,4 +8,5 @@ public interface TransactionDao {
     List<Transaction> findByDateRange(LocalDateTime startDate, LocalDateTime endDate);
     List<Transaction> findByTarget(String target);
     List<Transaction> findByAmountSign(boolean isPositive);
+    Integer makeTransaction(Transaction transaction);
 }

@@ -41,7 +41,8 @@ public enum BankCode {
     신한은행("088"),
     케이뱅크("089"),
     카카오뱅크("090"),
-    토스뱅크("092");
+    토스뱅크("092"),
+    얼마페이("123");
 
     private final String code;
 

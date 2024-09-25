@@ -60,7 +60,7 @@ public class ExcelService {
             }
 
             if(nameColIndex == -1 || amountColIndex == -1){
-                throw new ErrorException(ErrorCode.ExcelParsingFailed);
+                throw new ErrorException(ErrorCode.EXCEL_PARSING_FAILED);
             }
 
             for (int rowIndex = StartrowIndex; rowIndex < rowCount; rowIndex++) {
@@ -104,7 +104,7 @@ public class ExcelService {
 
         if(parsedDataList.isEmpty()){
             log.error("일치하는 파일 내용이 없습니다.");
-            throw new ErrorException(ErrorCode.NoContent);
+            throw new ErrorException(ErrorCode.NO_CONTENT);
         }
 
         return parsedDataList;

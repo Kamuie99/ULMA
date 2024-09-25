@@ -28,9 +28,9 @@ public class EventDaoImpl implements EventDao{
     private final DSLContext dsl;
 
     @Override
-    public Integer addEvent(EventCommand event) {
+    public Integer addEvent(EventCommand event, Integer userId) {
         Record1<Integer> saveEvent = dsl.insertInto(EVENT, EVENT.NAME, EVENT.CATEGORY, EVENT.DATE, EVENT.USERS_ID, EVENT.CREATE_AT)
-                .values(event.name(), event.category(), event.date(), event.userId(), LocalDateTime.now())
+                .values(event.name(), event.category(), event.date(), userId, LocalDateTime.now())
                 .returningResult(EVENT.ID)
                 .fetchOne();
 

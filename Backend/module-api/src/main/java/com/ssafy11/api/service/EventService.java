@@ -1,7 +1,5 @@
 package com.ssafy11.api.service;
 
-import com.ssafy11.api.exception.ErrorCode;
-import com.ssafy11.api.exception.ErrorException;
 import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.events.dto.EventCommand;
 import com.ssafy11.domain.events.EventDao;
@@ -19,24 +17,24 @@ import org.springframework.util.Assert;
 public class EventService {
     private final EventDao eventDao;
 
-    public Integer addEvent(EventCommand event) {
+    public Integer addEvent(EventCommand event, String userId) {
         Assert.notNull(event, "Event must not be null");
-        Integer eventId = eventDao.addEvent(event);
+        Integer eventId = eventDao.addEvent(event, Integer.parseInt(userId));
         Assert.notNull(eventId, "Event id must not be null");
         return eventId;
     }
 
-    public boolean isUserEventCreated(final Integer eventId, final Integer userId) {
+    public boolean isUserEventCreated(final Integer eventId, final String userId) {
         Assert.notNull(eventId, "eventId is required");
         Assert.notNull(userId, "userId is required");
-        return eventDao.isUserEventCreated(eventId, userId);
+        return eventDao.isUserEventCreated(eventId, Integer.parseInt(userId));
     }
 
-    public Integer updateEvent(EventCommand event, Integer eventId) {
+    public Integer updateEvent(EventCommand event, Integer eventId, String userId) {
         Assert.notNull(event, "Event must not be null");
         Assert.notNull(eventId, "EventId must not be null");
 
-        Assert.isTrue(isUserEventCreated(eventId, event.userId()), "사용자가 만든 이벤트가 아닙니다.");
+        Assert.isTrue(isUserEventCreated(eventId, userId), "사용자가 만든 이벤트가 아닙니다.");
 
         Integer resultId = eventDao.updateEvent(event, eventId);
         Assert.notNull(eventId, "Event id must not be null");
@@ -44,20 +42,20 @@ public class EventService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<Event> getEvents(Integer userId, PageDto pageDto) {
+    public PageResponse<Event> getEvents(String userId, PageDto pageDto) {
         Assert.notNull(userId, "User must not be null");
 
-        PageResponse<Event> EventsList = eventDao.getEvents(userId, pageDto);
-        Assert.notNull(EventsList, "Events list must not be null");
-        return EventsList;
+        PageResponse<Event> eventsList = eventDao.getEvents(Integer.parseInt(userId), pageDto);
+        Assert.notNull(eventsList, "Events list must not be null");
+        return eventsList;
 
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<EventParticipant> getEvent(Integer userId, Integer eventId, PageDto pageDto) {
+    public PageResponse<EventParticipant> getEvent(String userId, Integer eventId, PageDto pageDto) {
         Assert.notNull(eventId, "Event must not be null");
 
-        Assert.isTrue(userId.equals(eventDao.getEventByUserId(eventId)), "유저가 만든 이벤트가 아닙니다.");
+        Assert.isTrue(Integer.parseInt(userId)==(eventDao.getEventByUserId(eventId)), "유저가 만든 이벤트가 아닙니다.");
 
         PageResponse<EventParticipant> guestsList = eventDao.getEvent(eventId, pageDto);
         Assert.notNull(guestsList, "Guests list must not be null");

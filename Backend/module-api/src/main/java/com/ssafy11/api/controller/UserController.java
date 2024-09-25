@@ -16,12 +16,9 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<?> getUserInfo(@AuthenticationPrincipal User user,
-                                         @PathVariable ("userId") Integer userId) {
-        Assert.notNull(userId, "userId must not be null");
-        Assert.isTrue(user.getUsername().equals(String.valueOf(userId)), "User ID does not match");
-        UserInfoRequest info = userService.getUserInfo(userId);
+    @GetMapping
+    public ResponseEntity<UserInfoRequest> getUserInfo(@AuthenticationPrincipal User user) {
+        UserInfoRequest info = userService.getUserInfo(user.getUsername());
         return ResponseEntity.ok(info);
     }
 }

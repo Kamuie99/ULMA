@@ -9,7 +9,7 @@ import com.ssafy11.domain.common.PageResponse;
 import com.ssafy11.api.service.ParticipantService;
 import com.ssafy11.domain.participant.dto.AddGuestResponse;
 import com.ssafy11.domain.participant.dto.Participant;
-import com.ssafy11.domain.participant.dto.Trade;
+import com.ssafy11.domain.participant.dto.Transaction;
 import com.ssafy11.domain.participant.dto.UserRelation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +33,7 @@ public class ParticipantController {
     @GetMapping("/same")
     public ResponseEntity<List<UserRelation>> sameName(@AuthenticationPrincipal User user,
                                       @RequestParam("name") String name) {
-        Assert.notNull(name, "name must not be null");
+        Assert.hasText(name, "name must not be null");
 
         List<UserRelation> userRelationList = participantService.sameName(user.getUsername(), name);
         return ResponseEntity.ok(userRelationList);
@@ -41,13 +41,13 @@ public class ParticipantController {
 
     //등록된 지인과 거래 내역
     @GetMapping("/{guestID}")
-    public ResponseEntity<PageResponse<Trade>> getTransactions(
+    public ResponseEntity<PageResponse<Transaction>> getTransactions(
                                             @AuthenticationPrincipal User user,
                                             @PathVariable("guestID") Integer guestId,
                                             @ModelAttribute PageDto pagedto) {
         Assert.notNull(guestId, "guestID must not be null");
 
-        PageResponse<Trade> transactions = participantService.getTransactions(user.getUsername(), guestId, pagedto);
+        PageResponse<Transaction> transactions = participantService.getTransactions(user.getUsername(), guestId, pagedto);
         return ResponseEntity.ok(transactions);
     }
 

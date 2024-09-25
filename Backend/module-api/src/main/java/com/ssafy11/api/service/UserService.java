@@ -1,5 +1,7 @@
 package com.ssafy11.api.service;
 
+import com.ssafy11.api.exception.ErrorCode;
+import com.ssafy11.api.exception.ErrorException;
 import com.ssafy11.domain.users.UserDao;
 import com.ssafy11.domain.users.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +17,8 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserInfoRequest getUserInfo(String userId) {
-        Assert.notNull(userId, "userId is required");
-        UserInfoRequest result = userDao.getUserInfo(Integer.parseInt(userId));
-        Assert.notNull(result, "result must not be null");
-        return result;
+        Assert.hasText(userId, "userId must not be empty");
+        return userDao.getUserInfo(Integer.parseInt(userId))
+                .orElseThrow(()->new ErrorException(ErrorCode.NotFound));
     }
 }

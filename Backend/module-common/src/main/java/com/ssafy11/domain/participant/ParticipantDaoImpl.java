@@ -3,7 +3,7 @@ package com.ssafy11.domain.participant;
 import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.common.PageResponse;
 import com.ssafy11.domain.participant.dto.Participant;
-import com.ssafy11.domain.participant.dto.Trade;
+import com.ssafy11.domain.participant.dto.Transaction;
 import com.ssafy11.domain.participant.dto.UserRelation;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
@@ -41,7 +41,7 @@ public class ParticipantDaoImpl implements ParticipantDao {
 
     @Transactional(readOnly = true)
     @Override
-    public PageResponse<Trade> getTransactions(Integer userId, Integer guestId, PageDto pageDto) {
+    public PageResponse<Transaction> getTransactions(Integer userId, Integer guestId, PageDto pageDto) {
         int size = pageDto.getSize();
         int page = pageDto.getPage();
 
@@ -58,7 +58,7 @@ public class ParticipantDaoImpl implements ParticipantDao {
 
         int offset = (page-1) * size;
 
-        List<Trade> result = dsl.select(PARTICIPATION.GUEST_ID,PARTICIPATION.EVENT_ID, EVENT.NAME, EVENT.DATE, PARTICIPATION.AMOUNT)
+        List<Transaction> result = dsl.select(PARTICIPATION.GUEST_ID,PARTICIPATION.EVENT_ID, EVENT.NAME, EVENT.DATE, PARTICIPATION.AMOUNT)
                 .from(PARTICIPATION)
                 .join(EVENT)
                 .on(EVENT.ID.eq(PARTICIPATION.EVENT_ID))
@@ -66,7 +66,7 @@ public class ParticipantDaoImpl implements ParticipantDao {
                 .and(EVENT.USERS_ID.eq(userId))
                 .limit(size)
                 .offset(offset)
-                .fetchInto(Trade.class);
+                .fetchInto(Transaction.class);
 
         return new PageResponse<>(result, page, totalItems, totalPages);
     }

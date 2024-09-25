@@ -11,5 +11,5 @@ public interface UserDao {
 	boolean existsByLoginId(String loginId);
 	Optional<Users> findByLoginId(String loginId);
 	void updateRefreshToken(String loginId, String refreshToken);
-	UserInfoRequest getUserInfo(Integer userId);
+	Optional<UserInfoRequest> getUserInfo(Integer userId);
 }

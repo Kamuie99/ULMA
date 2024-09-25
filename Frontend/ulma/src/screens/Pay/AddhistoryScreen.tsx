@@ -51,6 +51,7 @@ const styles = StyleSheet.create({
   },
   eventContainer: {
     flex: 1,
+    // 그림자
     shadowColor: colors.BLACK,
     shadowOpacity: 0.25, // 그림자의 투명도
     shadowRadius: 20, // 그림자의 흐림 정도

@@ -21,7 +21,7 @@ const payNavigations = {
   ACCOUNT_INPUT: 'Accountinput',
   ADD_HISTORY: 'Addhistory',
   ADDOPTION: 'Addoption',
-  CHANGE_RESULT: 'Changeresult',
+  CHARGER_RESULT: 'Chargerresult',
   PAY_LIST: 'Paylist',
   PAY_RECHARGE: 'Payrecharge',
   FRIENDHSHIP_SECLECT: 'Friendshipselect',

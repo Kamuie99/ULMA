@@ -211,8 +211,9 @@ function SignupScreen2() {
         birthDate: signupData.birthDate,
         genderDigit: signupData.genderDigit,
       });
-      if (response.status === 201) {
-        Alert.alert('회원가입 완료', '성공적으로 회원가입이 완료되었습니다.');
+      if (response.status === 200) {
+        Alert.alert('회원가입 완료', '회원가입이 완료되었습니다. 로그인 헤주세요.');
+        console.log('회원가입 완료');
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {

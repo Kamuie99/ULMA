@@ -12,11 +12,19 @@ import {
 } from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import axiosInstance from '@/api/axios'; // axiosInstance import
-import useAuthStore from '@/store/useAuthStore';
+import useSignupStore from '@/store/useSignupStore';
+import {StackScreenProps} from '@react-navigation/stack';
 import axios, { AxiosError } from 'axios';
+import { authNavigations } from '@/constants/navigations';
+import { AuthStackParamList } from '@/navigations/stack/AuthStackNavigator';
 
-function SignupScreen2() {
-  const {signupData, setSignupData} = useAuthStore();
+type SignupScreen2Props = StackScreenProps<
+  AuthStackParamList,
+  typeof authNavigations.SIGNUP2
+>;
+
+function SignupScreen2({navigation}: SignupScreen2Props) {
+  const {signupData, setSignupData, submitSignup} = useSignupStore();
   const [errors, setErrors] = useState({
     loginId: '',
     password: '',
@@ -222,58 +230,19 @@ function SignupScreen2() {
       return;
     }
     try {
-      console.log({
-        'name': signupData.name,
-        'loginId': signupData.loginId,
-        'password': signupData.password,
-        'passwordConfirm': signupData.passwordConfirm,
-        'email': signupData.email,
-        'phoneNumber': signupData.phoneNumber,
-        'birthDate': signupData.birthDate,
-        genderDigit: signupData.genderDigit,
-    })
-      // 회원가입 API 호출
-      const response = await axiosInstance.post('/auth/join', {
-        name: signupData.name,
-        loginId: signupData.loginId,
-        password: signupData.password,
-        passwordConfirm: signupData.passwordConfirm,
-        email: signupData.email,
-        phoneNumber: signupData.phoneNumber,
-        birthDate: signupData.birthDate,
-        genderDigit: signupData.genderDigit,
-      });
-      if (response.status === 200) {
-        Alert.alert('회원가입 완료', '회원가입이 완료되었습니다. 로그인 헤주세요.');
-        console.log('회원가입 완료');
-      }
+      await submitSignup();
+      Alert.alert('회원가입 완료', '회원가입이 완료되었습니다. 로그인 해주세요.');
+      // 여기에 로그인 화면으로 이동하는 네비게이션 로직을 추가할 수 있습니다.
+      navigation.navigate(authNavigations.LOGIN); // 'Login' 스크린 이름을 사용하여 이동
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError<any>;
-        if (axiosError.response) {
-          switch (axiosError.response.status) {
-            case 400:
-              Alert.alert('입력 오류', '입력한 정보를 다시 확인해주세요.');
-              break;
-            case 409:
-              Alert.alert('중복 오류', '이미 사용 중인 아이디 또는 이메일입니다.');
-              break;
-            case 422:
-              Alert.alert('유효성 검사 실패', '입력한 데이터가 유효하지 않습니다.');
-              break;
-            case 500:
-              Alert.alert('서버 오류', '서버에 문제가 발생했습니다. 나중에 다시 시도해주세요.');
-              break;
-            default:
-              Alert.alert('오류', `알 수 없는 오류가 발생했습니다: ${axiosError.response.status}`);
-          }
-          console.error('Server response:', axiosError.response.data);
-        } else if (axiosError.request) {
-          Alert.alert('네트워크 오류', '서버에 연결할 수 없습니다. 인터넷 연결을 확인해주세요.');
+        if (error.response && error.response.status === 401) {
+          Alert.alert('인증 오류', '인증에 실패했습니다. 다시 시도해주세요.');
+        } else if (error.response && error.response.status === 409) {
+          Alert.alert('회원가입 오류', '이미 사용 중인 정보입니다. 다른 정보를 입력해주세요.');
         } else {
-          Alert.alert('오류', '요청 설정 중 오류가 발생했습니다.');
+          Alert.alert('서버 오류', '서버와 통신 중 오류가 발생했습니다. 나중에 다시 시도해주세요.');
         }
-        console.error('Error message:', axiosError.message);
       } else {
         Alert.alert('오류', '알 수 없는 오류가 발생했습니다.');
         console.error('Unknown error:', error);

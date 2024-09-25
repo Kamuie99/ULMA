@@ -1,5 +1,7 @@
 package com.ssafy11.domain.users;
 
+import com.ssafy11.domain.users.dto.UserInfoRequest;
+
 import java.util.Optional;
 
 public interface UserDao {
@@ -9,4 +11,5 @@ public interface UserDao {
 	boolean existsByLoginId(String loginId);
 	Optional<Users> findByLoginId(String loginId);
 	void updateRefreshToken(String loginId, String refreshToken);
+	UserInfoRequest getUserInfo(Integer userId);
 }

@@ -20,6 +20,7 @@ const payNavigations = {
   ACCOUNT_HISTORY: 'Accounthistory',
   ACCOUNT_INPUT: 'Accountinput',
   ADD_HISTORY: 'Addhistory',
+  ADDOPTION: 'Addoption',
   CHANGE_RESULT: 'Changeresult',
   PAY_LIST: 'Paylist',
   PAY_RECHARGE: 'Payrecharge',

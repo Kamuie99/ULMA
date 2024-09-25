@@ -16,11 +16,13 @@ import PayrechargingScreen from '@/screens/Pay/PayrechargingScreen';
 import RecommendOptionScreen from '@/screens/Pay/RecommendOptionScreen';
 import SendingScreen from '@/screens/Pay/SendingScreen';
 import AccounthistoryScreen from '@/screens/Pay/AccounthistoryScreen';
+import AddoptionScreen from '@/screens/Pay/AddoptionScreen';
 
 export type payStackParamList = {
   [payNavigations.ACCOUNT_HISTORY]: undefined;
   [payNavigations.ACCOUNT_INPUT]: undefined;
   [payNavigations.ADD_HISTORY]: undefined;
+  [payNavigations.ADDOPTION]: undefined;
   [payNavigations.CHANGE_RESULT]: undefined;
   [payNavigations.FRIENDHSHIP_SECLECT]: undefined;
   [payNavigations.PAY_LIST]: undefined;
@@ -69,12 +71,20 @@ function PayStackNavigator() {
           },
         }}
       /> */}
-      <Stack.Screen
+      {/* <Stack.Screen
         name={payNavigations.ADD_HISTORY}
         component={AddhistoryScreen}
         options={{
           headerTitle: '이벤트 자세히 보기',
           headerStyle: {backgroundColor: colors.LIGHTGRAY},
+        }}
+      /> */}
+      <Stack.Screen
+        name={payNavigations.ADD_HISTORY}
+        component={AddoptionScreen}
+        options={{
+          headerTitle: '',
+          headerShown: false,
         }}
       />
       {/* <Stack.Screen

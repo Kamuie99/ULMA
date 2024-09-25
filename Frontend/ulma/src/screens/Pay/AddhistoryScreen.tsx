@@ -8,11 +8,12 @@ export default function AddhistoryScreen() {
     <View style={styles.container}>
       {/* 이벤트 정보 */}
       <View style={styles.eventContainer}>
-        <Text style={styles.eventTitle}>내 돌잔치</Text>
-        <Text style={styles.eventDate}>1997-10-01</Text>
+        <View style={styles.evTitleContainer}>
+          <Text style={styles.eventTitle}>내 돌잔치</Text>
+          <Text style={styles.eventDate}>1997-10-01</Text>
+        </View>
 
         {/* 참여자 리스트 */}
-
         <View style={styles.participantItem}>
           <Text style={styles.participantName}>이유찬</Text>
           <Text style={styles.participantGroup}>SSAFY</Text>
@@ -29,25 +30,31 @@ const styles = StyleSheet.create({
     backgroundColor: colors.LIGHTGRAY,
   },
   eventContainer: {
+    flex: 1,
+    shadowColor: colors.BLACK,
+    shadowOpacity: 0.25, // 그림자의 투명도
+    shadowRadius: 20, // 그림자의 흐림 정도
+    elevation: 4,
+    borderColor: colors.GRAY_300,
+    backgroundColor: colors.WHITE,
     marginHorizontal: 16,
     marginVertical: 20,
-    backgroundColor: 'white',
+    borderWidth: 1,
     borderRadius: 8,
     padding: 20,
-    borderWidth: 1,
-    borderColor: '#D9D9D9',
   },
   eventTitle: {
     fontSize: 18,
-    fontFamily: 'SamsungGothicCondensed',
-    fontWeight: '400',
-    color: 'black',
+    fontWeight: '800',
+    color: colors.BLACK,
+  },
+  evTitleContainer: {
+    flexDirection: 'row',
   },
   eventDate: {
     fontSize: 15,
-    fontFamily: 'SamsungGothicCondensed',
     fontWeight: '400',
-    color: '#A7A7A7',
+    color: colors.GRAY_700,
     marginTop: 5,
   },
   participantList: {

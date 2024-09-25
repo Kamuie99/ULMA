@@ -1,4 +1,5 @@
 //수취내역추가하기 페이지
+import CustomButton from '@/components/common/CustomButton';
 import {colors} from '@/constants';
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Alert} from 'react-native';
@@ -9,8 +10,10 @@ export default function AddhistoryScreen() {
       {/* 이벤트 정보 */}
       <View style={styles.eventContainer}>
         <View style={styles.evTitleContainer}>
-          <Text style={styles.eventTitle}>내 돌잔치</Text>
-          <Text style={styles.eventDate}>1997-10-01</Text>
+          <View>
+            <Text style={styles.eventTitle}>내 돌잔치</Text>
+            <Text style={styles.eventDate}>1997-10-01</Text>
+          </View>
         </View>
 
         {/* 참여자 리스트 */}
@@ -19,6 +22,7 @@ export default function AddhistoryScreen() {
           <Text style={styles.participantGroup}>SSAFY</Text>
           <Text style={styles.participantAmount}>100000 원</Text>
         </View>
+        <CustomButton label="받은 돈 추가하기" />
       </View>
     </View>
   );

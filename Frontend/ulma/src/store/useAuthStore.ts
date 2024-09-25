@@ -56,7 +56,7 @@ const useAuthStore = create<AuthStore>(set => ({
   setAccessToken: token => set({accessToken: token}),
   setRefreshToken: token => set({refreshToken: token}),
   setUserId: userId => set({userId}),
-  isLoggedIn: true,
+  isLoggedIn: false,
   login: async (loginId, password) => {
     try {
       const response = await axiosInstance.post<LoginResponse>('/auth/login', {

@@ -3,7 +3,7 @@ import { StyleSheet, View, TextInput, Text, TouchableOpacity, ScrollView, Animat
 import { SafeAreaView } from 'react-native-safe-area-context';
 import axiosInstance from '@/api/axios'; // axiosInstance import
 import useAuthStore from '@/store/useAuthStore';
-import { AxiosError } from 'axios';
+import axios, { AxiosError } from 'axios';
 
 function SignupScreen2() {
   const { signupData, setSignupData } = useAuthStore();
@@ -183,14 +183,69 @@ function SignupScreen2() {
     }
   };
 
-  const handleSignup = () => {
-    // 회원가입 로직을 여기에 추가
+  const handleSignup = async () => {
+    // 비밀번호 확인 에러가 있을 경우 회원가입 중단 
     if (passwordError || passwordConfirmError) {
       Alert.alert('오류', '비밀번호를 올바르게 입력해주세요.');
       return;
     }
-    Alert.alert('회원가입', '회원가입이 완료되었습니다.');
-    console.log('Signup data:', signupData); // 모든 값이 저장된 상태 출력
+    try {
+      console.log({
+        'name': signupData.name,
+        'loginId': signupData.loginId,
+        'password': signupData.password,
+        'passwordConfirm': signupData.passwordConfirm,
+        'email': signupData.email,
+        'phoneNumber': signupData.phoneNumber,
+        'birthDate': signupData.birthDate,
+        genderDigit: signupData.genderDigit,
+    })
+      // 회원가입 API 호출
+      const response = await axiosInstance.post('/auth/join', {
+        name: signupData.name,
+        loginId: signupData.loginId,
+        password: signupData.password,
+        passwordConfirm: signupData.passwordConfirm,
+        email: signupData.email,
+        phoneNumber: signupData.phoneNumber,
+        birthDate: signupData.birthDate,
+        genderDigit: signupData.genderDigit,
+      });
+      if (response.status === 201) {
+        Alert.alert('회원가입 완료', '성공적으로 회원가입이 완료되었습니다.');
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError<any>;
+        if (axiosError.response) {
+          switch (axiosError.response.status) {
+            case 400:
+              Alert.alert('입력 오류', '입력한 정보를 다시 확인해주세요.');
+              break;
+            case 409:
+              Alert.alert('중복 오류', '이미 사용 중인 아이디 또는 이메일입니다.');
+              break;
+            case 422:
+              Alert.alert('유효성 검사 실패', '입력한 데이터가 유효하지 않습니다.');
+              break;
+            case 500:
+              Alert.alert('서버 오류', '서버에 문제가 발생했습니다. 나중에 다시 시도해주세요.');
+              break;
+            default:
+              Alert.alert('오류', `알 수 없는 오류가 발생했습니다: ${axiosError.response.status}`);
+          }
+          console.error('Server response:', axiosError.response.data);
+        } else if (axiosError.request) {
+          Alert.alert('네트워크 오류', '서버에 연결할 수 없습니다. 인터넷 연결을 확인해주세요.');
+        } else {
+          Alert.alert('오류', '요청 설정 중 오류가 발생했습니다.');
+        }
+        console.error('Error message:', axiosError.message);
+      } else {
+        Alert.alert('오류', '알 수 없는 오류가 발생했습니다.');
+        console.error('Unknown error:', error);
+      }
+    }
   };
 
   return (

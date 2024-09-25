@@ -3,8 +3,9 @@
 import CustomButton from '@/components/common/CustomButton';
 import {colors} from '@/constants';
 import {authNavigations} from '@/constants/navigations';
-import {useNavigation} from '@react-navigation/native';
-import {StackNavigationProp} from '@react-navigation/stack';
+import {AuthStackParamList} from '@/navigations/stack/AuthStackNavigator';
+import {RouteProp, useNavigation} from '@react-navigation/native';
+import {StackNavigationProp, StackScreenProps} from '@react-navigation/stack';
 import React, {useRef, useState} from 'react';
 import {
   View,
@@ -100,14 +101,12 @@ const Pagination: React.FC<PaginationProps> = ({data, scrollX}) => {
   );
 };
 
-type RootStackParamList = {
-  auth: {screen: keyof AuthStackParamList}; // 'auth' 스택에 AuthStackParamList의 스크린들이 포함됨
-};
-type AuthStackParamList = {
-  LoginHome: undefined;
-};
-const HomeScreen: React.FC = () => {
-  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+type AuthHomeScreenProps = StackScreenProps<
+  AuthStackParamList,
+  typeof authNavigations.AUTH_HOME
+>;
+
+function AuthHomeScreen({navigation}: AuthHomeScreenProps) {
   const scrollX = useRef(new Animated.Value(0)).current;
   const [, setCurrentSlideIndex] = useState(0);
 
@@ -137,13 +136,11 @@ const HomeScreen: React.FC = () => {
 
       <CustomButton
         label="시작하기"
-        onPress={() =>
-          navigation.navigate('Auth', {screen: authNavigations.LOGIN_HOME})
-        }
+        onPress={() => navigation.navigate(authNavigations.LOGIN_HOME)}
       />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -170,7 +167,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
-    color: colors.GRAY,
+    color: colors.GRAY_700,
     textAlign: 'center',
     marginHorizontal: 20,
     marginTop: 10,
@@ -178,9 +175,9 @@ const styles = StyleSheet.create({
   dot: {
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.GRAY,
+    backgroundColor: colors.GRAY_700,
     marginHorizontal: 5,
   },
 });
 
-export default HomeScreen;
+export default AuthHomeScreen;

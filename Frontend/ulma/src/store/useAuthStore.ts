@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import {create} from 'zustand';
 import axiosInstance from '@/api/axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -35,7 +35,7 @@ interface AuthStore {
   isLoggedIn: boolean;
 }
 
-const useAuthStore = create<AuthStore>((set) => ({
+const useAuthStore = create<AuthStore>(set => ({
   signupData: {
     name: '',
     loginId: '',
@@ -46,23 +46,27 @@ const useAuthStore = create<AuthStore>((set) => ({
     birthDate: '',
     genderDigit: '',
   },
-  setSignupData: (data) => set((state) => ({ signupData: { ...state.signupData, ...data } })),
+  setSignupData: data =>
+    set(state => ({signupData: {...state.signupData, ...data}})),
   isPhoneVerified: false,
-  setPhoneVerified: (verified) => set({ isPhoneVerified: verified }),
+  setPhoneVerified: verified => set({isPhoneVerified: verified}),
   accessToken: null,
   refreshToken: null,
   userId: null,
-  setAccessToken: (token) => set({ accessToken: token }),
-  setRefreshToken: (token) => set({ refreshToken: token }),
-  setUserId: (userId) => set({ userId }),
-  isLoggedIn: false,
+  setAccessToken: token => set({accessToken: token}),
+  setRefreshToken: token => set({refreshToken: token}),
+  setUserId: userId => set({userId}),
+  isLoggedIn: true,
   login: async (loginId, password) => {
     try {
-      const response = await axiosInstance.post<LoginResponse>('/auth/login', { loginId, password });
-      const { accessToken, refreshToken, msg } = response.data;
+      const response = await axiosInstance.post<LoginResponse>('/auth/login', {
+        loginId,
+        password,
+      });
+      const {accessToken, refreshToken, msg} = response.data;
       await AsyncStorage.setItem('accessToken', accessToken);
       await AsyncStorage.setItem('refreshToken', refreshToken);
-      set({ accessToken, refreshToken, isLoggedIn: true });
+      set({accessToken, refreshToken, isLoggedIn: true});
       return response.data;
     } catch (error) {
       console.error('Login failed:', error);
@@ -73,7 +77,12 @@ const useAuthStore = create<AuthStore>((set) => ({
     try {
       await AsyncStorage.removeItem('accessToken');
       await AsyncStorage.removeItem('refreshToken');
-      set({ accessToken: null, refreshToken: null, userId: null, isLoggedIn: false });
+      set({
+        accessToken: null,
+        refreshToken: null,
+        userId: null,
+        isLoggedIn: false,
+      });
     } catch (error) {
       console.error('Logout failed:', error);
       throw error;

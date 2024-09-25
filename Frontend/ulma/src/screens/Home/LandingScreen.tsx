@@ -34,7 +34,7 @@ const LandingPage: React.FC = () => {
 
   // 일정 관리 바로가기 버튼 핸들러
   const handleScheduleNavigation = () => {
-    navigation.navigate('SchedulePage'); // 네비게이션 경로를 적절하게 설정
+    // navigation.navigate('SchedulePage'); // 네비게이션 경로를 적절하게 설정
   };
 
   return (
@@ -69,10 +69,10 @@ const LandingPage: React.FC = () => {
 
       {/* ULMA 페이 바로가기 예시 */}
       <View style={styles.ulmaContainer}>
-        <Image
+        {/* <Image
           source={require('./path_to_ulma_image.png')}
           style={styles.ulmaImage}
-        />
+        /> */}
         <TouchableOpacity onPress={() => console.log('ULMA 페이로 이동')}>
           <Text style={styles.ulmaText}>ULMA 페이 바로가기 &gt;</Text>
         </TouchableOpacity>

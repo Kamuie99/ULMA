@@ -1,5 +1,6 @@
 //수취내역추가하기 페이지
 import CustomButton from '@/components/common/CustomButton';
+import EventTag from '@/components/common/EventTag';
 import {colors} from '@/constants';
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Alert} from 'react-native';
@@ -14,6 +15,7 @@ export default function AddhistoryScreen() {
             <Text style={styles.eventTitle}>내 돌잔치</Text>
             <Text style={styles.eventDate}>1997-10-01</Text>
           </View>
+          <EventTag label="돌잔치" />
         </View>
 
         {/* 참여자 리스트 */}
@@ -45,7 +47,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     borderWidth: 1,
     borderRadius: 8,
-    padding: 20,
+    paddingVertical: 20,
   },
   eventTitle: {
     fontSize: 18,
@@ -54,6 +56,9 @@ const styles = StyleSheet.create({
   },
   evTitleContainer: {
     flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
   },
   eventDate: {
     fontSize: 15,

@@ -84,10 +84,10 @@ public class UserDaoImpl implements UserDao {
 	}
 
 	@Override
-	public UserInfoRequest getUserInfo(Integer userId) {
-		return dsl.select(USERS.EMAIL, USERS.NAME, USERS.ACCOUNT, USERS.ACCOUNT_NUMBER, USERS.PHONE_NUMBER, USERS.GENDER, USERS.BIRTHDATE, DSL.field("TIMESTAMPDIFF(YEAR, birthdate, CURDATE())").as("age"))
-				.from(USERS)
-				.where(USERS.ID.eq(userId))
-				.fetchOneInto(UserInfoRequest.class);
+	public Optional<UserInfoRequest> getUserInfo(Integer userId) {
+		return Optional.ofNullable(dsl.select(USERS.EMAIL, USERS.NAME, USERS.ACCOUNT, USERS.ACCOUNT_NUMBER, USERS.PHONE_NUMBER, USERS.GENDER, USERS.BIRTHDATE, DSL.field("TIMESTAMPDIFF(YEAR, birthdate, CURDATE())").as("age"))
+                .from(USERS)
+                .where(USERS.ID.eq(userId))
+                .fetchOneInto(UserInfoRequest.class));
 	}
 }

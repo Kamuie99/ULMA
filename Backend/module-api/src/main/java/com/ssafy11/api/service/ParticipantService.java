@@ -8,7 +8,7 @@ import com.ssafy11.domain.events.EventDao;
 import com.ssafy11.domain.participant.ParticipantDao;
 import com.ssafy11.domain.participant.dto.AddGuestResponse;
 import com.ssafy11.domain.participant.dto.Participant;
-import com.ssafy11.domain.participant.dto.Trade;
+import com.ssafy11.domain.participant.dto.Transaction;
 import com.ssafy11.domain.participant.dto.UserRelation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,7 +26,7 @@ public class ParticipantService {
 
     @Transactional(readOnly = true)
     public List<UserRelation> sameName(String userId, String name){
-        Assert.notNull(userId, "userId is required");
+        Assert.hasText(userId, "UserId must not be null");
         Assert.notNull(name, " name is required");
         List<UserRelation> userRelationList = participantDao.sameName(Integer.parseInt(userId), name);
         Assert.notNull(userRelationList, "userRelationList is required");
@@ -34,10 +34,10 @@ public class ParticipantService {
     }
 
     @Transactional(readOnly = true)
-    public PageResponse<Trade> getTransactions(String userId, Integer guestId, PageDto pagedto){
-        Assert.notNull(userId, "userId is required");
+    public PageResponse<Transaction> getTransactions(String userId, Integer guestId, PageDto pagedto){
+        Assert.hasText(userId, "UserId must not be null");
         Assert.notNull(guestId, "guestId is required");
-        PageResponse<Trade> transactionsList = participantDao.getTransactions(Integer.parseInt(userId), guestId, pagedto);
+        PageResponse<Transaction> transactionsList = participantDao.getTransactions(Integer.parseInt(userId), guestId, pagedto);
         Assert.notNull(transactionsList, "transactionsList is required");
         return transactionsList;
     }
@@ -88,7 +88,7 @@ public class ParticipantService {
     }
 
     public PageResponse<UserRelation> getUserRelation(String userId, PageDto pagedto) {
-        Assert.notNull(userId, "userId is required");
+        Assert.hasText(userId, "userId is required");
         PageResponse<UserRelation> userRelationList = participantDao.getUserRelations(Integer.parseInt(userId), pagedto);
         Assert.notNull(userRelationList, "userRelationList is required");
         return userRelationList;

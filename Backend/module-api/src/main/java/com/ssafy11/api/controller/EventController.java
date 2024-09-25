@@ -7,7 +7,6 @@ import com.ssafy11.api.service.EventService;
 import com.ssafy11.domain.events.dto.Event;
 import com.ssafy11.domain.common.PageResponse;
 import com.ssafy11.domain.participant.dto.EventParticipant;
-import com.ssafy11.domain.participant.dto.GptResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -65,24 +64,21 @@ public class EventController {
 
     //경조사 AI 축하 메시지 추천
     @PostMapping("/ai/recommend/message")
-    public ResponseEntity<String> aiMessage(@RequestBody GptResponse gptResponse) {
-        Assert.notNull(gptResponse, "gptResponse must not be null");
+    public ResponseEntity<String> aiMessage(@RequestBody String gptQuotes) {
+        Assert.hasText(gptQuotes, "gptResponse must not be null");
 
-        String resultQuestion = gptResponse.gptQuotes() ;
-        String gptMoney = gptService.getChatResponse(resultQuestion, 0);
+        String gptMoney = gptService.getChatResponse(gptQuotes, 0);
 
         return ResponseEntity.ok(gptMoney);
     }
 
     //AI 금액 추천
     @PostMapping("/ai/recommend/money")
-    public ResponseEntity<String> aiAmount(@RequestBody GptResponse gptResponse) {
-        Assert.notNull(gptResponse, "gptResponse must not be null");
+    public ResponseEntity<String> aiAmount(@RequestBody String gptQuotes) {
+        Assert.hasText(gptQuotes, "gptResponse must not be null");
+        String gptMoney = gptService.getChatResponse(gptQuotes, 1);
 
-        String resultQuestion = gptResponse.gptQuotes();
-        String GptMoney = gptService.getChatResponse(resultQuestion, 1);
-
-        return ResponseEntity.ok(GptMoney);
+        return ResponseEntity.ok(gptMoney);
     }
 
 }

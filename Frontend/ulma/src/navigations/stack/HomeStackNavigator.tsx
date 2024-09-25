@@ -5,7 +5,6 @@ import {StyleSheet, View} from 'react-native';
 
 import {colors} from '@/constants';
 import Icon from 'react-native-vector-icons/Entypo';
-import HomeScreen from '@/screens/Home/HomeScreen';
 import LandingPage from '@/screens/Home/LandingScreen';
 
 export type homeStackParamList = {
@@ -35,8 +34,8 @@ function HomeStackNavigator() {
         },
       }}>
       <Stack.Screen
-        name={homeNavigations.HOME}
-        component={HomeScreen}
+        name={homeNavigations.LANDING}
+        component={LandingPage}
         options={{
           headerTitle: ' ',
           headerShown: false,

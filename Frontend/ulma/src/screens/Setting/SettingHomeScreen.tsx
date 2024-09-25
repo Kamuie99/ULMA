@@ -1,31 +1,56 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
   ScrollView,
+  Alert, // 로그아웃 확인창을 띄우기 위한 Alert import
 } from 'react-native';
-import {settingNavigations} from '@/constants/navigations';
-import {payNavigations} from '@/constants/navigations';
+import { settingNavigations } from '@/constants/navigations';
+import { payNavigations } from '@/constants/navigations';
 import Icon from 'react-native-vector-icons/Ionicons';
+import useAuthStore from '@/store/useAuthStore';
 
 interface SettingHomeScreenProps {
   navigation: any; // 실제 프로젝트에서는 더 구체적인 타입을 사용해야 합니다
 }
 
-function SettingHomeScreen({navigation}: SettingHomeScreenProps) {
+function SettingHomeScreen({ navigation }: SettingHomeScreenProps) {
+  const logout = useAuthStore((state) => state.logout); // 로그아웃 함수 가져오기
+
+  // 로그아웃을 확인하는 함수
+  const handleLogout = () => {
+    Alert.alert(
+      '로그아웃 하시겠습니까?',
+      '',
+      [
+        { text: '아니오', style: 'cancel' },
+        {
+          text: '예',
+          onPress: async () => {
+            await logout(); // 로그아웃 실행
+          },
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
   return (
     <ScrollView style={styles.container}>
-      <TouchableOpacity
-        style={styles.userInfo}
-        onPress={() => navigation.navigate(settingNavigations.USER_DETAIL)}>
+      <View style={styles.userInfo}>
         <View>
           <Text style={styles.userName}>김싸피</Text>
           <Text style={styles.userEmail}>dakgoo02@naver.com</Text>
         </View>
-        <Icon name="chevron-forward" size={24} color="#000" />
-      </TouchableOpacity>
+        <View style={styles.userInfoRight}>
+          <TouchableOpacity onPress={handleLogout}>
+            <Text style={styles.logoutText}>로그아웃</Text>
+          </TouchableOpacity>
+          <Icon name="chevron-forward" size={24} color="#000" />
+        </View>
+      </View>
 
       <View style={styles.accountInfoBox}>
         <Text style={styles.accountInfoTitle}>계좌 정보</Text>
@@ -43,7 +68,7 @@ function SettingHomeScreen({navigation}: SettingHomeScreenProps) {
       <TouchableOpacity
         style={styles.option}
         onPress={() =>
-          navigation.navigate('Pay', {screen: payNavigations.PAY_RECHARGE})
+          navigation.navigate('Pay', { screen: payNavigations.PAY_RECHARGE })
         }>
         <Text style={styles.optionText}>Pay 충전하기</Text>
         <Icon name="chevron-forward" size={24} color="#000" />
@@ -85,6 +110,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
+  userInfoRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   userName: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -92,6 +121,11 @@ const styles = StyleSheet.create({
   userEmail: {
     fontSize: 14,
     color: '#666',
+  },
+  logoutText: {
+    fontSize: 14,
+    color: '#ff0000', // 로그아웃 텍스트의 색상 (빨간색)
+    marginRight: 10, // 텍스트와 아이콘 사이 간격
   },
   accountInfoBox: {
     backgroundColor: '#f0f0f0',

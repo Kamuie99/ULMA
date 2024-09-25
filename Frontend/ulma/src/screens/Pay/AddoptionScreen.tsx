@@ -1,4 +1,5 @@
-import React from 'react';
+import {colors} from '@/constants';
+import React, {useEffect} from 'react';
 import {
   View,
   Text,
@@ -7,29 +8,37 @@ import {
   TouchableOpacity,
   FlatList,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/Entypo';
 
 const options = [
   {
     key: '1',
     label: '계좌 내역 불러오기',
     description: '계좌 내역에서 선택 후 바로 등록해보세요.',
-    imageUrl: 'https://via.placeholder.com/28x26',
+    imageUrl: require('@/assets/Pay/modal/option1.png'),
   },
   {
     key: '2',
     label: '엑셀 등록하기',
     description: '적어 놓은 내역을 등록해보세요.',
-    imageUrl: 'https://via.placeholder.com/26x30',
+    imageUrl: require('@/assets/Pay/modal/option2.png'),
   },
   {
     key: '3',
     label: '직접 등록하기',
     description: '직접 받은 경조사비를 등록해보세요.',
-    imageUrl: 'https://via.placeholder.com/26x28',
+    imageUrl: require('@/assets/Pay/modal/option3.png'),
   },
 ];
 
-const AddoptionScreen: React.FC = () => {
+function AddoptionScreen({navigation}) {
+  useEffect(() => {
+    // 페이지에 들어올 때 탭바 숨기기
+    navigation.getParent()?.setOptions({
+      tabBarStyle: {display: 'none'},
+    });
+  }, [navigation]);
+
   const handlePress = (label: string) => {
     console.log(`${label} 선택됨`);
   };
@@ -38,13 +47,13 @@ const AddoptionScreen: React.FC = () => {
   const renderItem = ({item}: {item: (typeof options)[0]}) => (
     <TouchableOpacity onPress={() => handlePress(item.label)}>
       <View style={styles.optionContainer}>
-        <Image style={styles.icon} source={{uri: item.imageUrl}} />
+        <Image style={styles.icon} source={item.imageUrl} />
         <View style={styles.textContainer}>
           <Text style={styles.optionLabel}>{item.label}</Text>
           <Text style={styles.optionDescription}>{item.description}</Text>
         </View>
         <View style={styles.arrow}>
-          <View style={styles.arrowInner} />
+          <Icon name="chevron-right" size={20} color={colors.BLACK} />
         </View>
       </View>
     </TouchableOpacity>
@@ -52,32 +61,42 @@ const AddoptionScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={options}
-        renderItem={renderItem}
-        keyExtractor={item => item.key}
-      />
+      <View style={styles.modalBody}>
+        <FlatList
+          data={options}
+          renderItem={renderItem}
+          keyExtractor={item => item.key}
+        />
+      </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    justifyContent: 'flex-end',
   },
   optionContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: 15,
     paddingHorizontal: 20,
     backgroundColor: 'white',
-    marginBottom: 10,
+  },
+  modalBody: {
+    backgroundColor: colors.WHITE,
+    paddingBottom: '20%',
+    paddingTop: '3%',
+    borderTopLeftRadius: 15, // 왼쪽 위 둥근 모서리
+    borderTopRightRadius: 15, // 오른쪽 위 둥근 모서리
   },
   icon: {
     width: 28,
     height: 28,
+    marginRight: 7,
   },
   textContainer: {
     flex: 1,
@@ -85,27 +104,18 @@ const styles = StyleSheet.create({
   },
   optionLabel: {
     fontSize: 14,
-    fontFamily: 'SamsungGothicCondensed',
-    fontWeight: '400',
+    fontWeight: '600',
     color: 'black',
   },
   optionDescription: {
     fontSize: 13,
-    fontFamily: 'SamsungGothicCondensed',
     fontWeight: '400',
-    color: '#A7A7A7',
+    color: colors.GRAY_700,
     marginTop: 5,
   },
   arrow: {
-    width: 6,
-    height: 12,
-    transform: [{rotate: '180deg'}],
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  arrowInner: {
-    borderWidth: 1.5,
-    borderColor: 'black',
   },
 });
 

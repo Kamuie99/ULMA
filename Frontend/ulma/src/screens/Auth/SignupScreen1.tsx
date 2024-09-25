@@ -3,7 +3,7 @@ import { StyleSheet, View, TextInput, Text, TouchableOpacity, ScrollView, Animat
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { authNavigations } from '@/constants/navigations';
-import useAuthStore from '@/store/useAuthStore'; // Zustand store import
+import useSignupStore from '@/store/useSignupStore';
 import axiosInstance from '@/api/axios'; // axiosInstance import
 import { AuthStackParamList } from '@/navigations/stack/AuthStackNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -22,13 +22,13 @@ interface ErrorState {
 function SignupScreen1({}: SignupScreenProps) {
   const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
   
-  const { setSignupData } = useAuthStore(); // Zustand action for storing data
+  const { setSignupData, setPhoneVerified, isPhoneVerified } = useSignupStore(); // useSignupStore에서 필요한 상태 가져오기
   
-  const [name, setName] = useState(''); // Input fields
-  const [birthDate, setBirthDate] = useState('');
-  const [idLastDigit, setIdLastDigit] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
+  const [name, setName] = useState('');               // 이름 입력 상태
+  const [birthDate, setBirthDate] = useState('');     // 생년월일 앞자리 입력 상태
+  const [idLastDigit, setIdLastDigit] = useState(''); // 뒷자리 한자리 입력 상태
+  const [phoneNumber, setPhoneNumber] = useState(''); // 휴대폰 번호 입력 상태
+  const [verificationCode, setVerificationCode] = useState(''); // 인증번호 입력 받는 곳
   const [showVerificationCode, setShowVerificationCode] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const [verificationError, setVerificationError] = useState('');
@@ -149,15 +149,16 @@ function SignupScreen1({}: SignupScreenProps) {
   };
 
   const handleSendVerification = async () => {
+    // TODO
+    // 409 에러 발생시 이미 가입된 휴대폰 번호라는 에러 메시지 출력해야 함
     if (validateInputs()) {
       try {
         // 인증 요청 부분을 주석 처리
-        // const response = await axiosInstance.post('/auth/phone', {
-        //   phoneNumber: phoneNumber.replace(/-/g, ''),
-        // });
-        // if (response.status === 200) {
+        const response = await axiosInstance.post('/auth/phone', {
+          phoneNumber: phoneNumber.replace(/-/g, ''),
+        });
+        if (response.status === 200) {
         // 여기 까지 주석 처리 할 것
-
           setShowVerificationCode(true);
           setResendText('재전송');
           fadeIn(fadeAnim.verificationCode);
@@ -166,7 +167,7 @@ function SignupScreen1({}: SignupScreenProps) {
           setIsVerified(false);
           setVerificationError('');
         // 이것도 주석 처리 할 것
-          // }
+        }
       } catch (error) {
         console.error('인증번호 전송 오류:', error);
         Alert.alert('인증번호 전송에 실패했습니다. 다시 시도해주세요.');
@@ -184,40 +185,40 @@ function SignupScreen1({}: SignupScreenProps) {
       return;
     }
 
-    // 개발 테스트 환경에서는 인증번호를 000000으로 설정
-    if (verificationCode === '000000') {
-      setIsVerified(true);
-      setVerificationError('');
-      setShowVerificationCode(false);
-    } else {
-      setIsVerified(false);
-      setVerificationError('인증번호가 일치하지 않습니다.');
-    }
+    // 개발 테스트 환경에서는 인증번호를 999999으로 설정
+    // if (verificationCode === '999999') {
+    //   setIsVerified(true);
+    //   setVerificationError('');
+    //   setShowVerificationCode(false);
+    // } else {
+    //   setIsVerified(false);
+    //   setVerificationError('인증번호가 일치하지 않습니다.');
+    // }
 
     // 실제 서버 환경
-    // try {
-    //   const response = await axiosInstance.put('/auth/phone', {
-    //     phoneNumber: phoneNumber.replace(/-/g, ''), // 하이픈 제거한 휴대폰 번호
-    //     verificationCode: verificationCode, // 입력된 인증번호
-    //   });
+    try {
+      const response = await axiosInstance.put('/auth/phone', {
+        phoneNumber: phoneNumber.replace(/-/g, ''), // 하이픈 제거한 휴대폰 번호
+        verificationCode: verificationCode, // 입력된 인증번호
+      });
     
-    //   if (response.status === 200) {
-    //     setIsVerified(true); // 인증 성공
-    //     setVerificationError('');
-    //     setShowVerificationCode(false);
-    //     Alert.alert('인증 성공', '휴대폰 인증이 완료되었습니다.');
-    //   }
-    // } catch (err) {
-    //   const error = err as AxiosError;
-    //   console.log('에러 메시지:', error.response?.data);
-    //   if (error.response?.status === 400) {
-    //     setVerificationError('인증번호가 일치하지 않습니다.');
-    //   } else if (error.response?.status === 404) {
-    //     setVerificationError('존재하지 않는 인증번호입니다.');
-    //   } else {
-    //     Alert.alert('인증 실패', `서버 상태를 확인해주세요. (${error.response?.status})`);
-    //   }
-    // }
+      if (response.status === 200) {
+        setIsVerified(true); // 인증 성공
+        setVerificationError('');
+        setShowVerificationCode(false);
+        Alert.alert('인증 성공', '휴대폰 인증이 완료되었습니다.');
+      }
+    } catch (err) {
+      const error = err as AxiosError;
+      console.log('에러 메시지:', error.response?.data);
+      if (error.response?.status === 400) {
+        setVerificationError('인증번호가 일치하지 않습니다.');
+      } else if (error.response?.status === 404) {
+        setVerificationError('존재하지 않는 인증번호입니다.');
+      } else {
+        Alert.alert('인증 실패', `서버 상태를 확인해주세요. (${error.response?.status})`);
+      }
+    }
   };
 
   const formatTime = (seconds: number) => {

@@ -5,6 +5,9 @@ import { useNavigation } from '@react-navigation/native';
 import { authNavigations } from '@/constants/navigations';
 import useAuthStore from '@/store/useAuthStore'; // Zustand store import
 import axiosInstance from '@/api/axios'; // axiosInstance import
+import { AuthStackParamList } from '@/navigations/stack/AuthStackNavigator';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { AxiosError } from 'axios';
 
 interface SignupScreenProps {}
 
@@ -17,7 +20,7 @@ interface ErrorState {
 }
 
 function SignupScreen1({}: SignupScreenProps) {
-  const navigation = useNavigation();
+  const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
   
   const { setSignupData } = useAuthStore(); // Zustand action for storing data
   
@@ -152,16 +155,18 @@ function SignupScreen1({}: SignupScreenProps) {
         // const response = await axiosInstance.post('/auth/phone', {
         //   phoneNumber: phoneNumber.replace(/-/g, ''),
         // });
-
         // if (response.status === 200) {
+        // 여기 까지 주석 처리 할 것
+
           setShowVerificationCode(true);
           setResendText('재전송');
           fadeIn(fadeAnim.verificationCode);
-          Alert.alert('인증번호가 전송되었습니다. (개발용: 000000)');
+          Alert.alert('인증번호가 전송되었습니다.');
           startTimer();
           setIsVerified(false);
           setVerificationError('');
-        // }
+        // 이것도 주석 처리 할 것
+          // }
       } catch (error) {
         console.error('인증번호 전송 오류:', error);
         Alert.alert('인증번호 전송에 실패했습니다. 다시 시도해주세요.');
@@ -172,11 +177,14 @@ function SignupScreen1({}: SignupScreenProps) {
   };
 
   const handleVerifyCode = async () => {
+
+    // 시간 초과시 인증 안해줄거임
     if (timerExpired) {
       Alert.alert('인증 실패', '요청 시간이 초과되었습니다.');
       return;
     }
 
+    // 개발 테스트 환경에서는 인증번호를 000000으로 설정
     if (verificationCode === '000000') {
       setIsVerified(true);
       setVerificationError('');
@@ -185,6 +193,31 @@ function SignupScreen1({}: SignupScreenProps) {
       setIsVerified(false);
       setVerificationError('인증번호가 일치하지 않습니다.');
     }
+
+    // 실제 서버 환경
+    // try {
+    //   const response = await axiosInstance.put('/auth/phone', {
+    //     phoneNumber: phoneNumber.replace(/-/g, ''), // 하이픈 제거한 휴대폰 번호
+    //     verificationCode: verificationCode, // 입력된 인증번호
+    //   });
+    
+    //   if (response.status === 200) {
+    //     setIsVerified(true); // 인증 성공
+    //     setVerificationError('');
+    //     setShowVerificationCode(false);
+    //     Alert.alert('인증 성공', '휴대폰 인증이 완료되었습니다.');
+    //   }
+    // } catch (err) {
+    //   const error = err as AxiosError;
+    //   console.log('에러 메시지:', error.response?.data);
+    //   if (error.response?.status === 400) {
+    //     setVerificationError('인증번호가 일치하지 않습니다.');
+    //   } else if (error.response?.status === 404) {
+    //     setVerificationError('존재하지 않는 인증번호입니다.');
+    //   } else {
+    //     Alert.alert('인증 실패', `서버 상태를 확인해주세요. (${error.response?.status})`);
+    //   }
+    // }
   };
 
   const formatTime = (seconds: number) => {

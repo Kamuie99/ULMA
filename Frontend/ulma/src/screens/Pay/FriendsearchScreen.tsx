@@ -64,12 +64,20 @@ const FriendsearchScreen = () => {
 
   const renderPersonItem = ({item}: {item: Person}) => (
     <View>
-      <TouchableOpacity onPress={() => handlePersonPress(item.id)}>
+      <TouchableOpacity
+        onPress={() => handlePersonPress(item.id)}
+        style={styles.itemContainer}>
         <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
           <Text style={styles.friendName}>{item.name}</Text>
           <Text>{item.affiliation}</Text>
         </View>
-        <Icon name="chevron-left" size={24} color={colors.BLACK} />
+        <Icon
+          name={
+            selectedPersonIds.includes(item.id) ? 'chevron-up' : 'chevron-down'
+          }
+          size={24}
+          color={colors.BLACK}
+        />
       </TouchableOpacity>
 
       {selectedPersonIds.includes(item.id) && (
@@ -81,7 +89,7 @@ const FriendsearchScreen = () => {
               keyExtractor={(_, index) => index.toString()}
             />
           ) : (
-            <Text style={styles.partyItem}>함께 참여한 경조사가 없어요.</Text>
+            <Text>함께 참여한 경조사가 없어요 😢</Text>
           )}
         </View>
       )}
@@ -144,6 +152,11 @@ const styles = StyleSheet.create({
     color: colors.BLACK,
     marginVertical: 10,
     fontWeight: 'bold',
+  },
+  itemContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   partyList: {
     backgroundColor: colors.LIGHTGRAY,

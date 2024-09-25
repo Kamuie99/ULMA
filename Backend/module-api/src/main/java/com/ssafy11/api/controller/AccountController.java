@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/account")
 public class AccountController {
 
-    private final AccountService service;
+    private final AccountService accountService;
 
     @PostMapping
     public ResponseEntity<Account> createAccount(Account account) {
-        return ResponseEntity.ok(service.createAccount(account));
+        return ResponseEntity.ok(accountService.createAccount(account));
     }
 }

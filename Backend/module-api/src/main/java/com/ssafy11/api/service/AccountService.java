@@ -15,4 +15,8 @@ public class AccountService {
     public Account createAccount(Account account) {
         return accountDao.save(account);
     }
+
+    public Account findAccountById(Integer accountId) {
+        return accountDao.findById(accountId);
+    }
 }

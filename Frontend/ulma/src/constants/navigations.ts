@@ -1,12 +1,11 @@
 const homeNavigations = {
-  HOME: 'Home',
   LANDING: 'Landing',
 } as const;
 
 const authNavigations = {
+  AUTH_HOME: 'AuthHome',
   LOGIN_HOME: 'LoginHome',
   LOGIN: 'Login',
-  SIGNUP_HOME: 'SignupHome',
   SIGNUP1: 'Signup1',
   SIGNUP2: 'Signup2',
 } as const;

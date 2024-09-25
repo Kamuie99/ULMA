@@ -220,7 +220,7 @@ public class AuthService {
 		if(isRegisterdEmail(request.email())) {
 			throw new ErrorException(ErrorCode.Duplicated);
 		}
-		var mailVerification = (MailVerification) this.redisTemplate.opsForValue().get(request.phoneNumber());
+		var mailVerification = (MailVerification) this.redisTemplate.opsForValue().get(request.email());
 		if(mailVerification == null) {
 			throw new ErrorException(ErrorCode.NotFound);
 		}

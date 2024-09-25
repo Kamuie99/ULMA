@@ -1,22 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TextInput, Text, TouchableOpacity, ScrollView, Animated, Alert, ActivityIndicator } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, {useState, useEffect} from 'react';
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Animated,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import axiosInstance from '@/api/axios'; // axiosInstance import
 import useAuthStore from '@/store/useAuthStore';
 import axios, { AxiosError } from 'axios';
 
 function SignupScreen2() {
-  const { signupData, setSignupData } = useAuthStore();
-  const [errors, setErrors] = useState({ loginId: '', password: '', passwordConfirm: '', email: '' });
-  const [isLoginIdEditable, setLoginIdEditable] = useState(true);  // 아이디 입력창 수정 가능 여부
-  const [isDuplicateCheckDisabled, setDuplicateCheckDisabled] = useState(false);  // 중복체크 버튼 비활성화 여부
+  const {signupData, setSignupData} = useAuthStore();
+  const [errors, setErrors] = useState({
+    loginId: '',
+    password: '',
+    passwordConfirm: '',
+    email: '',
+  });
+  const [isLoginIdEditable, setLoginIdEditable] = useState(true); // 아이디 입력창 수정 가능 여부
+  const [isDuplicateCheckDisabled, setDuplicateCheckDisabled] = useState(false); // 중복체크 버튼 비활성화 여부
   const [passwordError, setPasswordError] = useState('');
   const [passwordConfirmError, setPasswordConfirmError] = useState('');
   const [isDuplicateChecked, setIsDuplicateChecked] = useState(false); // 중복 체크 완료 여부
-  const [isEmailSent, setIsEmailSent] = useState(false);  // 이메일 인증 여부
+  const [isEmailSent, setIsEmailSent] = useState(false); // 이메일 인증 여부
   const [isSendingEmail, setIsSendingEmail] = useState(false); // 이메일 발송 중 여부
-  const [emailVerificationCode, setEmailVerificationCode] = useState('');  // 인증번호 상태
-  const [emailVerificationError, setEmailVerificationError] = useState('');  // 이메일 관련 오류 상태
+  const [emailVerificationCode, setEmailVerificationCode] = useState(''); // 인증번호 상태
+  const [emailVerificationError, setEmailVerificationError] = useState(''); // 이메일 관련 오류 상태
   const [resendText, setResendText] = useState('인증메일 발송'); // 인증메일 발송 버튼 텍스트
   const [isEmailVerified, setIsEmailVerified] = useState(false); // 이메일 인증 완료 여부
   const [isVerifyingCode, setIsVerifyingCode] = useState(false); // 인증번호 확인 중 여부
@@ -33,7 +48,7 @@ function SignupScreen2() {
 
   // handleInputChange 함수 정의
   const handleInputChange = (field: keyof typeof signupData, value: string) => {
-    setSignupData({ [field]: value });
+    setSignupData({[field]: value});
   };
 
   const isId = (asValue: string) => {
@@ -42,21 +57,25 @@ function SignupScreen2() {
   };
 
   const isPassword = (asValue: string) => {
-    const regExp = /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+]).{8,16}$/;
+    const regExp =
+      /^(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[$`~!@$!%*#^?&\\(\\)\-_=+]).{8,16}$/;
     return regExp.test(asValue); // 비밀번호 유효성 검사
   };
 
   const isEmail = (asValue: string) => {
-    const regExp = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
+    const regExp =
+      /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
     return regExp.test(asValue);
   };
 
   const handlePasswordChange = (text: string) => {
-    setSignupData({ password: text });
+    setSignupData({password: text});
 
     // 비밀번호 유효성 검사
     if (!isPassword(text)) {
-      setPasswordError('8 ~ 16자 영문, 숫자, 특수문자를 최소 한가지씩 조합해주세요.');
+      setPasswordError(
+        '8 ~ 16자 영문, 숫자, 특수문자를 최소 한가지씩 조합해주세요.',
+      );
     } else {
       setPasswordError('');
     }
@@ -70,7 +89,7 @@ function SignupScreen2() {
   };
 
   const handlePasswordConfirmChange = (text: string) => {
-    setSignupData({ passwordConfirm: text });
+    setSignupData({passwordConfirm: text});
 
     // 비밀번호 확인 일치 여부 검사
     if (text !== signupData.password) {
@@ -82,13 +101,17 @@ function SignupScreen2() {
 
   const handleDuplicateCheck = async () => {
     if (!isId(signupData.loginId)) {
-      setErrors(prev => ({ ...prev, loginId: '영문자로 시작하는 영문자 또는 숫자 6~20자 아이디를 입력해주세요.' }));
+      setErrors(prev => ({
+        ...prev,
+        loginId:
+          '영문자로 시작하는 영문자 또는 숫자 6~20자 아이디를 입력해주세요.',
+      }));
       return;
     }
 
     try {
       const response = await axiosInstance.get('/auth/loginId', {
-        params: { loginId: signupData.loginId },
+        params: {loginId: signupData.loginId},
       });
 
       if (response.status === 200) {
@@ -99,7 +122,7 @@ function SignupScreen2() {
             {
               text: '아니오',
               onPress: () => {
-                setSignupData({ loginId: '' }); // 아이디 입력 초기화
+                setSignupData({loginId: ''}); // 아이디 입력 초기화
                 setLoginIdEditable(true); // 다시 아이디 입력 가능하도록
               },
               style: 'cancel',
@@ -112,7 +135,7 @@ function SignupScreen2() {
                 setIsDuplicateChecked(true); // 중복 체크 완료
               },
             },
-          ]
+          ],
         );
       }
     } catch (error) {
@@ -120,14 +143,20 @@ function SignupScreen2() {
       if (axiosError.response && axiosError.response.status === 409) {
         Alert.alert('중복된 아이디', '중복되는 아이디가 존재합니다.');
       } else {
-        Alert.alert('중복체크 오류', '아이디 중복체크 중 오류가 발생했습니다. 다시 시도해주세요.');
+        Alert.alert(
+          '중복체크 오류',
+          '아이디 중복체크 중 오류가 발생했습니다. 다시 시도해주세요.',
+        );
       }
     }
   };
 
   const handleEmailVerification = async () => {
     if (!isEmail(signupData.email)) {
-      setErrors(prev => ({ ...prev, email: '정확한 이메일 주소를 입력해주세요.' }));
+      setErrors(prev => ({
+        ...prev,
+        email: '정확한 이메일 주소를 입력해주세요.',
+      }));
       return;
     }
 
@@ -139,8 +168,11 @@ function SignupScreen2() {
       });
 
       if (response.status === 200) {
-        Alert.alert('이메일 인증', '인증 메일이 발송되었습니다. 인증번호를 입력해주세요.');
-        setIsEmailSent(true);  // 이메일 인증번호 입력창을 띄우기 위한 상태 변경
+        Alert.alert(
+          '이메일 인증',
+          '인증 메일이 발송되었습니다. 인증번호를 입력해주세요.',
+        );
+        setIsEmailSent(true); // 이메일 인증번호 입력창을 띄우기 위한 상태 변경
         setEmailVerificationError('');
         setResendText('재전송'); // 버튼 텍스트를 재전송으로 변경
       }
@@ -149,7 +181,10 @@ function SignupScreen2() {
       if (axiosError.response && axiosError.response.status === 409) {
         Alert.alert('중복된 이메일', '이미 사용중인 이메일입니다.');
       } else {
-        Alert.alert('이메일 발송 오류', '이메일 발송 중 오류가 발생했습니다. 다시 시도해주세요.');
+        Alert.alert(
+          '이메일 발송 오류',
+          '이메일 발송 중 오류가 발생했습니다. 다시 시도해주세요.',
+        );
       }
     } finally {
       setIsSendingEmail(false); // 로딩 종료
@@ -261,19 +296,23 @@ function SignupScreen2() {
             <TextInput
               placeholder="사용할 아이디를 입력하세요"
               value={signupData.loginId}
-              onChangeText={(text) => handleInputChange('loginId', text)} // handleInputChange 사용
+              onChangeText={text => handleInputChange('loginId', text)} // handleInputChange 사용
               style={styles.input}
               editable={isLoginIdEditable}
             />
             <TouchableOpacity
-              style={[styles.button, isDuplicateCheckDisabled && { backgroundColor: '#DDD' }]}
+              style={[
+                styles.button,
+                isDuplicateCheckDisabled && {backgroundColor: '#DDD'},
+              ]}
               onPress={handleDuplicateCheck}
-              disabled={isDuplicateCheckDisabled}
-            >
+              disabled={isDuplicateCheckDisabled}>
               <Text style={styles.buttonText}>중복체크</Text>
             </TouchableOpacity>
           </View>
-          {errors.loginId ? <Text style={styles.errorText}>{errors.loginId}</Text> : null}
+          {errors.loginId ? (
+            <Text style={styles.errorText}>{errors.loginId}</Text>
+          ) : null}
         </View>
 
         {/* 비밀번호 입력 */}
@@ -289,7 +328,9 @@ function SignupScreen2() {
                 secureTextEntry
                 editable={!isEmailVerified} // 이메일 인증 완료 후 수정 불가
               />
-              {passwordError ? <Text style={styles.errorText}>{passwordError}</Text> : null}
+              {passwordError ? (
+                <Text style={styles.errorText}>{passwordError}</Text>
+              ) : null}
             </View>
 
             <View style={styles.inputContainer}>
@@ -302,7 +343,9 @@ function SignupScreen2() {
                 secureTextEntry
                 editable={!isEmailVerified} // 이메일 인증 완료 후 수정 불가
               />
-              {passwordConfirmError ? <Text style={styles.errorText}>{passwordConfirmError}</Text> : null}
+              {passwordConfirmError ? (
+                <Text style={styles.errorText}>{passwordConfirmError}</Text>
+              ) : null}
             </View>
           </>
         )}
@@ -322,15 +365,17 @@ function SignupScreen2() {
               <TextInput
                 placeholder="이메일을 입력하세요"
                 value={signupData.email}
-                onChangeText={(text) => handleInputChange('email', text)} // handleInputChange 사용
+                onChangeText={text => handleInputChange('email', text)} // handleInputChange 사용
                 style={styles.input}
                 keyboardType="email-address"
               />
               <TouchableOpacity
-                style={[styles.button, isSendingEmail && { backgroundColor: '#DDD' }]}
+                style={[
+                  styles.button,
+                  isSendingEmail && {backgroundColor: '#DDD'},
+                ]}
                 onPress={handleEmailVerification}
-                disabled={isSendingEmail}
-              >
+                disabled={isSendingEmail}>
                 {isSendingEmail ? (
                   <ActivityIndicator size="small" color="#FFF" />
                 ) : (
@@ -339,7 +384,9 @@ function SignupScreen2() {
               </TouchableOpacity>
             </View>
           )}
-          {errors.email ? <Text style={styles.errorText}>{errors.email}</Text> : null}
+          {errors.email ? (
+            <Text style={styles.errorText}>{errors.email}</Text>
+          ) : null}
         </View>
 
         {/* 이메일 인증번호 입력 및 인증 */}
@@ -357,8 +404,7 @@ function SignupScreen2() {
             <TouchableOpacity
               style={styles.button}
               onPress={handleVerifyCode}
-              disabled={isVerifyingCode}
-            >
+              disabled={isVerifyingCode}>
               {isVerifyingCode ? (
                 <ActivityIndicator size="small" color="#FFF" />
               ) : (
@@ -378,8 +424,10 @@ function SignupScreen2() {
 
         {/* 회원가입 버튼 */}
         {isEmailVerified && (
-          <Animated.View style={{ opacity: fadeAnimSignupButton }}>
-            <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
+          <Animated.View style={{opacity: fadeAnimSignupButton}}>
+            <TouchableOpacity
+              style={styles.signupButton}
+              onPress={handleSignup}>
               <Text style={styles.signupButtonText}>회원가입 완료</Text>
             </TouchableOpacity>
           </Animated.View>

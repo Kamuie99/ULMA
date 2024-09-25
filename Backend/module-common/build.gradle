@@ -1,4 +1,17 @@
-import org.jooq.meta.jaxb.Logging
+import org.testcontainers.containers.MySQLContainer
+import org.gradle.api.services.BuildServiceParameters
+import org.gradle.api.services.BuildService
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.testcontainers:testcontainers:1.19.8'
+        classpath 'org.testcontainers:mysql:1.19.8'
+        classpath 'mysql:mysql-connector-java:8.0.33'
+    }
+}
 
 plugins {
     id 'nu.studer.jooq' version '9.0'
@@ -7,48 +20,55 @@ plugins {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jooq'
+
     implementation 'org.jooq:jooq:3.19.11'
     implementation 'org.jooq:jooq-codegen:3.19.11'
     jooqGenerator 'org.jooq:jooq-meta:3.19.11'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'mysql:mysql-connector-java:8.0.33'
     runtimeOnly 'com.mysql:mysql-connector-j'
     jooqGenerator 'com.mysql:mysql-connector-j'
     runtimeOnly 'com.h2database:h2'
+
+    implementation 'org.testcontainers:testcontainers'
+    implementation 'org.testcontainers:mysql'
+
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:junit-jupiter'
 }
 
+Provider<MySqlService> dbContainerProvider = project.getGradle()
+        .getSharedServices()
+        .registerIfAbsent("mysql", MySqlService.class, {})
+
 jooq {
-    version = '3.19.1'  // default (can be omitted)
-    edition = nu.studer.gradle.jooq.JooqEdition.OSS  // default (can be omitted)
+    def activeProfile = System.getProperty('spring.profiles.active', 'prod')
 
     configurations {
-        main {  // name of the jOOQ configuration
-            generateSchemaSourceOnCompilation = true  // default (can be omitted)
-
+        main {
             generationTool {
-                logging = Logging.WARN
-                jdbc {
-                    driver = 'com.mysql.cj.jdbc.Driver'
-                    url = 'jdbc:mysql://localhost:3306/ulma'
-                    user = 'root'
-                    password = '1234'
+                logging = org.jooq.meta.jaxb.Logging.WARN
+                if (activeProfile.contains('test')) {
+                    def dbContainer = dbContainerProvider.get().getContainer()
+                    jdbc {
+                        driver = 'com.mysql.cj.jdbc.Driver'
+                        url = dbContainer.jdbcUrl
+                        user = dbContainer.username
+                        password = dbContainer.password
+                    }
+                } else {
+                    jdbc {
+                        driver = 'com.mysql.cj.jdbc.Driver'
+                        url = 'jdbc:mysql://j11e204.p.ssafy.io:3306/ulma'
+                        user = 'userm'
+                        password = 'userm1234'
+                    }
                 }
                 generator {
                     name = 'org.jooq.codegen.DefaultGenerator'
                     database {
                         name = 'org.jooq.meta.mysql.MySQLDatabase'
                         inputSchema = 'ulma'
-                        forcedTypes {
-                            forcedType {
-                                name = 'varchar'
-                                includeExpression = '.*'
-                                includeTypes = 'JSONB?'
-                            }
-                            forcedType {
-                                name = 'varchar'
-                                includeExpression = '.*'
-                                includeTypes = 'INET'
-                            }
-                        }
                     }
                     generate {
                         deprecated = false
@@ -58,12 +78,25 @@ jooq {
                     }
                     target {
                         packageName = 'com.ssafy11.ulma.generated'
-                        directory = 'build/generated-src/jooq/main'  // default (can be omitted)
+                        directory = 'build/generated-src/jooq/main'
                     }
-                    strategy.name = 'org.jooq.codegen.DefaultGeneratorStrategy'
                 }
             }
         }
+    }
+}
+
+
+test {
+    useJUnitPlatform()
+    systemProperty 'org.testcontainers', 'DEBUG'
+
+    usesService dbContainerProvider
+    doFirst {
+        def dbContainer = dbContainerProvider.get().container
+        systemProperty('spring.datasource.url', dbContainer.jdbcUrl)
+        systemProperty('spring.datasource.username', dbContainer.username)
+        systemProperty('spring.datasource.password', dbContainer.password)
     }
 }
 
@@ -77,3 +110,39 @@ sonar {
     }
 }
 
+abstract class MySqlService implements BuildService<BuildServiceParameters.None>, AutoCloseable {
+
+    private final MySQLContainer container;
+
+    MySqlService() {
+        container = new MySQLContainer("mysql:8.0.33")
+                .withDatabaseName("ulma")
+                .withUsername("root")
+                .withPassword("1234");
+        container.start();
+
+        // SQL 파일을 컨테이너로 복사
+        String schemaFilePath = "C:\\Users\\SSAFY\\workspace\\S11P21E204\\Backend\\module-common\\src\\main\\resources\\schema.sql"
+        print(schemaFilePath)
+        File schemaFile = new File(schemaFilePath)
+
+        if (schemaFile.exists()) {
+            // 컨테이너 내부의 경로로 파일 복사
+            container.copyFileToContainer(
+                    org.testcontainers.utility.MountableFile.forHostPath(schemaFilePath),
+                    "/schema.sql"
+            );
+            // 복사된 schema.sql 파일을 MySQL에 적용
+            container.execInContainer("mysql", "-u", "root", "-p1234", "ulma", "-e", "source /schema.sql");
+        }
+    }
+
+    @Override
+    void close() {
+        container.stop();
+    }
+
+    MySQLContainer getContainer() {
+        return container;
+    }
+}

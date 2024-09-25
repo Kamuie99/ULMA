@@ -7,7 +7,7 @@ import com.ssafy11.domain.events.dto.EventCommand;
 import com.ssafy11.domain.participant.dto.EventParticipant;
 
 public interface EventDao {
-    Integer addEvent(EventCommand event);
+    Integer addEvent(EventCommand event, Integer userId);
     Integer updateEvent(EventCommand event, Integer eventId);
     Boolean isUserEventCreated(Integer eventId, Integer userId);
     PageResponse<Event> getEvents(Integer userId, PageDto pageDto);

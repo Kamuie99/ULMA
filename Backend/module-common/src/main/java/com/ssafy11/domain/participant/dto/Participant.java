@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 public record Participant(
         Integer eventId,
         Integer guestId,
-        Integer amount,
-        Integer userId
+        Integer amount
 ) {
 
 }

@@ -2,22 +2,18 @@ package com.ssafy11.domain.participant;
 
 import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.common.PageResponse;
-import com.ssafy11.domain.events.dto.EventCommand;
 import com.ssafy11.domain.participant.dto.Participant;
 import com.ssafy11.domain.participant.dto.Transaction;
 import com.ssafy11.domain.participant.dto.UserRelation;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
-import org.jooq.Field;
 import org.jooq.Record1;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.ssafy11.ulma.generated.Tables.*;
 

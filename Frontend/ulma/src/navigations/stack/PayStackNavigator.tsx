@@ -55,7 +55,7 @@ function PayStackNavigator() {
           return <Icon name="chevron-left" size={24} color={colors.BLACK} />;
         },
       }}>
-      <Stack.Screen
+      {/* <Stack.Screen
         name={payNavigations.ACCOUNT_HISTORY}
         component={AccounthistoryScreen}
         options={{
@@ -65,7 +65,7 @@ function PayStackNavigator() {
             return <Icon name="cross" size={24} color={colors.BLACK} />;
           },
         }}
-      />
+      /> */}
       {/* <Stack.Screen
         name={payNavigations.ACCOUNT_INPUT}
         component={AccountinputScreen}
@@ -110,14 +110,14 @@ function PayStackNavigator() {
           headerTitle: 'Pay 충전 결과',
         }}
       /> */}
-      <Stack.Screen
+      {/* <Stack.Screen
         name={payNavigations.FRIEND_SEARCH}
         component={FriendsearchScreen}
         options={{
           headerTitle: '계좌 내역 확인하기',
           headerStyle: {backgroundColor: colors.LIGHTGRAY},
         }}
-      />
+      /> */}
       {/* <Stack.Screen
         name={payNavigations.FRIENDHSHIP_SECLECT}
         component={FriendshipselectScreen}
@@ -125,12 +125,21 @@ function PayStackNavigator() {
           headerTitle: 'AI 금액 추천',
         }}
       /> */}
-      {/* 
-      <Stack.Screen
+      {/* <Stack.Screen
+        name={payNavigations.PAY_LIST}
+        component={PaylistScreen}
+        options={{
+          headerTitle: 'Pay 이력보기',
+        }}
+      /> */}
+      {/* <Stack.Screen
         name={payNavigations.PAY_RECHARGE}
         component={PayrechargingScreen}
         options={{
-          headerTitle: '계좌 내역 확인하기',
+          headerTitle: 'Pay 충전하기',
+          headerBackImage: () => {
+            return <Icon name="cross" size={24} color={colors.BLACK} />;
+          },
         }}
       /> */}
       {/* <Stack.Screen
@@ -141,6 +150,16 @@ function PayStackNavigator() {
           headerShown: false,
         }}
       /> */}
+      <Stack.Screen
+        name={payNavigations.SENDING}
+        component={SendingScreen}
+        options={{
+          headerTitle: 'Pay 충전하기',
+          headerBackImage: () => {
+            return <Icon name="cross" size={24} color={colors.BLACK} />;
+          },
+        }}
+      />
     </Stack.Navigator>
   );
 }

@@ -13,26 +13,57 @@ const EventAddScreen = () => {
   const [eventDate, setEventDate] = useState<Date>(new Date()); // 행사 날짜 및 시간
   const [open, setOpen] = useState(false); // DatePicker 열림 상태
   const [accessToken, setAccessToken] = useState<string | null>(null); // 액세스 토큰
+  const [userData, setUserData] = useState<any>(null); // 사용자 정보 상태
 
-  // 액세스 토큰 불러오기
+  // 액세스 토큰과 회원 정보 불러오기
   useEffect(() => {
-    const loadAccessToken = async () => {
+    const loadAccessTokenAndUserInfo = async () => {
       try {
         const token = await AsyncStorage.getItem('accessToken');
         if (token) {
           setAccessToken(token);
+          // 사용자 정보 불러오기
+          const response = await axios.get('http://j11e204.p.ssafy.io/api/user', {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          setUserData(response.data); // 사용자 정보 저장
         } else {
-          console.log('토큰이 존재하지 않습니다.왜 존재하지 않습니까');
-          Alert.alert('에러', '토큰이 없어여.로그인했다고');
+          console.log('토큰이 존재하지 않습니다.');
+          Alert.alert('에러', '토큰이 없어 로그인이 필요합니다.');
         }
       } catch (error) {
-        console.error('토큰 불러오기 오류:', error);
+        console.error('토큰 또는 사용자 정보 불러오기 오류:', error);
         Alert.alert('에러', '토큰 불러오는 중 오류가 발생했습니다.');
       }
     };
 
-    loadAccessToken();
+    loadAccessTokenAndUserInfo();
   }, []);
+
+  // 액세스 토큰 갱신 (선택적으로 사용할 수 있음)
+  const refreshAccessToken = async () => {
+    try {
+      const refreshToken = await AsyncStorage.getItem('refreshToken');
+      if (refreshToken) {
+        const response = await axios.post('http://j11e204.p.ssafy.io/api/auth/refresh', {
+          refreshToken,
+        });
+        const { accessToken: newAccessToken } = response.data;
+        await AsyncStorage.setItem('accessToken', newAccessToken); // 새로운 액세스 토큰 저장
+        setAccessToken(newAccessToken);
+        return newAccessToken;
+      } else {
+        Alert.alert('에러', '리프레시 토큰이 없습니다. 다시 로그인하세요.');
+        return null;
+      }
+    } catch (error) {
+      console.error('토큰 갱신 오류:', error);
+      Alert.alert('에러', '토큰 갱신 중 문제가 발생했습니다.');
+      return null;
+    }
+  };
 
   // 행사 저장 처리 함수
   const handleSaveEvent = async () => {
@@ -49,7 +80,7 @@ const EventAddScreen = () => {
     try {
       // API 요청 보내기
       const response = await axios.post(
-        'http://j11e204.p.ssafy.io/api/events',
+        `http://j11e204.p.ssafy.io/api/users/${userData?.id}/events`, // 회원의 이벤트 추가 API
         {
           category: selectedEventType,
           name: eventTitle,

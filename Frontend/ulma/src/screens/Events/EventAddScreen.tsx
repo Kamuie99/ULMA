@@ -1,47 +1,18 @@
-import React, {useState, useEffect} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, Alert} from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';  // 토큰 저장을 위한 AsyncStorage
+import React, {useState} from 'react';
+import {View, TouchableOpacity, StyleSheet, Alert, Text} from 'react-native';
 import DatePicker from 'react-native-date-picker';
 import TitleTextField from '@/components/common/TitleTextField';
 import CustomButton from '@/components/common/CustomButton';
-import axios from 'axios'; // axios 임포트
+import axiosInstance from '@/api/axios'; // 수정된 axiosInstance 불러오기
 import InputField from '@/components/common/InputField';
+import {NavigationProp} from '@react-navigation/native';
+import {eventNavigations} from '@/constants/navigations';
 
-const EventAddScreen = () => {
+const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
   const [eventTitle, setEventTitle] = useState<string>(''); // 행사 제목
   const [selectedEventType, setSelectedEventType] = useState<string | null>(null); // 행사 유형
   const [eventDate, setEventDate] = useState<Date>(new Date()); // 행사 날짜 및 시간
   const [open, setOpen] = useState(false); // DatePicker 열림 상태
-  const [accessToken, setAccessToken] = useState<string | null>(null); // 액세스 토큰
-  const [userData, setUserData] = useState<any>(null); // 사용자 정보 상태
-
-  // 액세스 토큰과 회원 정보 불러오기
-  useEffect(() => {
-    const loadAccessTokenAndUserInfo = async () => {
-      try {
-        const token = await AsyncStorage.getItem('accessToken');
-        console.log("불러온 액세스 토큰:", token); // 액세스 토큰 확인
-        if (token) {
-          setAccessToken(token);
-          // 사용자 정보 불러오기
-          const response = await axios.get('http://j11e204.p.ssafy.io/api/user', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          setUserData(response.data); // 사용자 정보 저장
-        } else {
-          console.log('토큰이 존재하지 않습니다.');
-          Alert.alert('에러', '토큰이 없어 로그인이 필요합니다.');
-        }
-      } catch (error) {
-        console.error('토큰 또는 사용자 정보 불러오기 오류:', error);
-        Alert.alert('에러', '토큰 불러오는 중 오류가 발생했습니다.');
-      }
-    };
-
-    loadAccessTokenAndUserInfo();
-  }, []);
 
   // 행사 저장 처리 함수
   const handleSaveEvent = async () => {
@@ -50,29 +21,19 @@ const EventAddScreen = () => {
       return;
     }
 
-    if (!accessToken) {
-      Alert.alert('에러', '로그인이 필요합니다.');
-      return;
-    }
-
     try {
       // API 요청 보내기
-      const response = await axios.post(
-        `http://j11e204.p.ssafy.io/api/users/${userData?.id}/events`, // 회원의 이벤트 추가 API
-        {
-          category: selectedEventType,
-          name: eventTitle,
-          date: eventDate.toISOString(), // 날짜 및 시간을 ISO 형식으로 변환하여 전송
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`, // 토큰 추가
-          },
-        },
-      );
+      const response = await axiosInstance.post('/events', {
+        category: selectedEventType,
+        name: eventTitle,
+        date: eventDate.toISOString(), // 날짜 및 시간을 ISO 형식으로 변환하여 전송
+      });
 
       console.log('성공:', response.data);
       Alert.alert('성공', '이벤트가 저장되었습니다.');
+      
+      // 이벤트 저장 후 이벤트 목록 화면으로 이동
+      navigation.navigate(eventNavigations.EVENT);
     } catch (error) {
       console.error('API 요청 오류:', error);
       Alert.alert('에러', '이벤트 저장 중 오류가 발생했습니다.');

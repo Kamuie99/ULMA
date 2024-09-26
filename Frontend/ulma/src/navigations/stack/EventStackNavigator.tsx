@@ -1,17 +1,15 @@
 import {eventNavigations} from '@/constants/navigations';
 import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet} from 'react-native';
 
 import {colors} from '@/constants';
 import Icon from 'react-native-vector-icons/Entypo';
 import EventAddScreen from '@/screens/Events/EventAddScreen';
-import EventDateScreen from '@/screens/Events/EventDateScreen';
 import EventScreen from '@/screens/Events/EventScreen';
 
 export type eventStackParamList = {
   [eventNavigations.EVENT_ADD]: undefined;
-  [eventNavigations.EVENT_DATE]: undefined;
   [eventNavigations.EVENT]: undefined;
 };
 
@@ -52,13 +50,6 @@ function EventStackNavigator() {
           headerBackImage: () => {
             return <Icon name="cross" size={24} color={colors.BLACK} />;
           },
-        }}
-      />
-      <Stack.Screen
-        name={eventNavigations.EVENT_DATE}
-        component={EventDateScreen}
-        options={{
-          headerTitle: '이벤트 추가하기',
         }}
       />
     </Stack.Navigator>

@@ -16,11 +16,12 @@ public class TransactionDaoImpl implements TransactionDao{
     private final DSLContext dsl;
 
     @Override
-    public Integer save(Transaction transaction) {
+    public Integer save(Integer userId, CreateTransaction transaction) {
         return dsl.insertInto(TRANSACTION)
                 .set(TRANSACTION.ACCOUNT_ID, transaction.accountId())
+                .set(TRANSACTION.USER_ID, userId)
                 .set(TRANSACTION.AMOUNT, transaction.amount())
-                .set(TRANSACTION.TRANSACTION_DATE, transaction.transactionDate())
+                .set(TRANSACTION.INFO, transaction.info())
                 .set(TRANSACTION.BALANCE, transaction.balance())
                 .set(TRANSACTION.TARGET, transaction.target())
                 .returning(TRANSACTION.TRANSACTION_ID)
@@ -29,20 +30,7 @@ public class TransactionDaoImpl implements TransactionDao{
     }
 
     @Override
-    public Integer makeTransaction(Transaction transaction) {
-        return dsl.insertInto(TRANSACTION)
-                .set(TRANSACTION.ACCOUNT_ID, transaction.accountId())
-                .set(TRANSACTION.AMOUNT, transaction.amount())
-                .set(TRANSACTION.TRANSACTION_DATE, transaction.transactionDate())
-                .set(TRANSACTION.BALANCE, transaction.balance())
-                .set(TRANSACTION.TARGET, transaction.target())
-                .returning(TRANSACTION.TRANSACTION_ID)
-                .fetchOne()
-                .getTransactionId();
-    }
-
-    @Override
-    public List<Transaction> findByDateRange(LocalDateTime startDate, LocalDateTime endDate) {
+    public List<Transaction> findByDateRange(Integer userId, LocalDateTime startDate, LocalDateTime endDate) {
         // startDate와 endDate를 설정하는 메서드 호출
         LocalDateTime[] dateRange = getValidatedDateRange(startDate, endDate);
         startDate = dateRange[0];
@@ -54,14 +42,14 @@ public class TransactionDaoImpl implements TransactionDao{
     }
 
     @Override
-    public List<Transaction> findByTarget(String target) {
+    public List<Transaction> findByTarget(Integer userId, String target) {
         return dsl.selectFrom(TRANSACTION)
                 .where(TRANSACTION.TARGET.eq(target))
                 .fetchInto(Transaction.class);
     }
 
     @Override
-    public List<Transaction> findByAmountSign(boolean isPositive) {
+    public List<Transaction> findByAmountSign(Integer userId, boolean isPositive) {
         if (isPositive) {
             return dsl.selectFrom(TRANSACTION)
                     .where(TRANSACTION.AMOUNT.gt(0L))

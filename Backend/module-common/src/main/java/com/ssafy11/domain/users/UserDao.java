@@ -12,6 +12,4 @@ public interface UserDao {
 	boolean existsByLoginId(String loginId);
 	Optional<Users> findByLoginId(String loginId);
 	void updateRefreshToken(String loginId, String refreshToken);
-	List<Account> findAccounts(Integer userId, String bankCode);
-	Account chooseAccount(Integer userId, String accountNumber);
 }

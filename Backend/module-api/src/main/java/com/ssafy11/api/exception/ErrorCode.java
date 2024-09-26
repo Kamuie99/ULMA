@@ -19,6 +19,9 @@ public enum ErrorCode {
 	InternalServer(HttpStatus.INTERNAL_SERVER_ERROR, "잠시 후 다시 시도해주세요"),
 	InvalidToken(HttpStatus.UNAUTHORIZED, "토큰이 잘못되었습니다."),
 	RefreshTokenMismatch(HttpStatus.UNAUTHORIZED, "토큰이 일치하지 않습니다."),
+	NotEnoughFundsException(HttpStatus.BAD_REQUEST, "잔액이 부족합니다."),
+	InvalidDateRangeException(HttpStatus.BAD_REQUEST, "유효하지 않은 날짜 범위입니다. 시작 날짜가 종료 날짜보다 빠르거나 같아야 합니다."),
+	AlreadyExistPay(HttpStatus.CONFLICT, "이미 생성하신 얼마페이가 있습니다."),
 
 	// 회원
 	PasswordMismatch(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다.");

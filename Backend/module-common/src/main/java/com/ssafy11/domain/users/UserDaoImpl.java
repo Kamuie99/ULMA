@@ -84,26 +84,5 @@ public class UserDaoImpl implements UserDao {
 			.execute();
 	}
 
-	@Override
-	public List<Account> findAccounts(Integer userId, String bankCode) {
-		return dsl.selectFrom(ACCOUNT)
-				.where(ACCOUNT.USER_ID.eq(userId))
-				.and(ACCOUNT.BANK_CODE.eq(bankCode))
-				.fetchInto(Account.class);
-	}
-
-	@Override
-	@Transactional
-	public Account chooseAccount(Integer userId, String accountNumber) {
-		dsl.update(USERS)
-				.set(USERS.ACCOUNT_NUMBER, accountNumber)
-				.where(USERS.ID.eq(userId))
-				.execute();
-
-		return dsl.select(ACCOUNT)
-				.from(ACCOUNT)
-				.where(ACCOUNT.ACCOUNT_NUMBER.eq(accountNumber))
-				.fetchOneInto(Account.class);
-	}
 
 }

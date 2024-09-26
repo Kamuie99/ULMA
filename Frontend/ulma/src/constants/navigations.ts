@@ -14,6 +14,8 @@ const eventNavigations = {
   EVENT_ADD: 'EventAdd',
   EVENT_DATE: 'EventDate',
   EVENT: 'Event',
+  EVENT_COMMENT: 'EventComment',
+  EVENT_COMMENT_RESULT: 'EventCommentResult',
 } as const;
 
 const payNavigations = {

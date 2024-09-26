@@ -3,6 +3,7 @@ import axiosInstance from '@/api/axios';
 import * as Keychain from 'react-native-keychain'; // Keychain 모듈 불러오기
 
 interface LoginResponse {
+  data: { accessToken: any; refreshToken: any; };
   accessToken: string;
   refreshToken: string;
   msg: string;

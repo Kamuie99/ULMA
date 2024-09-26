@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Alert } from 'react-native';
+import React, {useState} from 'react';
+import {StyleSheet, View, Alert} from 'react-native';
 import CustomButton from '@/components/common/CustomButton';
 import InputField from '@/components/common/InputField';
 import TitleTextField from '@/components/common/TitleTextField';
 import useAuthStore from '@/store/useAuthStore';
-import axios, { AxiosError } from 'axios';
+import axios, {AxiosError} from 'axios';
+import Toast from 'react-native-toast-message';
 
 function LoginScreen() {
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
-  const login = useAuthStore((state) => state.login);
+  const login = useAuthStore(state => state.login);
 
   const handleLogin = async () => {
     try {
@@ -19,9 +20,15 @@ function LoginScreen() {
     } catch (error) {
       const axiosError = error as AxiosError;
       if (axiosError.response && axiosError.response.status === 401) {
-        Alert.alert('로그인 실패', '아이디 또는 비밀번호가 올바르지 않습니다.');
+        Toast.show({
+          text1: '아이디 또는 비밀번호가 올바르지 않습니다.',
+          type: 'error',
+        });
       } else {
-        Alert.alert('오류', '로그인 중 문제가 발생했습니다. 다시 시도해주세요.');
+        Toast.show({
+          text1: '로그인 중 문제가 발생했습니다. 다시 시도해주세요.',
+          type: 'error',
+        });
       }
     }
   };
@@ -35,6 +42,7 @@ function LoginScreen() {
         placeholder="아이디"
         autoCapitalize="none"
       />
+      <View style={{height: 20}} />
       <TitleTextField frontLabel="비밀번호를 입력해주세요." />
       <InputField
         value={password}
@@ -42,7 +50,7 @@ function LoginScreen() {
         placeholder="비밀번호"
         secureTextEntry
       />
-      <CustomButton label="로그인 하기" onPress={handleLogin} />
+      <CustomButton size="maxSize" label="로그인" onPress={handleLogin} />
     </View>
   );
 }
@@ -51,6 +59,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    gap: 20,
   },
 });
 

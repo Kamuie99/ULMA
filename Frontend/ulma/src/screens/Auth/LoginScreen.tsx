@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Alert } from 'react-native';
+import React, {useState} from 'react';
+import {StyleSheet, View, Alert} from 'react-native';
 import CustomButton from '@/components/common/CustomButton';
 import InputField from '@/components/common/InputField';
 import TitleTextField from '@/components/common/TitleTextField';
 import useAuthStore from '@/store/useAuthStore';
-import axios, { AxiosError } from 'axios';
+import axios, {AxiosError} from 'axios';
 
 function LoginScreen() {
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
-  const login = useAuthStore((state) => state.login);
+  const login = useAuthStore(state => state.login);
 
   const handleLogin = async () => {
     try {
@@ -21,7 +21,10 @@ function LoginScreen() {
       if (axiosError.response && axiosError.response.status === 401) {
         Alert.alert('로그인 실패', '아이디 또는 비밀번호가 올바르지 않습니다.');
       } else {
-        Alert.alert('오류', '로그인 중 문제가 발생했습니다. 다시 시도해주세요.');
+        Alert.alert(
+          '오류',
+          '로그인 중 문제가 발생했습니다. 다시 시도해주세요.',
+        );
       }
     }
   };

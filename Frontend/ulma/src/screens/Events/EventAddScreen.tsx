@@ -1,64 +1,90 @@
-// 이벤트(행사이름입력) 추가 페이지
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, Alert} from 'react-native';
-import {useNavigation} from '@react-navigation/native';
-import {eventNavigations} from '@/constants/navigations';
-import {StackNavigationProp} from '@react-navigation/stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';  // 토큰 저장을 위한 AsyncStorage
+import DatePicker from 'react-native-date-picker';
 import TitleTextField from '@/components/common/TitleTextField';
 import CustomButton from '@/components/common/CustomButton';
-import InputField from '@/components/common/InputField';
 import axios from 'axios'; // axios 임포트
-
-type EventStackParamList = {
-  [eventNavigations.EVENT_DATE]: {eventTitle: string} | undefined;
-};
+import InputField from '@/components/common/InputField';
 
 const EventAddScreen = () => {
-  const navigation =
-    useNavigation<StackNavigationProp<EventStackParamList, 'EventDate'>>();
-  const [eventTitle, setEventTitle] = useState<string>('');
-  const [selectedEventType, setSelectedEventType] = useState<string | null>(
-    null,
-  );
+  const [eventTitle, setEventTitle] = useState<string>(''); // 행사 제목
+  const [selectedEventType, setSelectedEventType] = useState<string | null>(null); // 행사 유형
+  const [eventDate, setEventDate] = useState<Date>(new Date()); // 행사 날짜 및 시간
+  const [open, setOpen] = useState(false); // DatePicker 열림 상태
+  const [accessToken, setAccessToken] = useState<string | null>(null); // 액세스 토큰
 
+  // 액세스 토큰 불러오기
+  useEffect(() => {
+    const loadAccessToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem('accessToken');
+        if (token) {
+          setAccessToken(token);
+        } else {
+          console.log('토큰이 존재하지 않습니다.왜 존재하지 않습니까');
+          Alert.alert('에러', '토큰이 없어여.로그인했다고');
+        }
+      } catch (error) {
+        console.error('토큰 불러오기 오류:', error);
+        Alert.alert('에러', '토큰 불러오는 중 오류가 발생했습니다.');
+      }
+    };
+
+    loadAccessToken();
+  }, []);
+
+  // 행사 저장 처리 함수
   const handleSaveEvent = async () => {
-    if (!eventTitle || !selectedEventType) {
-      Alert.alert('경고', '이벤트 제목과 유형을 입력하세요.');
+    if (!eventTitle || !selectedEventType || !eventDate) {
+      Alert.alert('경고', '이벤트 제목, 유형, 날짜를 모두 입력하세요.');
+      return;
+    }
+
+    if (!accessToken) {
+      Alert.alert('에러', '로그인이 필요합니다.');
       return;
     }
 
     try {
+      // API 요청 보내기
       const response = await axios.post(
-        'https://j11e204.p.ssafy.io:9443/api/events',
+        'http://j11e204.p.ssafy.io/api/events',
         {
-          title: eventTitle,
-          eventType: selectedEventType,
+          category: selectedEventType,
+          name: eventTitle,
+          date: eventDate.toISOString(), // 날짜 및 시간을 ISO 형식으로 변환하여 전송
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`, // 토큰 추가
+          },
         },
       );
 
       console.log('성공:', response.data);
-
-      // 성공적으로 저장된 경우 다음 화면으로 이동
-      navigation.navigate(eventNavigations.EVENT_DATE, {
-        eventTitle: eventTitle, // 전달할 이벤트 제목
-      });
+      Alert.alert('성공', '이벤트가 저장되었습니다.');
     } catch (error) {
       console.error('API 요청 오류:', error);
       Alert.alert('에러', '이벤트 저장 중 오류가 발생했습니다.');
     }
   };
 
+  // 이벤트 유형 옵션
   const eventTypes = ['결혼', '돌잔치', '장례식', '생일', '기타'];
 
   return (
     <View style={styles.container}>
       <TitleTextField frontLabel="어떤 경조사인가요?" />
+
+      {/* 이벤트 제목 입력 */}
       <InputField
         placeholder="이벤트 제목을 입력하세요"
         value={eventTitle}
         onChangeText={setEventTitle}
       />
 
+      {/* 이벤트 유형 선택 */}
       <View style={styles.buttonContainer}>
         {eventTypes.map(type => (
           <TouchableOpacity
@@ -80,6 +106,28 @@ const EventAddScreen = () => {
         ))}
       </View>
 
+      {/* 이벤트 날짜 및 시간 선택 */}
+      <TouchableOpacity onPress={() => setOpen(true)} style={styles.dateButton}>
+        <Text style={styles.dateButtonText}>
+          {eventDate ? eventDate.toLocaleString() : '날짜 및 시간 선택'}
+        </Text>
+      </TouchableOpacity>
+
+      <DatePicker
+        modal
+        open={open}
+        date={eventDate}
+        mode="datetime"  // 날짜 및 시간 선택 모드
+        onConfirm={(date: React.SetStateAction<Date>) => {
+          setOpen(false);
+          setEventDate(date);
+        }}
+        onCancel={() => {
+          setOpen(false);
+        }}
+      />
+
+      {/* 확인 버튼 */}
       <CustomButton label="확인" variant="outlined" onPress={handleSaveEvent} />
     </View>
   );
@@ -88,8 +136,8 @@ const EventAddScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 20,
   },
-
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -110,6 +158,18 @@ const styles = StyleSheet.create({
   },
   selectedButtonText: {
     color: '#fff',
+  },
+  dateButton: {
+    padding: 16,
+    borderRadius: 5,
+    borderWidth: 1,
+    borderColor: '#00C77F',
+    marginBottom: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dateButtonText: {
+    color: '#00C77F',
   },
 });
 

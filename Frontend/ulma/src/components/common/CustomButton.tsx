@@ -15,10 +15,10 @@ import {colors} from '@/constants';
 interface CustomButtonProps extends PressableProps {
   label: string;
   variant?: 'filled' | 'outlined';
-  size?: 'large' | 'medium';
+  size?: 'large' | 'medium' | 'maxSize';
   inValid?: boolean;
   customStyle?: StyleProp<ViewStyle>; // 타입을 StyleProp<ViewStyle>로 변경
-  howDown?: number;
+  posY?: number;
 }
 
 const deviceHeight = Dimensions.get('screen').height;
@@ -29,7 +29,7 @@ function CustomButton({
   size = 'large',
   inValid = false,
   customStyle,
-  howDown = 30,
+  posY = 30,
   ...props
 }: CustomButtonProps) {
   return (
@@ -41,7 +41,7 @@ function CustomButton({
           pressed ? styles[`${variant}Pressed`] : styles[variant],
           inValid && styles.inValid,
           customStyle ? customStyle : null, // customStyle이 있으면 추가
-          {bottom: howDown},
+          {bottom: posY},
         ]}
         {...props}>
         <View style={styles[size]}>

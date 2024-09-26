@@ -38,6 +38,7 @@ function AuthStackNavigator() {
         headerBackImage: () => {
           return <Icon name="chevron-left" size={24} color={colors.BLACK} />;
         },
+        headerShadowVisible: false,
       }}>
       <Stack.Screen
         name={authNavigations.AUTH_HOME}

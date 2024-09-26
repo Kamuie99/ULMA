@@ -1,4 +1,4 @@
-import React, { ForwardedRef, forwardRef, useRef, useState } from 'react';
+import React, {ForwardedRef, forwardRef, useRef, useState} from 'react';
 import {
   Dimensions,
   Pressable,
@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 
-import { colors } from '@/constants';
+import {colors} from '@/constants';
 
 interface InputFieldProps extends TextInputProps {
   disabled?: boolean;
@@ -18,8 +18,8 @@ const deviceHeight = Dimensions.get('screen').height;
 
 const InputField = forwardRef(
   (
-    { disabled = false, ...props }: InputFieldProps,
-    ref: ForwardedRef<TextInput>
+    {disabled = false, ...props}: InputFieldProps,
+    ref: ForwardedRef<TextInput>,
   ) => {
     const innerRef = useRef<TextInput | null>(null);
     const [text, onChangeText] = useState('');
@@ -37,7 +37,7 @@ const InputField = forwardRef(
           <TextInput
             ref={innerRef}
             style={[styles.input, disabled && styles.disabled]}
-            placeholderTextColor={colors.GRAY}
+            placeholderTextColor={colors.GRAY_700}
             value={text}
             onChangeText={onChangeText}
             spellCheck={false}
@@ -47,7 +47,7 @@ const InputField = forwardRef(
         </View>
       </Pressable>
     );
-  }
+  },
 );
 
 const styles = StyleSheet.create({
@@ -61,15 +61,15 @@ const styles = StyleSheet.create({
   input: {
     color: colors.BLACK,
     backgroundColor: 'transparent',
-    padding: 10,
+    paddingVertical: 10,
     fontSize: 18,
     borderBottomWidth: 1,
     borderBottomColor: colors.GREEN_700,
     width: '90%',
   },
   disabled: {
-    backgroundColor: colors.GRAY,
-    color: colors.GRAY,
+    backgroundColor: colors.GRAY_300,
+    color: colors.GRAY_700,
   },
 });
 

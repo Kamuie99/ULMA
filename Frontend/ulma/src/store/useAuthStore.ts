@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import {create} from 'zustand';
 import axiosInstance from '@/api/axios';
 import * as Keychain from 'react-native-keychain'; // Keychain 모듈 불러오기
 
@@ -18,24 +18,27 @@ interface AuthStore {
   loadTokens: () => Promise<void>; // 저장된 토큰을 불러오는 함수
 }
 
-const useAuthStore = create<AuthStore>(set => ({
+const useAuthStore = create<AuthStore>((set: (arg0: { accessToken: any; refreshToken: any; isLoggedIn: boolean; }) => void) => ({
   accessToken: null,
   refreshToken: null,
   isLoggedIn: false,
 
   // 로그인 시 Keychain에 토큰 저장
-  login: async (loginId, password) => {
+  login: async (loginId: any, password: any) => {
     try {
       const response = await axiosInstance.post<LoginResponse>('/auth/login', {
         loginId,
         password,
       });
-      const { accessToken, refreshToken } = response.data;
+      const {accessToken, refreshToken} = response.data;
 
       // Keychain에 토큰 저장
-      await Keychain.setGenericPassword('tokens', JSON.stringify({ accessToken, refreshToken }));
+      await Keychain.setGenericPassword(
+        'tokens',
+        JSON.stringify({accessToken, refreshToken}),
+      );
 
-      set({ accessToken, refreshToken, isLoggedIn: true });
+      set({accessToken, refreshToken, isLoggedIn: true});
       return response.data;
     } catch (error) {
       console.error('로그인 실패:', error);
@@ -47,7 +50,7 @@ const useAuthStore = create<AuthStore>(set => ({
   logout: async () => {
     try {
       await Keychain.resetGenericPassword();
-      set({ accessToken: null, refreshToken: null, isLoggedIn: false });
+      set({accessToken: null, refreshToken: null, isLoggedIn: false});
     } catch (error) {
       console.error('로그아웃 실패:', error);
       throw error;
@@ -59,8 +62,8 @@ const useAuthStore = create<AuthStore>(set => ({
     try {
       const credentials = await Keychain.getGenericPassword();
       if (credentials) {
-        const { accessToken, refreshToken } = JSON.parse(credentials.password);
-        set({ accessToken, refreshToken, isLoggedIn: true });
+        const {accessToken, refreshToken} = JSON.parse(credentials.password);
+        set({accessToken, refreshToken, isLoggedIn: true});
       }
     } catch (error) {
       console.error('토큰 불러오기 실패:', error);
@@ -68,9 +71,12 @@ const useAuthStore = create<AuthStore>(set => ({
   },
 
   // 토큰을 Keychain에 저장하는 함수
-  setTokens: async (accessToken, refreshToken) => {
-    await Keychain.setGenericPassword('tokens', JSON.stringify({ accessToken, refreshToken }));
-    set({ accessToken, refreshToken, isLoggedIn: true });
+  setTokens: async (accessToken: any, refreshToken: any) => {
+    await Keychain.setGenericPassword(
+      'tokens',
+      JSON.stringify({accessToken, refreshToken}),
+    );
+    set({accessToken, refreshToken, isLoggedIn: true});
   },
 }));
 

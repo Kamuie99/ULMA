@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -17,7 +17,12 @@ interface SettingHomeScreenProps {
 }
 
 function SettingHomeScreen({ navigation }: SettingHomeScreenProps) {
-  const logout = useAuthStore((state) => state.logout); // 로그아웃 함수 가져오기
+  const { logout, userInfo } = useAuthStore();
+  // fetchUserInfo
+  
+  // useEffect(() => {
+  //   fetchUserInfo();
+  // }, []);
 
   // 로그아웃을 확인하는 함수
   const handleLogout = () => {
@@ -41,8 +46,8 @@ function SettingHomeScreen({ navigation }: SettingHomeScreenProps) {
     <ScrollView style={styles.container}>
       <View style={styles.userInfo}>
         <View>
-          <Text style={styles.userName}>김싸피</Text>
-          <Text style={styles.userEmail}>dakgoo02@naver.com</Text>
+          <Text style={styles.userName}>{userInfo?.name || '사용자'}</Text>
+          <Text style={styles.userEmail}>{userInfo?.email || '이메일 없음'}</Text>
         </View>
         <View style={styles.userInfoRight}>
           <TouchableOpacity onPress={handleLogout}>

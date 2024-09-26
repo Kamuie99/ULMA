@@ -18,10 +18,13 @@ axiosInstance.interceptors.request.use(
       const token = await AsyncStorage.getItem('token');
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
+        // 디버깅: 토큰 출력
+        console.log('Sending request with token:', token);
       }
       return config;
     } catch (error) {
-      return Promise.reject(error);
+      console.error('토큰 가져오기 실패:', error);
+      return config;
     }
   },
   (error) => {

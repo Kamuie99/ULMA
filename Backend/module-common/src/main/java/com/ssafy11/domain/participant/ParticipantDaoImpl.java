@@ -83,10 +83,9 @@ public class ParticipantDaoImpl implements ParticipantDao {
 
     @Override
     public Integer addParticipant(Participant participant) {
-        Integer result = dsl.insertInto(PARTICIPATION, PARTICIPATION.EVENT_ID, PARTICIPATION.GUEST_ID, PARTICIPATION.AMOUNT, PARTICIPATION.CREATE_AT)
+        return dsl.insertInto(PARTICIPATION, PARTICIPATION.EVENT_ID, PARTICIPATION.GUEST_ID, PARTICIPATION.AMOUNT, PARTICIPATION.CREATE_AT)
                 .values(participant.eventId(), participant.guestId(), participant.amount(), LocalDateTime.now())
                 .execute();
-        return result;
     }
 
     @Override
@@ -125,10 +124,9 @@ public class ParticipantDaoImpl implements ParticipantDao {
 
     @Override
     public Integer addUserRelation(Integer guestId, Integer userId) {
-        Integer result = dsl.insertInto(USERS_RELATION, USERS_RELATION.USERS_ID, USERS_RELATION.GUEST_ID, USERS_RELATION.CREATE_AT)
+        return dsl.insertInto(USERS_RELATION, USERS_RELATION.USERS_ID, USERS_RELATION.GUEST_ID, USERS_RELATION.CREATE_AT)
                 .values(userId, guestId, LocalDateTime.now())
                 .execute();
-        return result;
     }
 
     @Transactional(readOnly = true)

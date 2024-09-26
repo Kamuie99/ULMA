@@ -158,7 +158,7 @@ function SignupScreen1({}: SignupScreenProps) {
           phoneNumber: phoneNumber.replace(/-/g, ''),
         });
         if (response.status === 200) {
-        // 여기 까지 주석 처리 할 것
+          // 여기 까지 주석 처리 할 것
           setShowVerificationCode(true);
           setResendText('재전송');
           fadeIn(fadeAnim.verificationCode);
@@ -166,16 +166,22 @@ function SignupScreen1({}: SignupScreenProps) {
           startTimer();
           setIsVerified(false);
           setVerificationError('');
-        // 이것도 주석 처리 할 것
+          // 이것도 주석 처리 할 것
         }
       } catch (error) {
-        console.error('인증번호 전송 오류:', error);
-        Alert.alert('인증번호 전송에 실패했습니다. 다시 시도해주세요.');
+        const err = error as AxiosError 
+        if (err.response && err.response.status === 409) {
+          Alert.alert('이미 가입된 휴대폰 번호입니다.');
+        } else {
+          console.error('인증번호 전송 오류:', err);
+          Alert.alert('인증번호 전송에 실패했습니다. 다시 시도해주세요.');
+        }
       }
     } else {
       Alert.alert('올바른 값을 입력하세요.');
     }
   };
+  
 
   const handleVerifyCode = async () => {
 

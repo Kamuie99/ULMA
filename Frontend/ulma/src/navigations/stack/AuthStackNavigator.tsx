@@ -38,15 +38,14 @@ function AuthStackNavigator() {
         headerBackImage: () => {
           return <Icon name="chevron-left" size={24} color={colors.BLACK} />;
         },
+        headerShadowVisible: false,
       }}>
       <Stack.Screen
         name={authNavigations.AUTH_HOME}
         component={AuthHomeScreen}
         options={{
           headerTitle: ' ',
-          headerBackImage: () => {
-            return <Icon name="cross" size={24} color={colors.BLACK} />;
-          },
+          headerShown: false,
         }}
       />
       <Stack.Screen
@@ -57,6 +56,8 @@ function AuthStackNavigator() {
           headerBackImage: () => {
             return <Icon name="cross" size={24} color={colors.BLACK} />;
           },
+          // headerStyle: {backgroundColor: colors.LIGHTGRAY},
+          headerTransparent: true,
         }}
       />
       <Stack.Screen

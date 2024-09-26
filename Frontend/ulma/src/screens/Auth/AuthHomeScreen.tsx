@@ -19,6 +19,7 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
 
 const {width} = Dimensions.get('window');
 
@@ -64,7 +65,7 @@ const SlideItem: React.FC<SlideItemProps> = ({item}) => {
     <View style={styles.slide}>
       <Text style={styles.title}>{item.title}</Text>
       <Text style={styles.description}>{item.description}</Text>
-      <Image source={item.image} style={styles.image} />
+      <FastImage source={item.image} style={styles.image} />
     </View>
   );
 };

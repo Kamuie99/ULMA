@@ -55,6 +55,8 @@ function AuthStackNavigator() {
           headerBackImage: () => {
             return <Icon name="cross" size={24} color={colors.BLACK} />;
           },
+          // headerStyle: {backgroundColor: colors.LIGHTGRAY},
+          headerTransparent: true,
         }}
       />
       <Stack.Screen

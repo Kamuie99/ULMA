@@ -1,23 +1,16 @@
-//이벤트(행사이름입력) 추가 페이지
+// 이벤트(행사이름입력) 추가 페이지
 import React, {useState} from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-} from 'react-native';
-import {colors} from '@/constants';
+import {View, Text, TouchableOpacity, StyleSheet, Alert} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {eventNavigations} from '@/constants/navigations';
 import {StackNavigationProp} from '@react-navigation/stack';
 import TitleTextField from '@/components/common/TitleTextField';
 import CustomButton from '@/components/common/CustomButton';
 import InputField from '@/components/common/InputField';
+import axios from 'axios'; // axios 임포트
 
 type EventStackParamList = {
-  [eventNavigations.EVENT_DATE]: undefined;
+  [eventNavigations.EVENT_DATE]: {eventTitle: string} | undefined;
 };
 
 const EventAddScreen = () => {
@@ -28,17 +21,31 @@ const EventAddScreen = () => {
     null,
   );
 
-  const handleSaveEvent = () => {
+  const handleSaveEvent = async () => {
     if (!eventTitle || !selectedEventType) {
-      console.log('경고', '이벤트 제목과 유형을 입력하세요.');
+      Alert.alert('경고', '이벤트 제목과 유형을 입력하세요.');
       return;
     }
 
-    // 이벤트 저장 처리 후 다음 화면으로 이동
-    // console.log('성공', '이벤트가 저장되었습니다.');
-    navigation.navigate(eventNavigations.EVENT_DATE, {
-      eventTitle: eventTitle, // 전달할 이벤트 제목
-    });
+    try {
+      const response = await axios.post(
+        'https://j11e204.p.ssafy.io:9443/api/events',
+        {
+          title: eventTitle,
+          eventType: selectedEventType,
+        },
+      );
+
+      console.log('성공:', response.data);
+
+      // 성공적으로 저장된 경우 다음 화면으로 이동
+      navigation.navigate(eventNavigations.EVENT_DATE, {
+        eventTitle: eventTitle, // 전달할 이벤트 제목
+      });
+    } catch (error) {
+      console.error('API 요청 오류:', error);
+      Alert.alert('에러', '이벤트 저장 중 오류가 발생했습니다.');
+    }
   };
 
   const eventTypes = ['결혼', '돌잔치', '장례식', '생일', '기타'];

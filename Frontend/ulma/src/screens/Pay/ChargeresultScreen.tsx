@@ -1,99 +1,106 @@
 //충전결과확인
-import React from 'react';
+import React, {useEffect} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {useRoute} from '@react-navigation/native';
+import CustomButton from '@/components/common/CustomButton';
+import {colors} from '@/constants';
 
-const ChangeresultScreen = () => {
-  const navigation = useNavigation();
+function ChangeresultScreen({navigation}) {
+  useEffect(() => {
+    // 페이지에 들어올 때 탭바 숨기기
+    navigation.getParent()?.setOptions({
+      tabBarStyle: {display: 'none'},
+    });
+  }, [navigation]);
+
   const route = useRoute();
   const {amount} = route.params as {amount: string};
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Pay 충전하기</Text>
-      </View>
-
-      <View style={styles.content}>
-        <Text style={styles.label}>충전 결과</Text>
-        <View style={styles.infoContainer}>
-          <Text style={styles.infoText}>충전 계좌</Text>
-          <Text style={styles.infoText}>000-1111-00-1111</Text>
-        </View>
-        <View style={styles.infoContainer}>
-          <Text style={styles.infoText}>충전 금액</Text>
-          <Text style={styles.infoText}>
-            {Number(amount).toLocaleString()} 원
-          </Text>
-        </View>
-        <View style={styles.infoContainer}>
-          <Text style={styles.infoText}>충전 후 잔액</Text>
-          <Text style={styles.infoText}>354,000 원</Text>
+      {/* Transfer Details */}
+      <View style={styles.resultContainer}>
+        <View style={styles.detailRow}>
+          <Text style={styles.label}>충전 계좌</Text>
+          <Text style={styles.value}>000-1111-00-1111</Text>
         </View>
 
-        <Text style={styles.successText}>
-          충전이 성공적으로 완료되었습니다.
+        <View style={styles.detailRow}>
+          <Text style={styles.label}>충전 금액</Text>
+          <Text style={styles.value}>{amount} 원</Text>
+        </View>
+
+        <View style={styles.detailRow}>
+          <Text style={styles.label}>충전 후 잔액</Text>
+          <Text style={styles.value}>54,000 원</Text>
+        </View>
+
+        <Text style={styles.successMessage}>
+          {'\n        충전이 성공적으로 완료되었습니다.\n        '}
         </Text>
       </View>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.goBack()}>
-        <Text style={styles.buttonText}>확인</Text>
-      </TouchableOpacity>
+      {/* Confirm Button */}
+      <CustomButton label="확인" />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
   },
   header: {
-    marginTop: 50,
+    paddingTop: 50,
+    paddingBottom: 20,
     alignItems: 'center',
+    backgroundColor: 'white',
   },
-  headerText: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  headerTitle: {
+    color: 'black',
+    fontSize: 14,
+    fontFamily: 'Inter',
+    fontWeight: '700',
   },
-  content: {
-    padding: 20,
-    backgroundColor: '#f5f5f5',
+  resultContainer: {
+    backgroundColor: colors.LIGHTGRAY,
     borderRadius: 10,
-  },
-  label: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 10,
-  },
-  infoContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    padding: 20,
+    marginHorizontal: 20,
     marginVertical: 10,
   },
-  infoText: {
-    fontSize: 16,
-    color: '#666',
+  resultTitle: {
+    color: 'black',
+    fontSize: 15,
+    fontFamily: 'SamsungGothicCondensed',
+    fontWeight: '400',
+    marginBottom: 20,
   },
-  successText: {
-    marginTop: 20,
-    fontSize: 16,
-    color: '#FF6F61',
+  detailRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  label: {
+    color: colors.GRAY_700,
+    fontSize: 15,
+    fontFamily: 'SamsungGothicCondensedOTF',
+    fontWeight: '500',
+  },
+  value: {
+    color: 'black',
+    fontSize: 15,
+    fontFamily: 'SamsungGothicCondensedOTF',
+    fontWeight: '500',
+  },
+  successMessage: {
     textAlign: 'center',
-  },
-  button: {
-    backgroundColor: '#00C77F',
-    paddingVertical: 15,
-    alignItems: 'center',
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
+    color: colors.PINK,
+    fontSize: 15,
+    fontWeight: '800',
+    marginTop: 10,
   },
 });
 

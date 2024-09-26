@@ -1,21 +1,21 @@
-import {settingNavigations} from '@/constants/navigations';
+import {mypageNavigations} from '@/constants/navigations';
 import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
 import {StyleSheet, View} from 'react-native';
 
 import {colors} from '@/constants';
 import Icon from 'react-native-vector-icons/Entypo';
-import SettingHomeScreen from '@/screens/Setting/SettingHomeScreen';
-import UserDetailScreen from '@/screens/Setting/UserDetailScreen';
+import UserDetailScreen from '@/screens/MyPage/UserDetailScreen';
+import MyPageHomeScreen from '@/screens/MyPage/MyPageHomeScreen';
 
-export type settingStackParamList = {
-  [settingNavigations.SETTING_HOME]: undefined;
-  [settingNavigations.USER_DETAIL]: undefined;
+export type mypageStackParamList = {
+  [mypageNavigations.MYPAGE_HOME]: undefined;
+  [mypageNavigations.USER_DETAIL]: undefined;
 };
 
-const Stack = createStackNavigator<settingStackParamList>();
+const Stack = createStackNavigator<mypageStackParamList>();
 
-function SettingStackNavigator() {
+function MyPageStackNavigator() {
   return (
     <Stack.Navigator
       screenOptions={{
@@ -35,15 +35,15 @@ function SettingStackNavigator() {
         },
       }}>
       <Stack.Screen
-        name={settingNavigations.SETTING_HOME}
-        component={SettingHomeScreen}
+        name={mypageNavigations.MYPAGE_HOME}
+        component={MyPageHomeScreen}
         options={{
           headerTitle: ' ',
           headerShown: false,
         }}
-      />      
+      />
       <Stack.Screen
-        name={settingNavigations.USER_DETAIL}
+        name={mypageNavigations.USER_DETAIL}
         component={UserDetailScreen}
         options={{
           headerTitle: ' ',
@@ -56,4 +56,4 @@ function SettingStackNavigator() {
 
 const styles = StyleSheet.create({});
 
-export default SettingStackNavigator;
+export default MyPageStackNavigator;

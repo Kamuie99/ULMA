@@ -20,6 +20,7 @@ const EventAddScreen = () => {
     const loadAccessTokenAndUserInfo = async () => {
       try {
         const token = await AsyncStorage.getItem('accessToken');
+        console.log("불러온 액세스 토큰:", token); // 액세스 토큰 확인
         if (token) {
           setAccessToken(token);
           // 사용자 정보 불러오기
@@ -41,29 +42,6 @@ const EventAddScreen = () => {
 
     loadAccessTokenAndUserInfo();
   }, []);
-
-  // 액세스 토큰 갱신 (선택적으로 사용할 수 있음)
-  const refreshAccessToken = async () => {
-    try {
-      const refreshToken = await AsyncStorage.getItem('refreshToken');
-      if (refreshToken) {
-        const response = await axios.post('http://j11e204.p.ssafy.io/api/auth/refresh', {
-          refreshToken,
-        });
-        const { accessToken: newAccessToken } = response.data;
-        await AsyncStorage.setItem('accessToken', newAccessToken); // 새로운 액세스 토큰 저장
-        setAccessToken(newAccessToken);
-        return newAccessToken;
-      } else {
-        Alert.alert('에러', '리프레시 토큰이 없습니다. 다시 로그인하세요.');
-        return null;
-      }
-    } catch (error) {
-      console.error('토큰 갱신 오류:', error);
-      Alert.alert('에러', '토큰 갱신 중 문제가 발생했습니다.');
-      return null;
-    }
-  };
 
   // 행사 저장 처리 함수
   const handleSaveEvent = async () => {

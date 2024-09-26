@@ -1,4 +1,4 @@
-import React, {ForwardedRef, forwardRef, useRef, useState} from 'react';
+import React, { ForwardedRef, forwardRef, useRef, useState } from 'react';
 import {
   Dimensions,
   Pressable,
@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 
-import {colors} from '@/constants';
+import { colors } from '@/constants';
 
 interface InputFieldProps extends TextInputProps {
   disabled?: boolean;
@@ -17,9 +17,15 @@ interface InputFieldProps extends TextInputProps {
 const deviceHeight = Dimensions.get('screen').height;
 
 const InputField = forwardRef(
-  ({disabled = false, ...props}: InputFieldProps) => {
+  (
+    { disabled = false, ...props }: InputFieldProps,
+    ref: ForwardedRef<TextInput>
+  ) => {
     const innerRef = useRef<TextInput | null>(null);
-    const [text, onChangeText] = useState(''); // useState 컴포넌트 내부로 이동
+    const [text, onChangeText] = useState('');
+
+    // ref를 innerRef로 연결하되, null 가능성 처리
+    React.useImperativeHandle(ref, () => innerRef.current || null);
 
     const handlePressInput = () => {
       innerRef.current?.focus();
@@ -41,7 +47,7 @@ const InputField = forwardRef(
         </View>
       </Pressable>
     );
-  },
+  }
 );
 
 const styles = StyleSheet.create({

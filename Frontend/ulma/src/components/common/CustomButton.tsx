@@ -3,9 +3,11 @@ import {
   Dimensions,
   Pressable,
   PressableProps,
+  StyleProp,
   StyleSheet,
   Text,
   View,
+  ViewStyle,
 } from 'react-native';
 
 import {colors} from '@/constants';
@@ -13,8 +15,10 @@ import {colors} from '@/constants';
 interface CustomButtonProps extends PressableProps {
   label: string;
   variant?: 'filled' | 'outlined';
-  size?: 'large' | 'medium';
+  size?: 'large' | 'medium' | 'maxSize';
   inValid?: boolean;
+  customStyle?: StyleProp<ViewStyle>; // 타입을 StyleProp<ViewStyle>로 변경
+  posY?: number;
 }
 
 const deviceHeight = Dimensions.get('screen').height;
@@ -24,6 +28,8 @@ function CustomButton({
   variant = 'filled',
   size = 'large',
   inValid = false,
+  customStyle,
+  posY = 30,
   ...props
 }: CustomButtonProps) {
   return (
@@ -34,6 +40,8 @@ function CustomButton({
           styles.container,
           pressed ? styles[`${variant}Pressed`] : styles[variant],
           inValid && styles.inValid,
+          customStyle ? customStyle : null, // customStyle이 있으면 추가
+          {bottom: posY},
         ]}
         {...props}>
         <View style={styles[size]}>
@@ -57,7 +65,6 @@ const styles = StyleSheet.create({
     display: 'flex',
     alignItems: 'center',
     position: 'absolute',
-    bottom: 30,
   },
   inValid: {
     opacity: 0.5,
@@ -74,6 +81,13 @@ const styles = StyleSheet.create({
   outlinedPressed: {
     backgroundColor: colors.GREEN_300,
     opacity: 0.5,
+  },
+  maxSize: {
+    width: '100%',
+    paddingVertical: deviceHeight > 700 ? 16 : 10,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
   large: {
     width: '90%',

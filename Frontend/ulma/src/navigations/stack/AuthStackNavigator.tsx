@@ -72,6 +72,7 @@ function AuthStackNavigator() {
         component={SignupScreen1}
         options={{
           headerTitle: '회원가입',
+          headerStyle: {backgroundColor: colors.LIGHTGRAY},
         }}
       />
       <Stack.Screen

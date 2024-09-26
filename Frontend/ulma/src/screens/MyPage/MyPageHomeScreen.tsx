@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,19 +7,19 @@ import {
   ScrollView,
   Alert, // 로그아웃 확인창을 띄우기 위한 Alert import
 } from 'react-native';
-import { settingNavigations } from '@/constants/navigations';
-import { payNavigations } from '@/constants/navigations';
+import {mypageNavigations} from '@/constants/navigations';
+import {payNavigations} from '@/constants/navigations';
 import Icon from 'react-native-vector-icons/Ionicons';
 import useAuthStore from '@/store/useAuthStore';
 
-interface SettingHomeScreenProps {
+interface MyPageHomeScreenProps {
   navigation: any; // 실제 프로젝트에서는 더 구체적인 타입을 사용해야 합니다
 }
 
-function SettingHomeScreen({ navigation }: SettingHomeScreenProps) {
-  const { logout, userInfo } = useAuthStore();
+function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
+  const {logout, userInfo} = useAuthStore();
   // fetchUserInfo
-  
+
   // useEffect(() => {
   //   fetchUserInfo();
   // }, []);
@@ -30,7 +30,7 @@ function SettingHomeScreen({ navigation }: SettingHomeScreenProps) {
       '로그아웃 하시겠습니까?',
       '',
       [
-        { text: '아니오', style: 'cancel' },
+        {text: '아니오', style: 'cancel'},
         {
           text: '예',
           onPress: async () => {
@@ -38,16 +38,20 @@ function SettingHomeScreen({ navigation }: SettingHomeScreenProps) {
           },
         },
       ],
-      { cancelable: false }
+      {cancelable: false},
     );
   };
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.userInfo}>
+      <TouchableOpacity
+        style={styles.userInfo}
+        onPress={() => navigation.navigate(mypageNavigations.USER_DETAIL)}>
         <View>
           <Text style={styles.userName}>{userInfo?.name || '사용자'}</Text>
-          <Text style={styles.userEmail}>{userInfo?.email || '이메일 없음'}</Text>
+          <Text style={styles.userEmail}>
+            {userInfo?.email || '이메일 없음'}
+          </Text>
         </View>
         <View style={styles.userInfoRight}>
           <TouchableOpacity onPress={handleLogout}>
@@ -55,7 +59,7 @@ function SettingHomeScreen({ navigation }: SettingHomeScreenProps) {
           </TouchableOpacity>
           <Icon name="chevron-forward" size={24} color="#000" />
         </View>
-      </View>
+      </TouchableOpacity>
 
       <View style={styles.accountInfoBox}>
         <Text style={styles.accountInfoTitle}>계좌 정보</Text>
@@ -73,7 +77,7 @@ function SettingHomeScreen({ navigation }: SettingHomeScreenProps) {
       <TouchableOpacity
         style={styles.option}
         onPress={() =>
-          navigation.navigate('Pay', { screen: payNavigations.PAY_RECHARGE })
+          navigation.navigate('Pay', {screen: payNavigations.PAY_RECHARGE})
         }>
         <Text style={styles.optionText}>Pay 충전하기</Text>
         <Icon name="chevron-forward" size={24} color="#000" />
@@ -172,4 +176,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SettingHomeScreen;
+export default MyPageHomeScreen;

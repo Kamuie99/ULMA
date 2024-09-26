@@ -102,7 +102,8 @@ const useAuthStore = create<AuthStore>((set, get) => ({
     try {
       const response = await axiosInstance.get<UserInfo>('/user');
       set({ userInfo: response.data });
-      console.log('가져온 사용자 정보:', response.data);
+      // 사용자 정보가 가져와 지지 않을때 이걸로 테스트 해보기
+      // console.log('가져온 사용자 정보:', response.data);
     } catch (error) {
       console.error('사용자 정보 가져오기 실패:', error);
     }

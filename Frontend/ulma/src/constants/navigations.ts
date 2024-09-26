@@ -31,8 +31,8 @@ const payNavigations = {
   SEND_RESULT: 'Sendresult',
 } as const;
 
-const settingNavigations = {
-  SETTING_HOME: 'SettingHome',
+const mypageNavigations = {
+  MYPAGE_HOME: 'MyPageHome',
   USER_DETAIL: 'UserDetail',
 } as const;
 
@@ -41,5 +41,5 @@ export {
   authNavigations,
   eventNavigations,
   payNavigations,
-  settingNavigations,
+  mypageNavigations,
 };

@@ -17,7 +17,7 @@ interface AuthStore {
   setTokens: (accessToken: string, refreshToken: string) => Promise<void>;
 }
 
-const useAuthStore = create<AuthStore>((set) => ({
+const useAuthStore = create<AuthStore>(set => ({
   accessToken: null,
   refreshToken: null,
   isLoggedIn: false,

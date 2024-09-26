@@ -14,7 +14,7 @@ function LoginScreen() {
   const handleLogin = async () => {
     try {
       const response = await login(loginId, password);
-      Alert.alert('로그인 성공', response.msg);
+      // Alert.alert('로그인 성공', response.msg);
       // 여기에 로그인 성공 후 네비게이션 로직을 추가할 수 있습니다.
     } catch (error) {
       const axiosError = error as AxiosError;

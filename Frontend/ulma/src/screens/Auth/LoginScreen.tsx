@@ -15,6 +15,8 @@ function LoginScreen() {
   const handleLogin = async () => {
     try {
       const response = await login(loginId, password);
+      // Alert.alert('로그인 성공', response.msg);
+      // 여기에 로그인 성공 후 네비게이션 로직을 추가할 수 있습니다.
     } catch (error) {
       const axiosError = error as AxiosError;
       if (axiosError.response && axiosError.response.status === 401) {
@@ -33,19 +35,19 @@ function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <TitleTextField frontLabel="아이디를 입력해주세요." />
+      <TitleTextField frontLabel="아이디" />
       <InputField
         value={loginId}
         onChangeText={setLoginId}
-        placeholder="아이디"
+        placeholder="아이디를 입력해주세요"
         autoCapitalize="none"
       />
       <View style={{height: 20}} />
-      <TitleTextField frontLabel="비밀번호를 입력해주세요." />
+      <TitleTextField frontLabel="비밀번호" />
       <InputField
         value={password}
         onChangeText={setPassword}
-        placeholder="비밀번호"
+        placeholder="비밀번호를 입력해주세요"
         secureTextEntry
       />
       <CustomButton size="maxSize" label="로그인" onPress={handleLogin} />

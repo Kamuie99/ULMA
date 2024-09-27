@@ -31,6 +31,7 @@ const payNavigations = {
   RECOMMEND_OPTION: 'RecommendOption',
   SENDING: 'Sending',
   SEND_RESULT: 'Sendresult',
+  INPUT_AMOUNT: 'InputAmount',
 } as const;
 
 const mypageNavigations = {

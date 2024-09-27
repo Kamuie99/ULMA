@@ -51,6 +51,8 @@ public class ParticipantService {
     public Integer addParticipant(Participant participant, String userId){
         Assert.notNull(participant, "participant is required");
 
+        Assert.isTrue(eventDao.isUserEventCreated(participant.eventId(), Integer.parseInt(userId)), "사용자가 만든 이벤트가 아닙니다.");
+
         if(isParticipant(participant.eventId(), participant.guestId())){
             throw new ErrorException(ErrorCode.Duplicated);
         }

@@ -71,14 +71,12 @@ public class ParticipantDaoImpl implements ParticipantDao {
                 .and(EVENT.USERS_ID.eq(userId))
                 .fetchOne(0, Integer.class);
 
-// SCHEDULE에서의 카운트
         Integer scheduleCount = dsl.selectCount()
                 .from(SCHEDULE)
                 .where(SCHEDULE.GUEST_ID.eq(guestId))
                 .and(SCHEDULE.USERS_ID.eq(userId))
                 .fetchOne(0, Integer.class);
 
-// 전체 카운트 계산
         int totalItemsCount = (participationCount != null ? participationCount : 0) + (scheduleCount != null ? scheduleCount : 0);
         int totalPages = (int) Math.ceil((double) totalItemsCount / size);
 

@@ -42,7 +42,7 @@ function LoginHomeScreen({navigation}: LoginHomeScreenProps) {
     <View style={styles.container}>
       <View style={styles.titles}>
         <Animated.View style={[styles.titles, {opacity: fadeAnim1}]}>
-          <TitleTextField frontLabel="반가워요!" />
+          <Text style={styles.title}>반가워요!</Text>
         </Animated.View>
         <Animated.Text style={[styles.title, {opacity: fadeAnim2}]}>
           나만의 경조사비 관리 비서
@@ -53,7 +53,7 @@ function LoginHomeScreen({navigation}: LoginHomeScreenProps) {
         </Animated.View>
       </View>
       <View style={styles.buttons}>
-        <Text style={styles.buttonText}>시작 방법을 선택해주세요.</Text>
+        {/* <Text style={styles.buttonText}>시작 방법을 선택해주세요.</Text> */}
         <View style={styles.buttonLayout}>
           <CustomButton
             label="로그인"
@@ -83,16 +83,16 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   title: {
-    fontSize: 20,
+    fontSize: 28,
     marginLeft: 20,
     color: colors.BLACK,
   },
   title2: {
-    fontSize: 20,
+    fontSize: 28,
     color: colors.BLACK,
   },
   title3: {
-    fontSize: 20,
+    fontSize: 28,
     marginLeft: 20,
     color: colors.GREEN_700,
     fontWeight: 'bold',

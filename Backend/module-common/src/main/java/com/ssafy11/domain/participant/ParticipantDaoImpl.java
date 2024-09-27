@@ -27,7 +27,7 @@ public class ParticipantDaoImpl implements ParticipantDao {
     @Transactional(readOnly = true)
     @Override
     public List<UserRelation> sameName(Integer userId, String name) {
-        List<UserRelation> result = dsl.select(GUEST.ID, GUEST.NAME, GUEST.CATEGORY)
+        List<UserRelation> result = dsl.select(GUEST.ID, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER)
                 .from(USERS)
                 .join(USERS_RELATION)
                 .on(USERS.ID.eq(USERS_RELATION.USERS_ID))

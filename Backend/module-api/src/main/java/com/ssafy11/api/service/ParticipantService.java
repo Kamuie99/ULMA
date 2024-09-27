@@ -6,10 +6,8 @@ import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.common.PageResponse;
 import com.ssafy11.domain.events.EventDao;
 import com.ssafy11.domain.participant.ParticipantDao;
-import com.ssafy11.domain.participant.dto.AddGuestResponse;
-import com.ssafy11.domain.participant.dto.Participant;
-import com.ssafy11.domain.participant.dto.Transaction;
-import com.ssafy11.domain.participant.dto.UserRelation;
+import com.ssafy11.domain.participant.dto.*;
+import com.ssafy11.domain.schedule.ScheduleDao;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +21,8 @@ import java.util.List;
 public class ParticipantService {
     private final ParticipantDao participantDao;
     private final EventDao eventDao;
+    private final ScheduleDao scheduleDao;
+
 
     @Transactional(readOnly = true)
     public List<UserRelation> sameName(String userId, String name){
@@ -40,6 +40,16 @@ public class ParticipantService {
         PageResponse<Transaction> transactionsList = participantDao.getTransactions(Integer.parseInt(userId), guestId, pagedto);
         Assert.notNull(transactionsList, "transactionsList is required");
         return transactionsList;
+    }
+
+    @Transactional(readOnly = true)
+    public TransactionSummary getTransactionSummary(String userId, Integer guestId){
+        Assert.hasText(userId, "UserId must not be null");
+        Assert.notNull(guestId, "guestId is required");
+        Assert.isTrue(scheduleDao.isMyGuest(Integer.parseInt(userId), guestId), "지인 관계가 아닙니다.");
+        TransactionSummary summary = participantDao.getTransactionSummary(Integer.parseInt(userId), guestId);
+        Assert.notNull(summary, "transactionSummary is required");
+        return summary;
     }
 
     public boolean isParticipant(final Integer eventId, final Integer participantId) {

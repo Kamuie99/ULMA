@@ -1,53 +1,83 @@
 // FriendsearchScreen
+import axiosInstance from '@/api/axios';
 import CustomButton from '@/components/common/CustomButton';
 import InputField from '@/components/common/InputField';
 import TitleTextField from '@/components/common/TitleTextField';
 import {colors} from '@/constants';
-import React, {useState} from 'react';
+import useAuthStore from '@/store/useAuthStore';
+import React, {useEffect, useState} from 'react';
 import {View, Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
 
 interface Person {
-  id: string;
+  guestId: number;
   name: string;
-  affiliation: string;
+  category: string;
   transactions: {description: string; date: string}[];
 }
 
 const FriendsearchScreen = () => {
-  const [searchQuery, setSearchQuery] = useState('이유찬');
-  const [selectedPersonIds, setSelectedPersonIds] = useState<string[]>([]);
+  const {accessToken} = useAuthStore();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [peopleData, setPeopleData] = useState<Person[]>([]); // 빈 배열로 초기화
+  const [selectedPeople, setSelectedPeople] = useState<Person[]>([]); // selectedPersonIds 대신 selectedPeople로 변경
 
-  const peopleData: Person[] = [
-    {
-      id: '1',
-      name: '이유찬',
-      affiliation: 'SSAFY',
-      transactions: [
-        {description: '친구 결혼식', date: '2020-01-01'},
-        {description: '친구 생일 파티', date: '2020-01-01'},
-      ],
-    },
-    {
-      id: '2',
-      name: '이유찬',
-      affiliation: '싸피대학교',
-      transactions: [],
-    },
-    // 다른 데이터 추가 가능
-  ];
+  // 처음에 데이터를 가져오는 useEffect
+  useEffect(() => {
+    const fetchPeopleData = async () => {
+      try {
+        const response = await axiosInstance.get('/participant', {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
 
-  const handlePersonPress = (personId: string) => {
-    if (selectedPersonIds.includes(personId)) {
+        // 응답에서 각 사람의 transactions를 별도 요청으로 가져옴
+        const peopleWithTransactions = await Promise.all(
+          response.data.data.map(async (person: Person) => {
+            const transactionsResponse = await axiosInstance.get(
+              `/participant/${person.guestId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                },
+              },
+            );
+            const newTransactions = transactionsResponse.data.data.map(
+              (item: any) => ({
+                description: item.eventName,
+                date: item.date.slice(0, 10),
+              }),
+            );
+            return {...person, transactions: newTransactions}; // transactions 추가
+          }),
+        );
+
+        setPeopleData(peopleWithTransactions); // 상태에 저장
+      } catch (error) {
+        console.error('Error fetching people data:', error);
+        setPeopleData([]); // 에러 발생 시 빈 배열로 설정
+      }
+    };
+
+    fetchPeopleData();
+  }, [accessToken]); // accessToken이 변경될 때만 fetch
+
+  // 사용자가 항목을 클릭했을 때 처리
+  const handlePersonPress = (person: Person) => {
+    if (selectedPeople.includes(person)) {
       // 이미 선택된 경우 선택 해제
-      setSelectedPersonIds(selectedPersonIds.filter(id => id !== personId));
+      setSelectedPeople(
+        selectedPeople.filter(p => p.guestId !== person.guestId),
+      );
     } else {
       // 선택되지 않은 경우 배열에 추가
-      setSelectedPersonIds([...selectedPersonIds, personId]);
+      setSelectedPeople([...selectedPeople, person]);
     }
   };
 
-  const filteredPeople = peopleData.filter(person =>
+  // 검색어에 따라 필터링된 데이터
+  const filteredPeople = (peopleData || []).filter((person: Person) =>
     person.name.includes(searchQuery),
   );
 
@@ -62,25 +92,28 @@ const FriendsearchScreen = () => {
     </View>
   );
 
+  // 리스트에서 사람을 렌더링하는 함수
   const renderPersonItem = ({item}: {item: Person}) => (
     <View>
       <TouchableOpacity
-        onPress={() => handlePersonPress(item.id)}
+        onPress={() => handlePersonPress(item)} // person 객체를 전달
         style={styles.itemContainer}>
         <View style={{flexDirection: 'row', alignItems: 'center', gap: 10}}>
           <Text style={styles.friendName}>{item.name}</Text>
-          <Text>{item.affiliation}</Text>
+          <Text>{item.category}</Text>
         </View>
         <Icon
           name={
-            selectedPersonIds.includes(item.id) ? 'chevron-up' : 'chevron-down'
+            selectedPeople.includes(item) // selectedPeople에 해당 person이 있는지 확인
+              ? 'chevron-up'
+              : 'chevron-down'
           }
           size={24}
           color={colors.BLACK}
         />
       </TouchableOpacity>
 
-      {selectedPersonIds.includes(item.id) && (
+      {selectedPeople.includes(item) && (
         <View style={styles.partyList}>
           {item.transactions.length > 0 ? (
             <FlatList
@@ -89,7 +122,9 @@ const FriendsearchScreen = () => {
               keyExtractor={(_, index) => index.toString()}
             />
           ) : (
-            <Text>함께 참여한 경조사가 없어요 😢</Text>
+            <Text style={styles.transactionItem}>
+              함께 참여한 경조사가 없어요 😢
+            </Text>
           )}
         </View>
       )}
@@ -103,14 +138,15 @@ const FriendsearchScreen = () => {
         <InputField
           placeholder="이름"
           value={searchQuery}
-          onChangeText={setSearchQuery} // 입력된 값이 상태로 반영됨
+          onChangeText={setSearchQuery}
         />
 
-        <Text style={styles.subheader}>혹시 이 사람 아닌가요?</Text>
+        {peopleData.length > 0 && (
+          <Text style={styles.subheader}>혹시 이 사람 아닌가요?</Text>
+        )}
         <FlatList
           data={filteredPeople}
           renderItem={renderPersonItem}
-          keyExtractor={item => item.id}
           style={styles.peopleList}
         />
 
@@ -179,7 +215,7 @@ const styles = StyleSheet.create({
   },
   transactionDate: {
     fontSize: 14,
-    color: '#999',
+    color: colors.GRAY_700,
   },
 });
 

@@ -4,10 +4,12 @@ import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.common.PageResponse;
 import com.ssafy11.domain.participant.dto.Participant;
 import com.ssafy11.domain.participant.dto.Transaction;
+import com.ssafy11.domain.participant.dto.TransactionSummary;
 import com.ssafy11.domain.participant.dto.UserRelation;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
+import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -81,6 +83,33 @@ public class ParticipantDaoImpl implements ParticipantDao {
         int totalPages = (int) Math.ceil((double) totalItemsCount / size);
 
         return new PageResponse<>(transactions, page, totalItemsCount, totalPages);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public TransactionSummary getTransactionSummary(Integer userId, Integer guestId) {
+        // 내가 지인에게 준 총액 (참여 테이블에서)
+        Integer totalGiven = dsl.select(DSL.sum(PARTICIPATION.AMOUNT))
+                .from(PARTICIPATION)
+                .join(EVENT)
+                .on(EVENT.ID.eq(PARTICIPATION.EVENT_ID))
+                .where(PARTICIPATION.GUEST_ID.eq(guestId)
+                        .and(EVENT.USERS_ID.eq(userId)))
+                .fetchOne(0, Integer.class);
+
+        // 내가 지인에게서 받은 총액 (일정 테이블에서)
+        Integer totalReceived = dsl.select(DSL.sum(SCHEDULE.AMOUNT).neg())
+                .from(SCHEDULE)
+                .where(SCHEDULE.GUEST_ID.eq(guestId)
+                        .and(SCHEDULE.USERS_ID.eq(userId)))
+                .fetchOne(0, Integer.class);
+
+        // 총계 계산
+        int totalBalance = (totalReceived != null ? totalReceived : 0)+(totalGiven != null ? totalGiven : 0);
+
+        return new TransactionSummary(totalGiven != null ? totalGiven : 0,
+                totalReceived != null ? totalReceived : 0,
+                totalBalance);
     }
 
 

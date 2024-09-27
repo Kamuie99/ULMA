@@ -4,6 +4,7 @@ import * as Keychain from 'react-native-keychain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface LoginResponse {
+  data: { accessToken: any; refreshToken: any; };
   accessToken: string;
   refreshToken: string;
   msg: string;

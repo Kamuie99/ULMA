@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.ssafy11.ulma.generated.Tables.*;
+import static org.jooq.impl.DSL.field;
 
 @Repository
 @Transactional
@@ -44,32 +45,46 @@ public class ParticipantDaoImpl implements ParticipantDao {
     public PageResponse<Transaction> getTransactions(Integer userId, Integer guestId, PageDto pageDto) {
         int size = pageDto.getSize();
         int page = pageDto.getPage();
+        int offset = (page - 1) * size;
 
-        Integer count = dsl.selectCount()
-                .from(PARTICIPATION)
-                .join(EVENT)
-                .on(EVENT.ID.eq(PARTICIPATION.EVENT_ID))
-                .where(PARTICIPATION.GUEST_ID.eq(guestId))
-                .and(EVENT.USERS_ID.eq(userId))
-                .fetchOne(0, Integer.class);
-
-        int totalItems = (count != null) ? count : 0;
-        int totalPages = (int) Math.ceil((double) totalItems/size);
-
-        int offset = (page-1) * size;
-
-        List<Transaction> result = dsl.select(PARTICIPATION.GUEST_ID,PARTICIPATION.EVENT_ID, EVENT.NAME, EVENT.DATE, PARTICIPATION.AMOUNT)
-                .from(PARTICIPATION)
-                .join(EVENT)
-                .on(EVENT.ID.eq(PARTICIPATION.EVENT_ID))
-                .where(PARTICIPATION.GUEST_ID.eq(guestId))
-                .and(EVENT.USERS_ID.eq(userId))
+        List<Transaction> transactions = dsl.select()
+                .from(
+                        dsl.select(PARTICIPATION.GUEST_ID, EVENT.NAME, EVENT.DATE, PARTICIPATION.AMOUNT)
+                                .from(PARTICIPATION)
+                                .join(EVENT).on(PARTICIPATION.EVENT_ID.eq(EVENT.ID))
+                                .where(PARTICIPATION.GUEST_ID.eq(guestId).and(EVENT.USERS_ID.eq(userId)))
+                                .unionAll(
+                                        dsl.select(SCHEDULE.GUEST_ID, SCHEDULE.NAME, SCHEDULE.DATE, SCHEDULE.AMOUNT.neg().as("amount"))
+                                                .from(SCHEDULE)
+                                                .where(SCHEDULE.GUEST_ID.eq(guestId).and(SCHEDULE.USERS_ID.eq(userId)))
+                                )
+                )
+                .orderBy(field("date").desc())
                 .limit(size)
                 .offset(offset)
                 .fetchInto(Transaction.class);
 
-        return new PageResponse<>(result, page, totalItems, totalPages);
+        Integer participationCount = dsl.selectCount()
+                .from(PARTICIPATION)
+                .join(EVENT).on(PARTICIPATION.EVENT_ID.eq(EVENT.ID))
+                .where(PARTICIPATION.GUEST_ID.eq(guestId))
+                .and(EVENT.USERS_ID.eq(userId))
+                .fetchOne(0, Integer.class);
+
+// SCHEDULE에서의 카운트
+        Integer scheduleCount = dsl.selectCount()
+                .from(SCHEDULE)
+                .where(SCHEDULE.GUEST_ID.eq(guestId))
+                .and(SCHEDULE.USERS_ID.eq(userId))
+                .fetchOne(0, Integer.class);
+
+// 전체 카운트 계산
+        int totalItemsCount = (participationCount != null ? participationCount : 0) + (scheduleCount != null ? scheduleCount : 0);
+        int totalPages = (int) Math.ceil((double) totalItemsCount / size);
+
+        return new PageResponse<>(transactions, page, totalItemsCount, totalPages);
     }
+
 
     @Override
     public Boolean isParticipant(Integer eventId, Integer participantId) {

@@ -83,10 +83,9 @@ public class ParticipantDaoImpl implements ParticipantDao {
 
     @Override
     public Integer addParticipant(Participant participant) {
-        Integer result = dsl.insertInto(PARTICIPATION, PARTICIPATION.EVENT_ID, PARTICIPATION.GUEST_ID, PARTICIPATION.AMOUNT, PARTICIPATION.CREATE_AT)
+        return dsl.insertInto(PARTICIPATION, PARTICIPATION.EVENT_ID, PARTICIPATION.GUEST_ID, PARTICIPATION.AMOUNT, PARTICIPATION.CREATE_AT)
                 .values(participant.eventId(), participant.guestId(), participant.amount(), LocalDateTime.now())
                 .execute();
-        return result;
     }
 
     @Override
@@ -125,10 +124,9 @@ public class ParticipantDaoImpl implements ParticipantDao {
 
     @Override
     public Integer addUserRelation(Integer guestId, Integer userId) {
-        Integer result = dsl.insertInto(USERS_RELATION, USERS_RELATION.USERS_ID, USERS_RELATION.GUEST_ID, USERS_RELATION.CREATE_AT)
+        return dsl.insertInto(USERS_RELATION, USERS_RELATION.USERS_ID, USERS_RELATION.GUEST_ID, USERS_RELATION.CREATE_AT)
                 .values(userId, guestId, LocalDateTime.now())
                 .execute();
-        return result;
     }
 
     @Transactional(readOnly = true)
@@ -149,11 +147,12 @@ public class ParticipantDaoImpl implements ParticipantDao {
 
         int offset = (page-1) * size;
 
-        List<UserRelation> result = dsl.select(USERS_RELATION.GUEST_ID, GUEST.NAME, GUEST.CATEGORY)
+        List<UserRelation> result = dsl.select(USERS_RELATION.GUEST_ID, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER)
                 .from(USERS_RELATION)
                 .join(GUEST)
                 .on(USERS_RELATION.GUEST_ID.eq(GUEST.ID))
                 .where(USERS_RELATION.USERS_ID.eq(userId))
+                .orderBy(GUEST.NAME.asc())
                 .limit(size)
                 .offset(offset)
                 .fetchInto(UserRelation.class);

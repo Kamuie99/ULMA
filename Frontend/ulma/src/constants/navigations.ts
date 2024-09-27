@@ -33,9 +33,16 @@ const payNavigations = {
   SEND_RESULT: 'Sendresult',
 } as const;
 
+
 const mypageNavigations = {
   MYPAGE_HOME: 'MyPageHome',
   USER_DETAIL: 'UserDetail',
+} as const;
+
+const friendsNavigations = {
+  FRIENDS_LIST: 'FriendsList',
+  FRIENDS_HOME: 'FriendsHome',
+  FRIENDS_ADD: 'FriendsAdd',
 } as const;
 
 export {
@@ -44,4 +51,5 @@ export {
   eventNavigations,
   payNavigations,
   mypageNavigations,
+  friendsNavigations,
 };

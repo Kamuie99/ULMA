@@ -1,5 +1,3 @@
-//이벤트모아보기페이지
-
 import React, {useCallback, useState} from 'react';
 import {
   View,
@@ -45,11 +43,33 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     }, []),
   );
 
+  // 이벤트 카테고리에 따른 색상을 설정하는 함수
+  const getEventTypeStyle = (name: string) => {
+    // 디버깅용으로 name 값을 출력
+    console.log(`name: '${name}'`);
+    // name에 따라 배경색을 결정
+    switch (name.trim().toLowerCase()) {
+      case '결혼':
+        return {backgroundColor: '#ffc0cb'}; // 분홍색
+      case '돌잔치':
+        return {backgroundColor: '#87CEFA'}; // 하늘색
+      case '장례식':
+        return {backgroundColor: '#A9A9A9'}; // 옅은 검은색
+      case '생일':
+        return {backgroundColor: '#97deb3'}; // 옅은 연두색
+      default:
+        return {backgroundColor: '#9aa160'}; // 기본값 노란색
+    }
+  };
   const renderItem = ({item}: {item: Event}) => (
     <TouchableOpacity
       style={styles.eventBox}
-      onPress={() => navigation.navigate('++상세보기++')}>
-      <Text style={styles.eventType}>{item.category}</Text>
+      onPress={() =>
+        navigation.navigate(eventNavigations.EVENT_DETAIL, {event_id: item.id})
+      }>
+      <Text style={[styles.eventType, getEventTypeStyle(item.name)]}>
+        {item.category}
+      </Text>
       <View style={styles.eventDetails}>
         <Text style={styles.eventTitle}>{item.name}</Text>
         <Text style={styles.eventDate}>
@@ -69,6 +89,11 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
 
   return (
     <View style={styles.container}>
+      {/* 상단 헤더 부분 추가 */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>내 이벤트 목록</Text>
+      </View>
+
       {events.length > 0 ? (
         <FlatList
           data={events}
@@ -95,6 +120,16 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: '#fff',
   },
+  header: {
+    paddingTop: 10, // 상태바 아래로부터 패딩
+    paddingBottom: 20,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
   addButton: {
     backgroundColor: '#00C77F',
     padding: 16,
@@ -112,27 +147,36 @@ const styles = StyleSheet.create({
   eventBox: {
     backgroundColor: '#f9f9f9',
     padding: 16,
-    borderRadius: 8,
+    borderRadius: 16,
     marginBottom: 16,
   },
   eventType: {
-    backgroundColor: '#ffc0cb',
-    padding: 4,
+    paddingVertical: 5, // 상하 패딩
+    paddingHorizontal: 15, // 좌우 패딩을 따로 설정하여 조절 가능
     borderRadius: 4,
     color: '#fff',
     fontWeight: 'bold',
-    marginBottom: 8,
+    marginBottom: 12,
+    alignSelf: 'flex-start', // 내용에 맞게 좌우 길이를 줄임
   },
   eventDetails: {
-    flexDirection: 'column',
+    flexDirection: 'row', // 같은 줄에 텍스트 배치
+    justifyContent: 'space-between', // 텍스트 사이에 공간 배치
+    alignItems: 'center', // 텍스트 높이 맞춤
+    marginBottom: 4, // 필요하면 하단 여백 추가
   },
   eventTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
+    flex: 1, // flex를 통해 공간을 차지하도록 설정
+    paddingLeft: 10,
   },
   eventDate: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#888',
+    fontWeight: 'bold',
+    textAlign: 'right', // 날짜를 오른쪽 정렬
+    flex: 1, // flex를 통해 남은 공간을 차지
   },
   loadingContainer: {
     flex: 1,

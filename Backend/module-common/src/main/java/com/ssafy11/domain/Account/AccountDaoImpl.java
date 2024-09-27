@@ -55,4 +55,18 @@ public class AccountDaoImpl implements AccountDao {
                 .where(ACCOUNT.ACCOUNT_NUMBER.eq(user.ACCOUNT_NUMBER))
                 .fetchOneInto(Account.class);
     }
+    @Override
+    public Account findByAccountNumber(String accountNumber) {
+        return dsl.selectFrom(ACCOUNT)
+                .where(ACCOUNT.ACCOUNT_NUMBER.eq(accountNumber))
+                .fetchOneInto(Account.class);
+    }
+
+    @Override
+    public Account findByAccountId(Integer accountId) {
+        return dsl.selectFrom(ACCOUNT)
+                .where(ACCOUNT.ID.eq(accountId))
+                .fetchOneInto(Account.class);
+    }
+
 }

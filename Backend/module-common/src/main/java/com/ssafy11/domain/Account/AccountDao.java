@@ -7,4 +7,6 @@ public interface AccountDao {
     Account connectAccount(Integer userid, String accountNumber);
     List<Account> findAllAccounts(Integer userId);
     Account connectedAccount(Integer userId);
+    Account findByAccountNumber(String accountNumber);
+    Account findByAccountId(Integer accountId);
 }

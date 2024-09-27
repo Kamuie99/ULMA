@@ -8,7 +8,10 @@ import {payNavigations} from '@/constants/navigations';
 import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import useAuthStore from '@/store/useAuthStore';
 import {useNavigation} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
+import {
+  createStackNavigator,
+  StackNavigationProp,
+} from '@react-navigation/stack';
 import React, {useEffect, useState} from 'react';
 import {View, Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
@@ -21,13 +24,17 @@ interface Person {
   transactions: {description: string; date: string}[];
 }
 
-const Stack = createStackNavigator<payStackParamList>();
+type InputAmountScreenNavigationProp = StackNavigationProp<
+  payStackParamList,
+  typeof payNavigations.INPUT_AMOUNT
+>;
 
 const FriendsearchScreen = () => {
   const {accessToken} = useAuthStore();
   const [searchQuery, setSearchQuery] = useState('');
   const [peopleData, setPeopleData] = useState<Person[]>([]); // 빈 배열로 초기화
   const [selectedPeople, setSelectedPeople] = useState<Person[]>([]); // selectedPersonIds 대신 selectedPeople로 변경
+  const navigation = useNavigation<InputAmountScreenNavigationProp>();
 
   // 처음에 데이터를 가져오는 useEffect
   useEffect(() => {
@@ -145,8 +152,6 @@ const FriendsearchScreen = () => {
       )}
     </View>
   );
-
-  const navigation = useNavigation();
 
   return (
     <View style={styles.container}>

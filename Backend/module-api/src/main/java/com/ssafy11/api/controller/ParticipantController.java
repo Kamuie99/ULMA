@@ -7,10 +7,7 @@ import com.ssafy11.api.service.ExcelService;
 import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.common.PageResponse;
 import com.ssafy11.api.service.ParticipantService;
-import com.ssafy11.domain.participant.dto.AddGuestResponse;
-import com.ssafy11.domain.participant.dto.Participant;
-import com.ssafy11.domain.participant.dto.Transaction;
-import com.ssafy11.domain.participant.dto.UserRelation;
+import com.ssafy11.domain.participant.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -40,15 +37,23 @@ public class ParticipantController {
     }
 
     //등록된 지인과 거래 내역
-    @GetMapping("/{guestID}")
-    public ResponseEntity<PageResponse<Transaction>> getTransactions(
-                                            @AuthenticationPrincipal User user,
-                                            @PathVariable("guestID") Integer guestId,
+    @GetMapping("/{guestId}")
+    public ResponseEntity<PageResponse<Transaction>> getTransactions(@AuthenticationPrincipal User user,
+                                            @PathVariable("guestId") Integer guestId,
                                             @ModelAttribute PageDto pagedto) {
         Assert.notNull(guestId, "guestID must not be null");
 
         PageResponse<Transaction> transactions = participantService.getTransactions(user.getUsername(), guestId, pagedto);
         return ResponseEntity.ok(transactions);
+    }
+
+    //거래내역 요약
+    @GetMapping("/summary/{guestId}")
+    public ResponseEntity<TransactionSummary> getTransactionSummary(@AuthenticationPrincipal User user,
+                                            @PathVariable("guestId") Integer guestId ){
+        Assert.notNull(guestId, "guestId must not be null");
+        TransactionSummary transactionSummary = participantService.getTransactionSummary(user.getUsername(), guestId);
+        return ResponseEntity.ok(transactionSummary);
     }
 
     //경조사비 추가(직접)

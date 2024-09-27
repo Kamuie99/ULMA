@@ -147,11 +147,12 @@ public class ParticipantDaoImpl implements ParticipantDao {
 
         int offset = (page-1) * size;
 
-        List<UserRelation> result = dsl.select(USERS_RELATION.GUEST_ID, GUEST.NAME, GUEST.CATEGORY)
+        List<UserRelation> result = dsl.select(USERS_RELATION.GUEST_ID, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER)
                 .from(USERS_RELATION)
                 .join(GUEST)
                 .on(USERS_RELATION.GUEST_ID.eq(GUEST.ID))
                 .where(USERS_RELATION.USERS_ID.eq(userId))
+                .orderBy(GUEST.NAME.asc())
                 .limit(size)
                 .offset(offset)
                 .fetchInto(UserRelation.class);

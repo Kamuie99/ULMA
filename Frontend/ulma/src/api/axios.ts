@@ -19,7 +19,7 @@ axiosInstance.interceptors.request.use(
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
         // 디버깅: 토큰 출력
-        console.log('Sending request with token:', token);
+        // console.log('Sending request with token:', token);
       }
       return config;
     } catch (error) {

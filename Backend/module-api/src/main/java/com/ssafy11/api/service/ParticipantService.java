@@ -82,7 +82,7 @@ public class ParticipantService {
 
     public Integer addGuestAndUserRelation(AddGuestResponse addGuestResponse, String userId){
         Assert.notNull(addGuestResponse, "addGuestResponse is required");
-        Integer guestId = participantDao.addGuests(addGuestResponse.name(), addGuestResponse.category());
+        Integer guestId = participantDao.addGuests(addGuestResponse.name(), addGuestResponse.category(), addGuestResponse.phoneNumber());
         Assert.notNull(guestId, "guestId is required");
         Integer returnValue = participantDao.addUserRelation(guestId, Integer.parseInt(userId));
         Assert.notNull(returnValue, "returnValue is required");
@@ -92,6 +92,14 @@ public class ParticipantService {
     public PageResponse<UserRelation> getUserRelation(String userId, PageDto pagedto) {
         Assert.hasText(userId, "userId is required");
         PageResponse<UserRelation> userRelationList = participantDao.getUserRelations(Integer.parseInt(userId), pagedto);
+        Assert.notNull(userRelationList, "userRelationList is required");
+        return userRelationList;
+    }
+
+    public PageResponse<UserRelation> getCategoryUserRelation(String userId, String category, PageDto pagedto) {
+        Assert.hasText(userId, "userId is required");
+        Assert.hasText(category, "category is required");
+        PageResponse<UserRelation> userRelationList = participantDao.getCategoryUserRelation(Integer.parseInt(userId),category, pagedto);
         Assert.notNull(userRelationList, "userRelationList is required");
         return userRelationList;
     }

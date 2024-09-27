@@ -117,5 +117,15 @@ public class ParticipantController {
         PageResponse<UserRelation> transactions = participantService.getUserRelation(user.getUsername(), pagedto);
         return ResponseEntity.ok(transactions);
     }
+    
+    //카테고리별 지인 정보 반환
+    @GetMapping("/category")
+    public ResponseEntity<PageResponse<UserRelation>> getCategoryParticipants(@AuthenticationPrincipal User user,
+                                                                      @RequestParam("category") String category,
+                                                                      @ModelAttribute PageDto pagedto) {
+        Assert.hasText(category, "category must not be null");
+        PageResponse<UserRelation> transactions = participantService.getCategoryUserRelation(user.getUsername(), category, pagedto);
+        return ResponseEntity.ok(transactions);
+    }
 
 }

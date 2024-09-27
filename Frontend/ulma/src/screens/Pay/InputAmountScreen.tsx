@@ -3,15 +3,25 @@ import CustomButton from '@/components/common/CustomButton';
 import InputField from '@/components/common/InputField';
 import TitleTextField from '@/components/common/TitleTextField';
 import {colors} from '@/constants';
+import {payNavigations} from '@/constants/navigations';
+import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import useAuthStore from '@/store/useAuthStore';
+import {RouteProp} from '@react-navigation/native';
+import {StackNavigationProp} from '@react-navigation/stack';
 import React, {useState} from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, Text, View} from 'react-native';
 
-interface InputAmountScreenProps {
-  guestId: number;
-}
+type InputAmountScreenRouteProp = RouteProp<
+  payStackParamList,
+  typeof payNavigations.INPUT_AMOUNT // 'INPUT_AMOUNT' 대신 정확한 경로 이름 사용
+>;
 
-function InputAmountScreen({guestId}: InputAmountScreenProps) {
+type InputAmountScreenProps = {
+  route: InputAmountScreenRouteProp;
+};
+
+function InputAmountScreen({route}: InputAmountScreenProps) {
+  const {guestId} = route.params; // route.params에서 guestId를 받아옴
   const {accessToken} = useAuthStore();
   const [amount, setAmount] = useState(0);
 
@@ -22,12 +32,12 @@ function InputAmountScreen({guestId}: InputAmountScreenProps) {
           Authorization: `Bearer ${accessToken}`,
         },
         params: {
-          eventId: 18,
+          eventId: 16,
           guestId: guestId,
           amount: amount,
         },
       });
-      console.log('response:', response.data);
+      console.log('response:', response);
     } catch (error) {
       console.log(guestId, amount);
       console.error('error:', error);

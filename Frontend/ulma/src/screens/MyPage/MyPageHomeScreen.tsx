@@ -10,8 +10,9 @@ import {
 import {mypageNavigations} from '@/constants/navigations';
 import {payNavigations} from '@/constants/navigations';
 import Icon from 'react-native-vector-icons/Ionicons';
-import useAuthStore from '@/store/useAuthStore';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon3 from 'react-native-vector-icons/MaterialIcons'
+import useAuthStore from '@/store/useAuthStore';
 import { colors } from '@/constants';
 
 interface MyPageHomeScreenProps {
@@ -53,7 +54,7 @@ function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
             <Text style={styles.buttonText}>충전</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate(payNavigations.PAY_TRANSFER)}>
+          <TouchableOpacity style={styles.button}>
             <Text style={styles.buttonText}>송금</Text>
           </TouchableOpacity>
 
@@ -97,6 +98,44 @@ function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
           </View>
           <Icon name="chevron-forward" size={15} color="#666" />
         </TouchableOpacity>
+      </View>
+      <View style={styles.InfoBox}>
+        <Text>
+          <Text style={styles.buttonText}>{userInfo?.name || '사용자'}</Text> 님을 위한 추천 서비스
+        </Text>
+        
+        <TouchableOpacity style={styles.InfoBoxInner}>
+          <View style={styles.MenuBar}>
+            <Icon2 name="star-four-points-outline" size={24} color="#000" />
+            <Text style={styles.InfoMenu}><Text style={styles.titlecolor}>ULMA</Text> AI 금액 추천</Text>
+          </View>
+          <Icon name="chevron-forward" size={15} color="#666" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.InfoBoxInner}>
+          <View style={styles.MenuBar}>
+            <Icon3 name="attach-money" size={24} color="#000" />
+            <Text style={styles.InfoMenu}>GPT-4o 금액추천</Text>
+          </View>
+          <Icon name="chevron-forward" size={15} color="#666" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.InfoBoxInner}>
+          <View style={styles.MenuBar}>
+            <Icon3 name="people-outline" size={24} color="#000" />
+            <Text style={styles.InfoMenu}>동나이대 비교 금액 추천</Text>
+          </View>
+          <Icon name="chevron-forward" size={15} color="#666" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.InfoBoxInner}>
+          <View style={styles.MenuBar}>
+            <Icon2 name="message-text-outline" size={24} color="#000" />
+            <Text style={styles.InfoMenu}>메세지 추천</Text>
+          </View>
+          <Icon name="chevron-forward" size={15} color="#666" />
+        </TouchableOpacity>
+
       </View>
 
 

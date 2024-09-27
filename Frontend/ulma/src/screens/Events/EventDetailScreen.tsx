@@ -47,7 +47,9 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
   const [isFetchingMore, setIsFetchingMore] = useState(false); // 추가 데이터 불러오는 중인지 상태
   const [hasMoreData, setHasMoreData] = useState(true); // 더 가져올 데이터가 있는지
   const [searchQuery, setSearchQuery] = useState(''); // 검색어 상태
-  const [searchExpanded, setSearchExpanded] = useState(false); // 검색창 확장 여부
+  const [searchResults, setSearchResults] = useState<Guest[]>([]);
+  const [selectedGuest, setSelectedGuest] = useState<string | null>(null); // 선택한 사용자
+  const [searchExpanded, setSearchExpanded] = useState(false);
 
   // 이벤트 상세 내역 불러오기
   const fetchEventDetail = async (newPage = 1) => {
@@ -94,12 +96,27 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
     }
   };
 
+  // API 호출 함수: 사용자 검색
+  const searchUser = async () => {
+    if (searchQuery.trim() === '') return; // 빈 검색어 방지
+
+    try {
+      const response = await axiosInstance.get(`/api/participant/same`, {
+        params: {name: searchQuery},
+      });
+      setSearchResults(response.data.data); // 검색 결과 반영
+    } catch (error) {
+      console.error('사용자 검색 중 오류 발생:', error);
+      Alert.alert('에러', '사용자를 검색하는 중 오류가 발생했습니다.');
+    }
+  };
+
   // POST 요청을 통해 새로운 거래내역 추가
   const addTransaction = async () => {
     try {
       const response = await axiosInstance.post('/participant/money', {
         eventId: event_id,
-        guestId,
+        guestId: selectedGuest, // 선택된 사용자
         amount,
       });
       Alert.alert('성공', '거래내역이 추가되었습니다.');
@@ -127,6 +144,17 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
     }
   };
 
+  const handleSelectGuest = (guestName: string) => {
+    setSelectedGuest(guestName); // 선택한 사용자의 이름 설정
+    setSearchQuery(guestName); // 검색 창에 이름 반영
+    setSearchResults([]); // 검색 결과 초기화
+  };
+
+  const handleClearSearch = () => {
+    setSelectedGuest(null); // 선택된 사용자 초기화
+    setSearchQuery(''); // 검색어 초기화
+  };
+
   // 검색어에 따라 필터링된 손님 목록을 반환
   const filteredGuests = guests.filter(guest =>
     guest.guestName.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -152,7 +180,7 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
   const renderItem = ({item}: {item: Guest}) => (
     <View style={styles.guestBox}>
       <Text style={styles.guestName}>{item.guestName}</Text>
-      <Text style={styles.guestCategory}>카테고리: {item.category}</Text>
+      <Text style={styles.guestCategory}>나와의 관계: {item.category}</Text>
       <Text style={styles.guestAmount}>
         금액: {item.amount.toLocaleString()}원
       </Text>
@@ -171,18 +199,13 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
               ? styles.searchBoxExpanded
               : styles.searchBoxCollapsed
           }>
-          {/* <Icon
-            name="search"
-            size={50}
-            color="#000"
-            style={styles.searchIcon}
-          /> */}
           {searchExpanded && (
             <TextInput
               style={styles.searchInput}
               placeholder="이름으로 검색"
               value={searchQuery}
               onChangeText={setSearchQuery} // 검색어 업데이트
+              onSubmitEditing={searchUser} // 입력 완료 시 검색 호출
             />
           )}
         </View>
@@ -225,12 +248,41 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
         onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <TextInput
-              style={styles.input}
-              placeholder="사용자 검색"
-              value={guestId}
-              onChangeText={setGuestId}
-            />
+            {/* 사용자 검색 */}
+            <View style={styles.searchContainer}>
+              <TextInput
+                style={styles.input}
+                placeholder="사용자 검색"
+                value={searchQuery}
+                onChangeText={text => {
+                  setSearchQuery(text);
+                  searchUser(); // 검색 호출
+                }}
+              />
+              {selectedGuest ? (
+                <TouchableOpacity
+                  onPress={handleClearSearch}
+                  style={styles.clearButton}>
+                  <Icon name="times" size={20} color="#000" />
+                </TouchableOpacity>
+              ) : null}
+            </View>
+
+            {/* 검색 결과 표시 */}
+            {searchResults.length > 0 && (
+              <FlatList
+                data={searchResults}
+                keyExtractor={item => item.guestId.toString()}
+                renderItem={({item}) => (
+                  <TouchableOpacity
+                    style={styles.searchResultItem}
+                    onPress={() => handleSelectGuest(item.guestName)}>
+                    <Text>{item.guestName}</Text>
+                  </TouchableOpacity>
+                )}
+              />
+            )}
+
             <TextInput
               style={styles.input}
               placeholder="금액"
@@ -238,11 +290,13 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
               onChangeText={setAmount}
               keyboardType="numeric"
             />
+
             <TouchableOpacity
               style={styles.submitButton}
               onPress={addTransaction}>
               <Text style={styles.submitButtonText}>등록하기</Text>
             </TouchableOpacity>
+
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={() => setModalVisible(false)}>
@@ -296,9 +350,6 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 10,
     width: '50%', // 확장 시 너비를 넓게 설정
-  },
-  searchIcon: {
-    marginRight: 8,
   },
   searchInput: {
     flex: 1,
@@ -379,6 +430,18 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  clearButton: {
+    marginLeft: 10,
+  },
+  searchResultItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
 });
 

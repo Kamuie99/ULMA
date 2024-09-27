@@ -19,6 +19,7 @@ interface UserInfo {
   gender: string;
   birthDate: string;
   age: number;
+  loginId: string;
 }
 
 interface AuthStore {

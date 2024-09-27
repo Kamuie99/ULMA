@@ -113,9 +113,9 @@ public class ParticipantDaoImpl implements ParticipantDao {
     }
 
     @Override
-    public Integer addGuests(String name, String category) {
-        Record1<Integer> saveGuest = dsl.insertInto(GUEST, GUEST.NAME, GUEST.CATEGORY, GUEST.CREATE_AT)
-                .values(name, category, LocalDateTime.now())
+    public Integer addGuests(String name, String category, String phoneNumber) {
+        Record1<Integer> saveGuest = dsl.insertInto(GUEST, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER, GUEST.CREATE_AT)
+                .values(name, category, phoneNumber, LocalDateTime.now())
                 .returningResult(GUEST.ID)
                 .fetchOne();
 
@@ -152,6 +152,38 @@ public class ParticipantDaoImpl implements ParticipantDao {
                 .join(GUEST)
                 .on(USERS_RELATION.GUEST_ID.eq(GUEST.ID))
                 .where(USERS_RELATION.USERS_ID.eq(userId))
+                .orderBy(GUEST.NAME.asc())
+                .limit(size)
+                .offset(offset)
+                .fetchInto(UserRelation.class);
+
+        return new PageResponse<>(result, page, totalItems, totalPages);
+    }
+
+    @Override
+    public PageResponse<UserRelation> getCategoryUserRelation(Integer userId, String category, PageDto pageDto) {
+        int size = pageDto.getSize();
+        int page = pageDto.getPage();
+
+        Integer count = dsl.selectCount()
+                .from(USERS_RELATION)
+                .join(GUEST)
+                .on(USERS_RELATION.GUEST_ID.eq(GUEST.ID))
+                .where(USERS_RELATION.USERS_ID.eq(userId))
+                .and(GUEST.CATEGORY.like(category))
+                .fetchOne(0, Integer.class);
+
+        int totalItems = (count != null) ? count : 0;
+        int totalPages = (int) Math.ceil((double) totalItems/size);
+
+        int offset = (page-1) * size;
+
+        List<UserRelation> result = dsl.select(USERS_RELATION.GUEST_ID, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER)
+                .from(USERS_RELATION)
+                .join(GUEST)
+                .on(USERS_RELATION.GUEST_ID.eq(GUEST.ID))
+                .where(USERS_RELATION.USERS_ID.eq(userId))
+                .and(GUEST.CATEGORY.like(category))
                 .orderBy(GUEST.NAME.asc())
                 .limit(size)
                 .offset(offset)

@@ -1,25 +1,31 @@
 import axiosInstance from '@/api/axios';
 import TitleTextField from '@/components/common/TitleTextField';
 import {colors} from '@/constants';
+import useAuthStore from '@/store/useAuthStore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useEffect, useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 
 interface EventCommentResultProps {}
 
 function EventCommentResult({}: EventCommentResultProps) {
+  const {accessToken} = useAuthStore();
   const [comments, setComments] = useState<string[]>([]);
   const eventName = '남자친구 생일';
 
+  // 페이지에 입장하면 멘트 요청 보냄
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 여기에 비동기 작업 수행 (예: API 호출)
-        // const response = await fetch('your-api-url');
-        const response = await axiosInstance.get(
-          '/auth/events/ai/recommend/message',
-          {params: {eventName: eventName}}, // 쿼리 파라미터로 전달
+        const response = await axiosInstance.post(
+          '/events/ai/recommend/message',
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            params: {gptQuotes: eventName},
+          },
         );
-        // const data = await response.json();
         console.log(response.data);
       } catch (error) {
         console.error('Error fetching data:', error);

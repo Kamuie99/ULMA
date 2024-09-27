@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View, Text, FlatList, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput } from 'react-native';
 import axiosInstance from '@/api/axios';
 import { colors } from '@/constants';
 
@@ -7,16 +7,18 @@ interface Friend {
   guestId: number;
   name: string;
   category: string;
-  phoneNumber: string | null; // phoneNumber를 포함하도록 인터페이스에 추가
+  phoneNumber: string | null;
 }
 
 interface FriendsListScreenProps {}
 
 function FriendsListScreen({}: FriendsListScreenProps) {
   const [friends, setFriends] = useState<Friend[]>([]);
+  const [filteredFriends, setFilteredFriends] = useState<Friend[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchFriends = useCallback(async (page: number) => {
     if (loading || !hasMore) return;
@@ -27,8 +29,8 @@ function FriendsListScreen({}: FriendsListScreenProps) {
         params: { size: 10, page },
       });
       const newFriends = response.data.data;
-      console.log(newFriends);
       setFriends(prevFriends => [...prevFriends, ...newFriends]);
+      setFilteredFriends(prevFriends => [...prevFriends, ...newFriends]);
       setCurrentPage(page);
       setHasMore(newFriends.length === 10);
     } catch (error) {
@@ -38,13 +40,39 @@ function FriendsListScreen({}: FriendsListScreenProps) {
     }
   }, [loading, hasMore]);
 
+  const searchFriends = useCallback(async (query: string) => {
+    if (!query) {
+      setFilteredFriends(friends);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get(`/participant/same`, {
+        params: { name: query },
+      });
+      setFilteredFriends(response.data);
+    } catch (error) {
+      console.error('친구 검색에 실패했습니다:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [friends]);
+
   useEffect(() => {
     fetchFriends(1);
   }, []);
 
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      searchFriends(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery, searchFriends]);
+
   const formatPhoneNumber = (phoneNumber: string | null) => {
     if (!phoneNumber) return '등록된 번호가 없습니다.';
-    // Assuming the phone number length is correct
     return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`;
   };
 
@@ -68,21 +96,27 @@ function FriendsListScreen({}: FriendsListScreenProps) {
   };
 
   const handleLoadMore = () => {
-    if (!loading && hasMore) {
+    if (!loading && hasMore && searchQuery === '') {
       fetchFriends(currentPage + 1);
     }
   };
 
   return (
     <View style={styles.container}>
+      <TextInput
+        style={styles.searchInput}
+        placeholder="지인 이름 또는 전화번호로 검색"
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+      />
       <FlatList
-        data={friends}
+        data={filteredFriends}
         renderItem={renderFriendCard}
         keyExtractor={item => item.guestId.toString()}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.1}
         ListFooterComponent={renderFooter}
-        extraData={friends} // 추가: 데이터가 변경될 때마다 FlatList 재렌더링
+        extraData={filteredFriends}
       />
     </View>
   );
@@ -93,6 +127,15 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: '#f5f5f5',
+  },
+  searchInput: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 16,
+    backgroundColor: 'white',
   },
   title: {
     fontSize: 24,

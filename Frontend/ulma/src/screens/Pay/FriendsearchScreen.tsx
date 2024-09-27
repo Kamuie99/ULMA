@@ -4,9 +4,14 @@ import CustomButton from '@/components/common/CustomButton';
 import InputField from '@/components/common/InputField';
 import TitleTextField from '@/components/common/TitleTextField';
 import {colors} from '@/constants';
+import {payNavigations} from '@/constants/navigations';
+import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import useAuthStore from '@/store/useAuthStore';
+import {useNavigation} from '@react-navigation/native';
+import {createStackNavigator} from '@react-navigation/stack';
 import React, {useEffect, useState} from 'react';
 import {View, Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
+import {ScrollView} from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/Entypo';
 
 interface Person {
@@ -15,6 +20,8 @@ interface Person {
   category: string;
   transactions: {description: string; date: string}[];
 }
+
+const Stack = createStackNavigator<payStackParamList>();
 
 const FriendsearchScreen = () => {
   const {accessToken} = useAuthStore();
@@ -86,10 +93,10 @@ const FriendsearchScreen = () => {
   }: {
     item: {description: string; date: string};
   }) => (
-    <View style={styles.transactionItem}>
+    <TouchableOpacity style={styles.transactionItem}>
       <Text style={styles.transactionDescription}>{item.description}</Text>
       <Text style={styles.transactionDate}>{item.date}</Text>
-    </View>
+    </TouchableOpacity>
   );
 
   // 리스트에서 사람을 렌더링하는 함수
@@ -126,34 +133,47 @@ const FriendsearchScreen = () => {
               함께 참여한 경조사가 없어요 😢
             </Text>
           )}
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate(payNavigations.INPUT_AMOUNT, {
+                guestId: item.guestId,
+              })
+            }>
+            <Text>선택</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
   );
 
+  const navigation = useNavigation();
+
   return (
     <View style={styles.container}>
       <View style={styles.cardContainer}>
-        <TitleTextField frontLabel="이름을 확인해주세요." />
-        <InputField
-          placeholder="이름"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-
-        {peopleData.length > 0 && (
-          <Text style={styles.subheader}>혹시 이 사람 아닌가요?</Text>
-        )}
-        <FlatList
-          data={filteredPeople}
-          renderItem={renderPersonItem}
-          style={styles.peopleList}
-        />
+        <View style={{paddingHorizontal: 10, gap: 40}}>
+          <TitleTextField frontLabel="이름을 확인해주세요." />
+          <InputField
+            placeholder="이름"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+        </View>
+        <ScrollView style={{paddingHorizontal: 10, marginBottom: 100}}>
+          {peopleData.length > 0 && (
+            <Text style={styles.subheader}>혹시 이 사람 아닌가요?</Text>
+          )}
+          <FlatList
+            data={filteredPeople}
+            renderItem={renderPersonItem}
+            style={styles.peopleList}
+          />
+        </ScrollView>
 
         <CustomButton
           label="확인"
           variant="outlined"
-          onPress={() => console.log('확인 버튼 누름')}
+          onPress={() => console.log('hi')}
         />
       </View>
     </View>
@@ -169,7 +189,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.WHITE,
     margin: 20,
-    paddingTop: 20,
+    paddingTop: 40,
     borderRadius: 15,
     borderColor: colors.GRAY_300,
     borderWidth: 1,
@@ -180,7 +200,7 @@ const styles = StyleSheet.create({
   },
   subheader: {
     fontSize: 14,
-    marginVertical: 10,
+    marginTop: 10,
     marginHorizontal: 20,
   },
   friendName: {

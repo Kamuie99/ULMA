@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.UUID;
+
 import static com.ssafy11.ulma.generated.Tables.USERS;
 import static com.ssafy11.ulma.generated.tables.Account.ACCOUNT;
 import static com.ssafy11.ulma.generated.tables.Receivehistory.RECEIVEHISTORY;
@@ -19,16 +22,25 @@ public class PayDaoImpl implements PayDao {
     private final AccountDao accountDao;
 
     @Override
-    public Account createPayAccount(Integer userId, PayAccount account) {
+    public Account createPayAccount(Integer userId) {
+        String accountNumber = generateAccountNumber();
         int accountId = dsl.insertInto(ACCOUNT)
                 .set(ACCOUNT.USER_ID, userId)
-                .set(ACCOUNT.ACCOUNT_NUMBER, account.accountNumber())
+                .set(ACCOUNT.ACCOUNT_NUMBER, accountNumber)
                 .set(ACCOUNT.BANK_CODE, "얼마페이")
                 .execute();
 
         return dsl.selectFrom(ACCOUNT)
                 .where(ACCOUNT.ID.eq(accountId))
                 .fetchOneInto(Account.class);
+    }
+
+    private String generateAccountNumber() {
+        // UUID 생성 후 숫자로 변환
+        String uuidNumeric = UUID.randomUUID().toString().replaceAll("[^0-9]", "");
+
+        // 8자리 숫자 추출 (앞에서 8자리를 자르고, 4자리-4자리로 나누기)
+        return uuidNumeric.substring(0, 4) + "-" + uuidNumeric.substring(4, 8);
     }
 
     @Override
@@ -251,4 +263,23 @@ public class PayDaoImpl implements PayDao {
         }
         return null;
     }
+    @Override
+    public List<SendHistory> findSendHistoryByUserId(Integer userId) {
+        return dsl.selectFrom(SENDHISTORY)
+                .where(SENDHISTORY.ACCOUNT_ID.in(
+                        dsl.select(ACCOUNT.ID)
+                                .from(ACCOUNT)
+                                .where(ACCOUNT.USER_ID.eq(userId))
+                                .and(ACCOUNT.BANK_CODE.eq("얼마페이"))))
+                .fetchInto(SendHistory.class);
+    }
+
+    @Override
+    public Account findPayAccountByUserId(Integer userId) {
+        return dsl.selectFrom(ACCOUNT)
+                .where(ACCOUNT.USER_ID.eq(userId))
+                .and(ACCOUNT.BANK_CODE.eq("얼마페이"))
+                .fetchOneInto(Account.class);
+    }
+
 }

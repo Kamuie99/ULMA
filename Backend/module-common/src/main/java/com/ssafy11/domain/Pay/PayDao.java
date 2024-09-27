@@ -2,10 +2,12 @@ package com.ssafy11.domain.Pay;
 
 import com.ssafy11.domain.Account.Account;
 
+import java.util.List;
+
 
 public interface PayDao {
     // 계좌 생성
-    Account createPayAccount(Integer userId, PayAccount account);
+    Account createPayAccount(Integer userId);
 
     // 계좌 잔액 충전
     ReceiveHistory chargeBalance(Integer accountId, Long amount);
@@ -24,4 +26,7 @@ public interface PayDao {
 
     // 수신 내역 생성
     ReceiveHistory createReceiveHistory(String accountNumber, Long amount, String sender, String senderAccountNumber, String info);
+
+    List<SendHistory> findSendHistoryByUserId(Integer userId);
+    Account findPayAccountByUserId(Integer userId);
 }

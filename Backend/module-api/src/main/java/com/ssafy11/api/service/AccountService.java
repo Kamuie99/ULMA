@@ -1,10 +1,13 @@
-package com.ssafy11.domain.Account;
+package com.ssafy11.api.service;
+
+import com.ssafy11.domain.Account.Account;
+import com.ssafy11.domain.Account.BankCode;
 
 import java.util.List;
 
-public interface AccountDao {
+public interface AccountService {
     Account createAccount(Integer userId, BankCode bankCode);
-    Account connectAccount(Integer userid, String accountNumber);
+    Account connectAccount(Integer userId, String accountNumber);
     List<Account> findAllAccounts(Integer userId);
     Account connectedAccount(Integer userId);
     Account findByAccountNumber(String accountNumber);

@@ -23,7 +23,6 @@ const payNavigations = {
   ACCOUNT_HISTORY: 'Accounthistory',
   ACCOUNT_INPUT: 'Accountinput',
   ADD_HISTORY: 'Addhistory',
-  ADDOPTION: 'Addoption',
   CHARGER_RESULT: 'Chargerresult',
   PAY_LIST: 'Paylist',
   PAY_RECHARGE: 'Payrecharge',
@@ -34,7 +33,6 @@ const payNavigations = {
   SEND_RESULT: 'Sendresult',
   INPUT_AMOUNT: 'InputAmount',
 } as const;
-
 
 const mypageNavigations = {
   MYPAGE_HOME: 'MyPageHome',

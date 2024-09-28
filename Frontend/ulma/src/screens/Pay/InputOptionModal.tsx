@@ -1,5 +1,5 @@
 import {colors} from '@/constants';
-import React, {useEffect} from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   FlatList,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
+import Modal from 'react-native-modal';
 
 const options = [
   {
@@ -31,19 +32,12 @@ const options = [
   },
 ];
 
-function AddoptionScreen({navigation}) {
-  useEffect(() => {
-    // 페이지에 들어올 때 탭바 숨기기
-    navigation.getParent()?.setOptions({
-      tabBarStyle: {display: 'none'},
-    });
-  }, [navigation]);
-
+function InputOptionModal({isVisible, onClose}) {
   const handlePress = (label: string) => {
     console.log(`${label} 선택됨`);
+    onClose(); // 옵션 선택 시 모달 닫기
   };
 
-  // 수정된 renderItem 함수
   const renderItem = ({item}: {item: (typeof options)[0]}) => (
     <TouchableOpacity onPress={() => handlePress(item.label)}>
       <View style={styles.optionContainer}>
@@ -60,7 +54,10 @@ function AddoptionScreen({navigation}) {
   );
 
   return (
-    <View style={styles.container}>
+    <Modal
+      isVisible={isVisible}
+      onBackdropPress={onClose}
+      style={styles.modalContainer}>
       <View style={styles.modalBody}>
         <FlatList
           data={options}
@@ -68,15 +65,14 @@ function AddoptionScreen({navigation}) {
           keyExtractor={item => item.key}
         />
       </View>
-    </View>
+    </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+  modalContainer: {
     justifyContent: 'flex-end',
+    margin: 0,
   },
   optionContainer: {
     flexDirection: 'row',
@@ -90,8 +86,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.WHITE,
     paddingBottom: '20%',
     paddingTop: '3%',
-    borderTopLeftRadius: 15, // 왼쪽 위 둥근 모서리
-    borderTopRightRadius: 15, // 오른쪽 위 둥근 모서리
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
   },
   icon: {
     width: 28,
@@ -119,4 +115,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddoptionScreen;
+export default InputOptionModal;

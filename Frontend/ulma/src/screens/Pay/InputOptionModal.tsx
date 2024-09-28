@@ -1,5 +1,5 @@
 import {colors} from '@/constants';
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -10,6 +10,10 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
 import Modal from 'react-native-modal';
+import Toast from 'react-native-toast-message';
+import DocumentPicker from 'react-native-document-picker'; // 문서 선택을 위한 라이브러리
+import axiosInstance from '@/api/axios';
+import useAuthStore from '@/store/useAuthStore';
 
 const options = [
   {
@@ -33,13 +37,78 @@ const options = [
 ];
 
 function InputOptionModal({isVisible, onClose}) {
-  const handlePress = (label: string) => {
-    console.log(`${label} 선택됨`);
+  const [excelFile, setExcelFile] = useState(null);
+  const {accessToken} = useAuthStore();
+
+  // 파일 선택 로직 추가
+  const pickExcelFile = async () => {
+    try {
+      const res = await DocumentPicker.pick({
+        type: [DocumentPicker.types.xlsx], // 엑셀 파일 선택
+      });
+      setExcelFile(res[0]); // 선택된 파일 저장
+      console.log('선택된 파일: ', res);
+    } catch (err) {
+      if (DocumentPicker.isCancel(err)) {
+        console.log('파일 선택이 취소되었습니다.');
+      } else {
+        console.error('파일 선택 오류:', err);
+      }
+    }
+  };
+
+  // 엑셀 파일 서버로 전송
+  const handleSubmit = async () => {
+    if (!excelFile) {
+      Toast.show({
+        type: 'error',
+        text1: '엑셀 파일을 선택해주세요.',
+      });
+      return;
+    }
+
+    const formData = new FormData();
+    const name = excelFile.name;
+    formData.append('file', {
+      name,
+      type: excelFile.type,
+      uri: excelFile.uri,
+    });
+
+    try {
+      const {
+        data: {path},
+      } = await axiosInstance.post('/participant/money/excel', formData, {
+        headers: {
+          'content-type': 'multipart/form-data',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      Toast.show({
+        type: 'success',
+        text1: '파일 업로드 성공',
+      });
+      onClose(); // 모달 닫기
+    } catch (e) {
+      Toast.show({
+        type: 'error',
+        text1: '파일 업로드 실패',
+        text2: '다시 시도해주세요.',
+      });
+    }
+  };
+
+  const handlePress = (key: string) => {
+    if (key === '2') {
+      // 엑셀 파일 선택을 위해 호출
+      pickExcelFile();
+    }
+    console.log(`${key} 선택됨`);
     onClose(); // 옵션 선택 시 모달 닫기
   };
 
   const renderItem = ({item}: {item: (typeof options)[0]}) => (
-    <TouchableOpacity onPress={() => handlePress(item.label)}>
+    <TouchableOpacity onPress={() => handlePress(item.key)}>
       <View style={styles.optionContainer}>
         <Image style={styles.icon} source={item.imageUrl} />
         <View style={styles.textContainer}>
@@ -65,6 +134,11 @@ function InputOptionModal({isVisible, onClose}) {
           keyExtractor={item => item.key}
         />
       </View>
+      {excelFile && (
+        <TouchableOpacity style={styles.uploadButton} onPress={handleSubmit}>
+          <Text style={styles.uploadButtonText}>엑셀 파일 업로드</Text>
+        </TouchableOpacity>
+      )}
     </Modal>
   );
 }
@@ -88,6 +162,18 @@ const styles = StyleSheet.create({
     paddingTop: '3%',
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
+  },
+  uploadButton: {
+    backgroundColor: colors.PRIMARY,
+    padding: 15,
+    margin: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  uploadButtonText: {
+    color: colors.WHITE,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   icon: {
     width: 28,

@@ -1,13 +1,19 @@
-//수취내역추가하기 페이지
 import CustomButton from '@/components/common/CustomButton';
 import EventTag from '@/components/common/EventTag';
 import {colors} from '@/constants';
-import React from 'react';
+import React, {useState} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Alert} from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
+import InputOptionModal from './InputOptionModal';
 
 export default function AddhistoryScreen() {
   const category = '돌잔치';
+  const [isModalVisible, setModalVisible] = useState(false);
+
+  const toggleModal = () => {
+    setModalVisible(!isModalVisible);
+  };
+
   return (
     <View style={styles.container}>
       {/* 이벤트 정보 */}
@@ -38,8 +44,11 @@ export default function AddhistoryScreen() {
           </TouchableOpacity>
           <View style={styles.divider} />
         </View>
-        <CustomButton label="입금 내역 추가하기" />
+        <CustomButton label="입금 내역 추가하기" onPress={toggleModal} />
       </View>
+
+      {/* InputOptionModal 모달 */}
+      <InputOptionModal isVisible={isModalVisible} onClose={toggleModal} />
     </View>
   );
 }
@@ -51,10 +60,9 @@ const styles = StyleSheet.create({
   },
   eventContainer: {
     flex: 1,
-    // 그림자
     shadowColor: colors.BLACK,
-    shadowOpacity: 0.25, // 그림자의 투명도
-    shadowRadius: 20, // 그림자의 흐림 정도
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
     elevation: 4,
     borderColor: colors.GRAY_300,
     backgroundColor: colors.WHITE,
@@ -96,7 +104,6 @@ const styles = StyleSheet.create({
   },
   participantItem: {
     flexDirection: 'row',
-    // justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 20,

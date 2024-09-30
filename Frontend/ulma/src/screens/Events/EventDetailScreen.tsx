@@ -143,6 +143,7 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
   if (!guests || guests.length === 0) {
     return (
       <View style={styles.emptyContainer}>
+        <Text>{event_id}</Text>
         <Text>이벤트 내역을 불러올 수 없습니다.</Text>
       </View>
     );

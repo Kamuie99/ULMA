@@ -44,6 +44,7 @@ const friendsNavigations = {
   FRIENDS_LIST: 'FriendsList',
   FRIENDS_HOME: 'FriendsHome',
   FRIENDS_ADD: 'FriendsAdd',
+  FREINDS_DETAIL: 'FriendsDetail',
 } as const;
 
 export {

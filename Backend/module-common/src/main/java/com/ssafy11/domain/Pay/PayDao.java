@@ -19,7 +19,7 @@ public interface PayDao {
     ReceiveHistory chargePayBalance(Integer accountId, Long amount);
 
     // 얼마페이 계좌에서 다른 계좌로 송금
-    SendHistory sendPayMoney(Integer userId, Integer accountId, String targetAccountNumber, Long amount);
+    SendHistory sendPayMoney(Integer userId, String targetAccountNumber, Long amount);
 
     // 송금 내역 생성
     SendHistory createSendHistory(String accountNumber, Long amount, String target, String targetAccountNumber, String info);

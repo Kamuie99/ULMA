@@ -51,11 +51,19 @@ public class AccountDaoImpl implements AccountDao {
     }
 
     @Override
-    public List<Account> findAllAccounts(Integer userId) {
-        return dsl.selectFrom(ACCOUNT)
-                .where(ACCOUNT.USER_ID.eq(userId))
-                .fetchInto(Account.class);
+    public List<Account> findAllAccounts(Integer userId, BankCode bankCode) {
+        if (bankCode != null) {
+            return dsl.selectFrom(ACCOUNT)
+                    .where(ACCOUNT.USER_ID.eq(userId))
+                    .and(ACCOUNT.BANK_CODE.eq(bankCode.getCode()))  // BankCode 필터 추가
+                    .fetchInto(Account.class);
+        } else {
+            return dsl.selectFrom(ACCOUNT)
+                    .where(ACCOUNT.USER_ID.eq(userId))
+                    .fetchInto(Account.class);
+        }
     }
+
 
     @Override
     public Account connectedAccount(Integer userId) {

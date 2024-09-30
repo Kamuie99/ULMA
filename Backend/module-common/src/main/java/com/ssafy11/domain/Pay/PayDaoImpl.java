@@ -152,7 +152,7 @@ public class PayDaoImpl implements PayDao {
 
 
     @Override
-    public SendHistory sendPayMoney(Integer userId, Integer accountId, String targetAccountNumber, Long amount) {
+    public SendHistory sendPayMoney(Integer userId, String targetAccountNumber, Long amount) {
         // 1. 사용자의 얼마페이 계좌를 조회
         Account payAccount = dsl.selectFrom(ACCOUNT)
                 .where(ACCOUNT.USER_ID.eq(userId))

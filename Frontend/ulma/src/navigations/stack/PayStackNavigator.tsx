@@ -18,6 +18,7 @@ import SendingScreen from '@/screens/Pay/SendingScreen';
 import AccounthistoryScreen from '@/screens/Pay/AccounthistoryScreen';
 import FriendsearchScreen from '@/screens/Pay/FriendsearchScreen';
 import InputAmountScreen from '@/screens/Pay/InputAmountScreen';
+import AiRecommendScreen from '@/screens/Pay/AiRecommendScreen'; // '.1'을 제거한 경로
 
 export type payStackParamList = {
   [payNavigations.ACCOUNT_HISTORY]: undefined;
@@ -31,6 +32,7 @@ export type payStackParamList = {
   [payNavigations.RECOMMEND_OPTION]: undefined;
   [payNavigations.SENDING]: undefined;
   [payNavigations.SEND_RESULT]: undefined;
+  LandingScreen: undefined;
   [payNavigations.INPUT_AMOUNT]: {guestId: number};
 };
 
@@ -157,6 +159,13 @@ function PayStackNavigator() {
           headerBackImage: () => {
             return <Icon name="cross" size={24} color={colors.BLACK} />;
           },
+        }}
+      />
+      <Stack.Screen
+        name={payNavigations.RECOMMEND_OPTION}
+        component={AiRecommendScreen}
+        options={{
+          headerTitle: 'AI 금액 추천',
         }}
       />
     </Stack.Navigator>

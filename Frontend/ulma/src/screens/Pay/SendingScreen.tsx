@@ -12,9 +12,14 @@ import {
 import TitleTextField from '@/components/common/TitleTextField';
 import {colors} from '@/constants';
 import CustomButton from '@/components/common/CustomButton';
-import {useNavigation} from '@react-navigation/native';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {payNavigations} from '@/constants/navigations';
+import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 
-function SendingScreen({navigation}) {
+function SendingScreen() {
+  // useNavigation에 제네릭 타입을 추가해 navigation 타입을 명시적으로 지정
+  const navigation = useNavigation<NavigationProp<payStackParamList>>();
+
   useEffect(() => {
     // 페이지에 들어올 때 탭바 숨기기
     navigation.getParent()?.setOptions({
@@ -42,7 +47,9 @@ function SendingScreen({navigation}) {
         </View>
 
         {/* 추천 액수 받기 섹션 */}
-        <TouchableOpacity style={styles.recommendationBox}>
+        <TouchableOpacity
+          style={styles.recommendationBox}
+          onPress={() => navigation.navigate(payNavigations.RECOMMEND_OPTION)}>
           <Image source={require('@/assets/Pay/RecommBtn.png')} />
         </TouchableOpacity>
         <CustomButton label="확인" variant="outlined" />

@@ -17,6 +17,7 @@ function LoginScreen() {
       const response = await login(loginId, password);
       // Alert.alert('로그인 성공', response.msg);
       // 여기에 로그인 성공 후 네비게이션 로직을 추가할 수 있습니다.
+      // 왜 여기 navigate 없는데 로그인하면 이동이 되는걸까?
     } catch (error) {
       const axiosError = error as AxiosError;
       if (axiosError.response && axiosError.response.status === 401) {

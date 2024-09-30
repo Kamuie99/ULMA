@@ -34,13 +34,15 @@ public class AccountController {
         return ResponseEntity.ok(registeredAccount);
     }
 
-    // 3. 내 계좌 보기
+    // 3. 내 계좌 보기 (은행 필터 추가)
     @GetMapping("/users/{user_id}/account")
     public ResponseEntity<List<Account>> viewAccounts(
-            @PathVariable("user_id") Integer userId) {
-        List<Account> accounts = accountService.findAllAccounts(userId);
+            @PathVariable("user_id") Integer userId,
+            @RequestParam(value = "bankCode", required = false) BankCode bankCode) {
+        List<Account> accounts = accountService.findAllAccounts(userId, bankCode);
         return ResponseEntity.ok(accounts);
     }
+
 
     // 4. 연결 계좌 정보 보기
     @GetMapping("/users/{user_id}/account/info")

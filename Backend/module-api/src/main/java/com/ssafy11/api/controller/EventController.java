@@ -1,14 +1,12 @@
 package com.ssafy11.api.controller;
 
-//import com.ssafy11.api.service.GptService;
 import com.ssafy11.api.service.GptService;
 import com.ssafy11.domain.common.PageDto;
-import com.ssafy11.domain.events.EventCommand;
+import com.ssafy11.domain.events.dto.EventCommand;
 import com.ssafy11.api.service.EventService;
 import com.ssafy11.domain.events.dto.Event;
 import com.ssafy11.domain.common.PageResponse;
 import com.ssafy11.domain.participant.dto.EventParticipant;
-import com.ssafy11.domain.participant.dto.GptResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,36 +24,39 @@ public class EventController {
     private final GptService gptService;
 
     @PostMapping //이벤트 추가
-    public ResponseEntity<?> addEvent(@AuthenticationPrincipal User user,
+    public ResponseEntity<Integer> addEvent(@AuthenticationPrincipal User user,
                                       @RequestBody EventCommand event) {
         Assert.notNull(event, "Event must not be null");
-        Assert.isTrue(user.getUsername().equals(String.valueOf(event.userId())), "User ID does not match");
 
-        Integer eventId = eventService.addEvent(event);
+        Integer eventId = eventService.addEvent(event, user.getUsername());
         return ResponseEntity.ok(eventId);
     }
 
-    @GetMapping("/{userId}") //이벤트 목록
-    public ResponseEntity<?> getAllEvents(@AuthenticationPrincipal User user,
-                                          @PathVariable("userId") Integer userId,
-                                          @ModelAttribute PageDto pagedto) {
-        Assert.notNull(userId, "userId must not be null");
-        Assert.isTrue(user.getUsername().equals(String.valueOf(userId)), "User ID does not match");
+    @PatchMapping ("/{eventId}")//이벤트 수정
+    public ResponseEntity<Integer> updateEvent(@AuthenticationPrincipal User user,
+                                         @RequestBody EventCommand event,
+                                         @PathVariable ("eventId") Integer eventId) {
+        Assert.notNull(event, "Event must not be null");
+        Assert.notNull(eventId, "Event ID must not be null");
+        int returnId = eventService.updateEvent(event, eventId,user.getUsername());
+        return ResponseEntity.ok(returnId);
+    }
 
-        PageResponse<Event> events = eventService.getEvents(userId, pagedto);
+    @GetMapping//이벤트 목록
+    public ResponseEntity<PageResponse<Event>> getAllEvents(@AuthenticationPrincipal User user,
+                                          @ModelAttribute PageDto pagedto) {
+        PageResponse<Event> events = eventService.getEvents(user.getUsername(), pagedto);
         return ResponseEntity.ok(events);
     }
 
     //이벤트 상세 목록(해당 이벤트 경조사 내역)
-    @GetMapping("/detail/{userId}/{eventId}")
-    public ResponseEntity<?> getEvent(@AuthenticationPrincipal User user,
-                                      @PathVariable("userId") Integer userId,
+    @GetMapping("/detail/{eventId}")
+    public ResponseEntity<PageResponse<EventParticipant>> getEvent(@AuthenticationPrincipal User user,
                                       @PathVariable("eventId") Integer eventId,
                                       @ModelAttribute PageDto pagedto) {
         Assert.notNull(eventId, "eventId must not be null");
-        Assert.isTrue(user.getUsername().equals(String.valueOf(userId)), "User ID does not match");
 
-        PageResponse<EventParticipant> guests = eventService.getEvent(userId, eventId, pagedto);
+        PageResponse<EventParticipant> guests = eventService.getEvent(user.getUsername(), eventId, pagedto);
         return ResponseEntity.ok(guests);
     }
 
@@ -63,28 +64,21 @@ public class EventController {
 
     //경조사 AI 축하 메시지 추천
     @PostMapping("/ai/recommend/message")
-    public ResponseEntity<String> aiMessage(@AuthenticationPrincipal User user,
-                            @RequestBody GptResponse gptResponse) {
-        Assert.notNull(gptResponse, "gptResponse must not be null");
-        Assert.isTrue(user.getUsername().equals(String.valueOf(gptResponse.userId())), "User ID does not match");
+    public ResponseEntity<String> aiMessage(@RequestBody String gptQuotes) {
+        Assert.hasText(gptQuotes, "gptResponse must not be null");
 
-        String resultQuestion = gptResponse.gptQuotes() ;
-        String GptMoney = gptService.getChatResponse(resultQuestion, 0);
+        String gptMoney = gptService.getChatResponse(gptQuotes, 0);
 
-        return ResponseEntity.ok(GptMoney);
+        return ResponseEntity.ok(gptMoney);
     }
 
     //AI 금액 추천
     @PostMapping("/ai/recommend/money")
-    public ResponseEntity<String> aiAmount(@AuthenticationPrincipal User user,
-                           @RequestBody GptResponse gptResponse) {
-        Assert.notNull(gptResponse, "gptResponse must not be null");
-        Assert.isTrue(user.getUsername().equals(String.valueOf(gptResponse.userId())), "User ID does not match");
+    public ResponseEntity<String> aiAmount(@RequestBody String gptQuotes) {
+        Assert.hasText(gptQuotes, "gptResponse must not be null");
+        String gptMoney = gptService.getChatResponse(gptQuotes, 1);
 
-        String resultQuestion = gptResponse.gptQuotes();
-        String GptMoney = gptService.getChatResponse(resultQuestion, 1);
-
-        return ResponseEntity.ok(GptMoney);
+        return ResponseEntity.ok(gptMoney);
     }
 
 }

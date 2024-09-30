@@ -5,12 +5,12 @@ import static com.ssafy11.ulma.generated.Tables.*;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import com.ssafy11.domain.users.dto.UserInfoRequest;
 import org.jooq.DSLContext;
 import org.jooq.Record1;
+import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,12 +31,13 @@ public class UserDaoImpl implements UserDao {
 				USERS.PASSWORD,
 				USERS.NAME,
 				USERS.PHONE_NUMBER,
+				USERS.BIRTHDATE,
+				USERS.GENDER,
 				USERS.CREATED_AT)
-			.values(command.loginId(), command.email(), command.password(), command.name(), command.phoneNumber(), LocalDateTime.now())
+			.values(command.loginId(), command.email(), command.password(), command.name(), command.phoneNumber(), command.birthday(), String.valueOf(command.gender()), LocalDateTime.now())
 			.returningResult(USERS.ID)
 			.fetchOne();
 
-		Assert.notNull(one.getValue(USERS.ID), "ID 에 null 값은 허용되지 않음");
 		return one.getValue(USERS.ID);
 	}
 
@@ -80,5 +81,13 @@ public class UserDaoImpl implements UserDao {
 			.set(USERS.REFRESH_TOKEN, refreshToken)
 			.where(USERS.LOGIN_ID.eq(loginId))
 			.execute();
+	}
+
+	@Override
+	public Optional<UserInfoRequest> getUserInfo(Integer userId) {
+		return Optional.ofNullable(dsl.select(USERS.LOGIN_ID, USERS.EMAIL, USERS.NAME, USERS.ACCOUNT, USERS.ACCOUNT_NUMBER, USERS.PHONE_NUMBER, USERS.GENDER, USERS.BIRTHDATE, DSL.field("TIMESTAMPDIFF(YEAR, birthdate, CURDATE())").as("age"))
+                .from(USERS)
+                .where(USERS.ID.eq(userId))
+                .fetchOneInto(UserInfoRequest.class));
 	}
 }

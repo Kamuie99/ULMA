@@ -23,6 +23,21 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     testImplementation 'org.springframework.security:spring-security-test'
     implementation 'com.github.codemonstur:embedded-redis:1.4.3'
+
+    //gpt
+    implementation 'io.github.flashvayne:chatgpt-spring-boot-starter:1.0.5'
+
+    //excel
+    implementation group: 'org.apache.poi', name: 'poi-scratchpad', version: '5.3.0'
+    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.3.0'
+
+    // testContainers
+    implementation 'org.testcontainers:testcontainers'
+    implementation 'org.testcontainers:mysql'
+
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:junit-jupiter'
+
 }
 
 sonar {

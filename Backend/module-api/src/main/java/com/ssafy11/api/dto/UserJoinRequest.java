@@ -8,5 +8,7 @@ public record UserJoinRequest (String name,
 							   String password,
 							   String passwordConfirm,
 							   String email,
-							   String phoneNumber){
+							   String phoneNumber,
+							   String birthDate,
+							   String genderDigit){
 }

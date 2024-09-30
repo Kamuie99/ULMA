@@ -1,5 +1,8 @@
 package com.ssafy11.domain.Account;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum BankCode {
     한국은행("001"),
     산업은행("002"),
@@ -50,7 +53,19 @@ public enum BankCode {
         this.code = code;
     }
 
+    @JsonValue
     public String getCode() {
         return code;
+    }
+
+    // Enum을 JSON에서 받을 때 매핑하는 로직
+    @JsonCreator
+    public static BankCode fromCode(String code) {
+        for (BankCode bankCode : BankCode.values()) {
+            if (bankCode.getCode().equals(code)) {
+                return bankCode;
+            }
+        }
+        throw new IllegalArgumentException("Unknown bank code: " + code);
     }
 }

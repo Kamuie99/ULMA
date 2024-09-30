@@ -6,7 +6,7 @@ import AuthStackNavigator from '../stack/AuthStackNavigator';
 function RootNavigator() {
   const {isLoggedIn} = useAuthStore();
 
-  return <>{!isLoggedIn ? <TabNavigator /> : <AuthStackNavigator />}</>;
+  return <>{isLoggedIn ? <TabNavigator /> : <AuthStackNavigator />}</>;
 }
 
 export default RootNavigator;

@@ -1,18 +1,22 @@
 import React, {useState} from 'react';
 import {View, TouchableOpacity, StyleSheet, Alert, Text} from 'react-native';
-import DatePicker from 'react-native-date-picker';
 import TitleTextField from '@/components/common/TitleTextField';
 import CustomButton from '@/components/common/CustomButton';
-import axiosInstance from '@/api/axios'; // 수정된 axiosInstance 불러오기
+import axiosInstance from '@/api/axios';
 import InputField from '@/components/common/InputField';
 import {NavigationProp} from '@react-navigation/native';
 import {eventNavigations} from '@/constants/navigations';
+import CalendarComponent from '@/components/calendar/CalendarButton'; // CalendarComponent 추가
+import {format} from 'date-fns'; // 날짜 형식 변환을 위한 라이브러리 추가
+import {ko} from 'date-fns/locale'; // 한글 로케일
 
 const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
   const [eventTitle, setEventTitle] = useState<string>(''); // 행사 제목
-  const [selectedEventType, setSelectedEventType] = useState<string | null>(null); // 행사 유형
-  const [eventDate, setEventDate] = useState<Date>(new Date()); // 행사 날짜 및 시간
-  const [open, setOpen] = useState(false); // DatePicker 열림 상태
+  const [selectedEventType, setSelectedEventType] = useState<string | null>(
+    null,
+  ); // 행사 유형
+  const [eventDate, setEventDate] = useState<string>(''); // 행사 날짜 선택 (string 형태로 변경)
+  const [calendarVisible, setCalendarVisible] = useState(false); // 달력 모달 상태
 
   // 행사 저장 처리 함수
   const handleSaveEvent = async () => {
@@ -22,16 +26,16 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     }
 
     try {
-      // API 요청 보내기
+      // ISO 형식으로 날짜 전송
       const response = await axiosInstance.post('/events', {
         category: selectedEventType,
         name: eventTitle,
-        date: eventDate.toISOString(), // 날짜 및 시간을 ISO 형식으로 변환하여 전송
+        date: new Date(eventDate).toISOString(), // 날짜를 ISO 형식으로 변환하여 전송
       });
 
       console.log('성공:', response.data);
       Alert.alert('성공', '이벤트가 저장되었습니다.');
-      
+
       // 이벤트 저장 후 이벤트 목록 화면으로 이동
       navigation.navigate(eventNavigations.EVENT);
     } catch (error) {
@@ -39,6 +43,11 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
       Alert.alert('에러', '이벤트 저장 중 오류가 발생했습니다.');
     }
   };
+
+  // 사용자에게 보여줄 때는 "년/월/일 오전/오후 시간 분" 형식으로 변환
+  const formattedDate = eventDate
+    ? format(new Date(eventDate), 'yyyy년 M월 d일 a h시 mm분', {locale: ko})
+    : '';
 
   // 이벤트 유형 옵션
   const eventTypes = ['결혼', '돌잔치', '장례식', '생일', '기타'];
@@ -76,26 +85,25 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
         ))}
       </View>
 
-      {/* 이벤트 날짜 및 시간 선택 */}
-      <TouchableOpacity onPress={() => setOpen(true)} style={styles.dateButton}>
+      {/* 달력 모달 열기 */}
+      <TouchableOpacity
+        onPress={() => setCalendarVisible(true)}
+        style={styles.dateButton}>
         <Text style={styles.dateButtonText}>
-          {eventDate ? eventDate.toLocaleString() : '날짜 및 시간 선택'}
+          {formattedDate ? formattedDate : '날짜 및 시간 선택'}
         </Text>
       </TouchableOpacity>
 
-      <DatePicker
-        modal
-        open={open}
-        date={eventDate}
-        mode="datetime"  // 날짜 및 시간 선택 모드
-        onConfirm={(date: React.SetStateAction<Date>) => {
-          setOpen(false);
-          setEventDate(date);
-        }}
-        onCancel={() => {
-          setOpen(false);
-        }}
-      />
+      {/* CalendarComponent 모달 */}
+      {calendarVisible && (
+        <CalendarComponent
+          selectedDate={eventDate}
+          onDateSelected={date => {
+            setEventDate(date); // 선택한 날짜 설정
+            setCalendarVisible(false); // 모달 닫기
+          }}
+        />
+      )}
 
       {/* 확인 버튼 */}
       <CustomButton label="확인" variant="outlined" onPress={handleSaveEvent} />

@@ -4,7 +4,7 @@ import * as Keychain from 'react-native-keychain';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface LoginResponse {
-  data: { accessToken: any; refreshToken: any; };
+  data: {accessToken: any; refreshToken: any};
   accessToken: string;
   refreshToken: string;
   msg: string;
@@ -37,7 +37,7 @@ interface AuthStore {
 const useAuthStore = create<AuthStore>((set, get) => ({
   accessToken: null,
   refreshToken: null,
-  isLoggedIn: true,
+  isLoggedIn: false,
   userInfo: null,
 
   login: async (loginId, password) => {

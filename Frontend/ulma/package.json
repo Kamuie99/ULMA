@@ -38,6 +38,7 @@
     "react-native-screens": "^3.34.0",
     "react-native-toast-message": "^2.2.1",
     "react-native-vector-icons": "^10.2.0",
+    "react-native-vision-camera": "^4.5.3",
     "zustand": "^4.5.5"
   },
   "devDependencies": {

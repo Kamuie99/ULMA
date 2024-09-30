@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput } from 'react-native';
 import axiosInstance from '@/api/axios';
 import { colors } from '@/constants';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native'; // useFocusEffect 추가
 import { friendsNavigations } from '@/constants/navigations';
 
 interface Friend {
@@ -32,8 +32,8 @@ function FriendsListScreen({}: FriendsListScreenProps) {
         params: { size: 10, page },
       });
       const newFriends = response.data.data;
-      setFriends(prevFriends => [...prevFriends, ...newFriends]);
-      setFilteredFriends(prevFriends => [...prevFriends, ...newFriends]);
+      setFriends(prevFriends => (page === 1 ? newFriends : [...prevFriends, ...newFriends])); // 첫 페이지면 초기화
+      setFilteredFriends(prevFriends => (page === 1 ? newFriends : [...prevFriends, ...newFriends])); // 첫 페이지면 초기화
       setCurrentPage(page);
       setHasMore(newFriends.length === 10);
     } catch (error) {
@@ -43,9 +43,12 @@ function FriendsListScreen({}: FriendsListScreenProps) {
     }
   }, [loading, hasMore]);
 
-  useEffect(() => {
-    fetchFriends(1);
-  }, []);
+  // 화면이 포커스를 받을 때마다 친구 목록을 다시 불러옴
+  useFocusEffect(
+    useCallback(() => {
+      fetchFriends(1); // 첫 페이지 데이터 새로 불러오기
+    }, [])
+  );
 
   const formatPhoneNumber = (phoneNumber: string | null) => {
     if (!phoneNumber) return '등록된 번호가 없습니다.';
@@ -90,7 +93,7 @@ function FriendsListScreen({}: FriendsListScreenProps) {
       <FlatList
         data={filteredFriends}
         renderItem={renderFriendCard}
-        keyExtractor={(item, index) => `${item.guestId}-${index}`}
+        keyExtractor={(item) => item.guestId.toString()} // guestId가 고유한 값인지 확인
         onEndReached={() => fetchFriends(currentPage + 1)}
         onEndReachedThreshold={0.1}
         ListFooterComponent={renderFooter}

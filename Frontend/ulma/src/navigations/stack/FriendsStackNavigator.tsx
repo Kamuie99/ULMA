@@ -27,7 +27,7 @@ function FriendsStackNavigator() {
           backgroundColor: colors.WHITE,
         },
         headerStyle: {
-          backgroundColor: colors.GRAY_100,
+          backgroundColor: colors.WHITE,
         },
         headerTitleAlign: 'left',
         headerTitleStyle: {

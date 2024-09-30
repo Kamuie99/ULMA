@@ -99,6 +99,44 @@ function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
           <Icon name="chevron-forward" size={15} color="#666" />
         </TouchableOpacity>
       </View>
+
+      <View style={styles.InfoBox}>
+        <Text>지인 관리</Text>
+        
+        <TouchableOpacity style={styles.InfoBoxInner}>
+          <View style={styles.MenuBar}>
+            <Icon2 name="account-search" size={24} color="#000" />
+            <Text style={styles.InfoMenu}>지인 목록 조회</Text>
+          </View>
+          <Icon name="chevron-forward" size={15} color="#666" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.InfoBoxInner}>
+          <View style={styles.MenuBar}>
+            <Icon2 name="account-plus" size={24} color="#000" />
+            <Text style={styles.InfoMenu}>지인 신규 등록</Text>
+          </View>
+          <Icon name="chevron-forward" size={15} color="#666" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.InfoBoxInner}>
+          <View style={styles.MenuBar}>
+            <Icon2 name="typewriter" size={24} color="#000" />
+            <Text style={styles.InfoMenu}>경조사비 내역 수기 등록</Text>
+          </View>
+          <Icon name="chevron-forward" size={15} color="#666" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.InfoBoxInner}>
+          <View style={styles.MenuBar}>
+            <Icon2 name="microsoft-excel" size={24} color="#000" />
+            <Text style={styles.InfoMenu}>경조사비 내역 엑셀 등록</Text>
+          </View>
+          <Icon name="chevron-forward" size={15} color="#666" />
+        </TouchableOpacity>
+      </View>
+
+
       <View style={styles.InfoBox}>
         <Text>
           <Text style={styles.buttonText}>{userInfo?.name || '사용자'}</Text> 님을 위한 추천 서비스

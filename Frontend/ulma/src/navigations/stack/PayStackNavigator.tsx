@@ -33,6 +33,7 @@ export type payStackParamList = {
   [payNavigations.RECOMMEND_OPTION]: undefined;
   [payNavigations.SENDING]: undefined;
   [payNavigations.SEND_RESULT]: undefined;
+  LandingScreen: undefined;
 };
 
 const Stack = createStackNavigator<payStackParamList>();

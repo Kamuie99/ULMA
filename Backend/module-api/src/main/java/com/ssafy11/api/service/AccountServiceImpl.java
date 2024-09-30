@@ -28,9 +28,10 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<Account> findAllAccounts(Integer userId) {
-        return accountDao.findAllAccounts(userId);
+    public List<Account> findAllAccounts(Integer userId, BankCode bankCode) {
+        return accountDao.findAllAccounts(userId, bankCode);
     }
+
 
     @Override
     public Account connectedAccount(Integer userId) {

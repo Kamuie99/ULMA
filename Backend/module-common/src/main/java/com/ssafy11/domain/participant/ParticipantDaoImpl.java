@@ -155,6 +155,18 @@ public class ParticipantDaoImpl implements ParticipantDao {
     }
 
     @Override
+    public Boolean isPhoneNumber(String phoneNumber, Integer userId) {
+        return dsl.fetchExists(
+                dsl.selectOne()
+                        .from(GUEST)
+                        .join(USERS_RELATION)
+                        .on(GUEST.ID.eq(USERS_RELATION.GUEST_ID))
+                        .where(USERS_RELATION.USERS_ID.eq(userId))
+                        .and(GUEST.PHONE_NUMBER.eq(phoneNumber))
+        );
+    }
+
+    @Override
     public Integer addGuests(String name, String category, String phoneNumber) {
         Record1<Integer> saveGuest = dsl.insertInto(GUEST, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER, GUEST.CREATE_AT)
                 .values(name, category, phoneNumber, LocalDateTime.now())

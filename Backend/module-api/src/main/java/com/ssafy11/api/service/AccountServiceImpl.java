@@ -2,7 +2,6 @@ package com.ssafy11.api.service;
 
 import com.ssafy11.domain.Account.Account;
 import com.ssafy11.domain.Account.AccountDao;
-import com.ssafy11.domain.Account.BankCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +16,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public Account createAccount(Integer userId, BankCode bankCode) {
+    public Account createAccount(Integer userId, String bankCode) {  // BankCode -> String
         return accountDao.createAccount(userId, bankCode);
     }
 
@@ -28,10 +27,9 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<Account> findAllAccounts(Integer userId, BankCode bankCode) {
+    public List<Account> findAllAccounts(Integer userId, String bankCode) {  // BankCode -> String
         return accountDao.findAllAccounts(userId, bankCode);
     }
-
 
     @Override
     public Account connectedAccount(Integer userId) {

@@ -1,6 +1,6 @@
 package com.ssafy11.domain.Account;
 
-import com.ssafy11.ulma.generated.tables.Users;
+import com.ssafy11.domain.users.Users;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
@@ -18,27 +18,27 @@ public class AccountDaoImpl implements AccountDao {
     private final DSLContext dsl;
 
     @Override
-    public Account createAccount(Integer userId, BankCode bankCode) {
+    public Account createAccount(Integer userId, String bankCode) {
         String accountNumber = generateAccountNumber();
 
-        int accountId = dsl.insertInto(ACCOUNT)
+        Integer accountId = dsl.insertInto(ACCOUNT)
                 .set(ACCOUNT.USER_ID, userId)
                 .set(ACCOUNT.ACCOUNT_NUMBER, accountNumber)
-                .set(ACCOUNT.BANK_CODE, bankCode.name())
-                .execute();
-        return dsl.select(ACCOUNT)
+                .set(ACCOUNT.BANK_CODE, bankCode)
+                .returning(ACCOUNT.ID)
+                .fetchOne()
+                .getValue(ACCOUNT.ID);
+
+        return dsl.selectFrom(ACCOUNT)
                 .where(ACCOUNT.ID.eq(accountId))
                 .fetchOneInto(Account.class);
     }
 
-    private String generateAccountNumber() {
-        // UUID 생성 후 숫자로 변환
-        String uuidNumeric = UUID.randomUUID().toString().replaceAll("[^0-9]", "");
 
-        // 8자리 숫자 추출 (앞에서 8자리를 자르고, 4자리-4자리로 나누기)
+    private String generateAccountNumber() {
+        String uuidNumeric = UUID.randomUUID().toString().replaceAll("[^0-9]", "");
         return uuidNumeric.substring(0, 4) + "-" + uuidNumeric.substring(4, 8);
     }
-
 
     @Override
     public Account connectAccount(Integer userid, String accountNumber) {
@@ -51,11 +51,11 @@ public class AccountDaoImpl implements AccountDao {
     }
 
     @Override
-    public List<Account> findAllAccounts(Integer userId, BankCode bankCode) {
+    public List<Account> findAllAccounts(Integer userId, String bankCode) {  // BankCode -> String
         if (bankCode != null) {
             return dsl.selectFrom(ACCOUNT)
                     .where(ACCOUNT.USER_ID.eq(userId))
-                    .and(ACCOUNT.BANK_CODE.eq(bankCode.getCode()))  // BankCode 필터 추가
+                    .and(ACCOUNT.BANK_CODE.eq(bankCode))  // String 처리
                     .fetchInto(Account.class);
         } else {
             return dsl.selectFrom(ACCOUNT)
@@ -64,17 +64,18 @@ public class AccountDaoImpl implements AccountDao {
         }
     }
 
-
     @Override
     public Account connectedAccount(Integer userId) {
         Users user = dsl.selectFrom(USERS)
                 .where(USERS.ID.eq(userId))
                 .fetchOneInto(Users.class);
-        
+
+        System.out.println(user);
         return dsl.selectFrom(ACCOUNT)
-                .where(ACCOUNT.ACCOUNT_NUMBER.eq(user.ACCOUNT_NUMBER))
+                .where(ACCOUNT.ACCOUNT_NUMBER.eq(user.getAccountNumber()))
                 .fetchOneInto(Account.class);
     }
+
     @Override
     public Account findByAccountNumber(String accountNumber) {
         return dsl.selectFrom(ACCOUNT)
@@ -88,5 +89,4 @@ public class AccountDaoImpl implements AccountDao {
                 .where(ACCOUNT.ID.eq(accountId))
                 .fetchOneInto(Account.class);
     }
-
 }

@@ -1,8 +1,9 @@
 package com.ssafy11.domain.Account;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
-
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum BankCode {
     한국은행("001"),
     산업은행("002"),
@@ -45,7 +46,8 @@ public enum BankCode {
     케이뱅크("089"),
     카카오뱅크("090"),
     토스뱅크("092"),
-    얼마페이("123");
+    얼마페이("123"),
+    TEST("999");
 
     private final String code;
 
@@ -59,7 +61,6 @@ public enum BankCode {
     }
 
     // Enum을 JSON에서 받을 때 매핑하는 로직
-    @JsonCreator
     public static BankCode fromCode(String code) {
         for (BankCode bankCode : BankCode.values()) {
             if (bankCode.getCode().equals(code)) {

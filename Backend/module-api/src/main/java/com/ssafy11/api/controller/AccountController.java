@@ -1,8 +1,9 @@
 package com.ssafy11.api.controller;
 
+import com.ssafy11.api.dto.account.AccountNumberRequest;
+import com.ssafy11.api.dto.account.BankCodeDTO;
 import com.ssafy11.api.service.AccountService;
 import com.ssafy11.domain.Account.Account;
-import com.ssafy11.domain.Account.BankCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,17 +21,19 @@ public class AccountController {
     @PostMapping("/{user_id}/account")
     public ResponseEntity<Account> createAccount(
             @PathVariable("user_id") Integer userId,
-            @RequestBody BankCode bankCode) {
+            @RequestBody BankCodeDTO bankCodeDTO) {  // BankCodeDTO로 변경
+        String bankCode = bankCodeDTO.getBankCode();  // bankCode 값 추출
         Account createdAccount = accountService.createAccount(userId, bankCode);
         return ResponseEntity.ok(createdAccount);
     }
+
 
     // 2. 내 계좌 등록하기
     @PostMapping("/users/{user_id}/account")
     public ResponseEntity<Account> registerAccount(
             @PathVariable("user_id") Integer userId,
-            @RequestBody String accountNumber) {
-        Account registeredAccount = accountService.connectAccount(userId, accountNumber);
+            @RequestBody AccountNumberRequest accountNumber) {
+        Account registeredAccount = accountService.connectAccount(userId, accountNumber.accountNumber());
         return ResponseEntity.ok(registeredAccount);
     }
 
@@ -38,11 +41,10 @@ public class AccountController {
     @GetMapping("/users/{user_id}/account")
     public ResponseEntity<List<Account>> viewAccounts(
             @PathVariable("user_id") Integer userId,
-            @RequestParam(value = "bankCode", required = false) BankCode bankCode) {
+            @RequestParam(value = "bankCode", required = false) String bankCode) {  // BankCode -> String
         List<Account> accounts = accountService.findAllAccounts(userId, bankCode);
         return ResponseEntity.ok(accounts);
     }
-
 
     // 4. 연결 계좌 정보 보기
     @GetMapping("/users/{user_id}/account/info")

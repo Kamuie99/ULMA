@@ -19,6 +19,7 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
+import FastImage from 'react-native-fast-image';
 
 const {width} = Dimensions.get('window');
 
@@ -64,14 +65,18 @@ const SlideItem: React.FC<SlideItemProps> = ({item}) => {
     <View style={styles.slide}>
       <Text style={styles.title}>{item.title}</Text>
       <Text style={styles.description}>{item.description}</Text>
-      <Image source={item.image} style={styles.image} />
+      <FastImage
+        source={item.image}
+        style={styles.image}
+        resizeMode={FastImage.resizeMode.contain}
+      />
     </View>
   );
 };
 
 const Pagination: React.FC<PaginationProps> = ({data, scrollX}) => {
   return (
-    <View style={{flexDirection: 'row', height: 64}}>
+    <View style={{flexDirection: 'row'}}>
       {data.map((_, i) => {
         const inputRange = [(i - 1) * width, i * width, (i + 1) * width];
         const dotWidth = scrollX.interpolate({
@@ -145,7 +150,7 @@ function AuthHomeScreen({navigation}: AuthHomeScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.WHITE,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -155,22 +160,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    width: '80%',
-    height: '60%',
-    resizeMode: 'contain',
+    width: '70%',
+    height: '50%',
+    marginTop: 20,
   },
   title: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     marginTop: 20,
-    textAlign: 'center',
+    textAlign: 'left',
+    width: '90%',
+    color: colors.BLACK,
   },
   description: {
-    fontSize: 14,
+    fontSize: 20,
     color: colors.GRAY_700,
-    textAlign: 'center',
+    textAlign: 'left',
+    width: '90%',
     marginHorizontal: 20,
-    marginTop: 10,
+    marginTop: 5,
+    marginBottom: 20,
   },
   dot: {
     height: 8,

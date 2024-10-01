@@ -1,7 +1,7 @@
 package com.ssafy11.api.service;
 
-import com.ssafy11.domain.participant.dto.UserRelation;
 import com.ssafy11.domain.schedule.ScheduleDao;
+import com.ssafy11.domain.schedule.dto.RecentSchedule;
 import com.ssafy11.domain.schedule.dto.Schedule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -63,6 +63,15 @@ public class ScheduleService {
         Assert.notNull(month, "Month must not be null");
 
         List<Schedule> scheduleList = scheduleDao.getSchedule(Integer.parseInt(userId), year, month);
+        Assert.notNull(scheduleList, "scheduleList is required");
+        return scheduleList;
+    }
+
+    @Transactional(readOnly = true)
+    public List<RecentSchedule> getRecentSchedule(String userId){
+        Assert.hasText(userId, "UserId must not be null");
+
+        List<RecentSchedule> scheduleList = scheduleDao.getRecentSchedule(Integer.parseInt(userId));
         Assert.notNull(scheduleList, "scheduleList is required");
         return scheduleList;
     }

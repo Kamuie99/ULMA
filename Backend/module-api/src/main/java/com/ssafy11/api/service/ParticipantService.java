@@ -60,7 +60,6 @@ public class ParticipantService {
 
     public Integer addParticipant(Participant participant, String userId){
         Assert.notNull(participant, "participant is required");
-
         Assert.isTrue(eventDao.isUserEventCreated(participant.eventId(), Integer.parseInt(userId)), "사용자가 만든 이벤트가 아닙니다.");
 
         if(isParticipant(participant.eventId(), participant.guestId())){
@@ -90,8 +89,14 @@ public class ParticipantService {
         return resultId;
     }
 
+    public boolean isPhoneNumber(String phoneNumber, Integer userId){
+        return participantDao.isPhoneNumber(phoneNumber,userId);
+    }
+
     public Integer addGuestAndUserRelation(AddGuestResponse addGuestResponse, String userId){
         Assert.notNull(addGuestResponse, "addGuestResponse is required");
+
+        Assert.isTrue(!isPhoneNumber(addGuestResponse.phoneNumber(), Integer.parseInt(userId)), "중복되는 휴대폰 번호입니다.");
         Integer guestId = participantDao.addGuests(addGuestResponse.name(), addGuestResponse.category(), addGuestResponse.phoneNumber());
         Assert.notNull(guestId, "guestId is required");
         Integer returnValue = participantDao.addUserRelation(guestId, Integer.parseInt(userId));

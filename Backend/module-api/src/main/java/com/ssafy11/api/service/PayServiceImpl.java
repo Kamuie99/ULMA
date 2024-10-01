@@ -1,16 +1,15 @@
 package com.ssafy11.api.service;
 
 import com.ssafy11.api.dto.account.AccountDTO;
-import com.ssafy11.api.dto.pay.ReceiveHistoryDTO;
-import com.ssafy11.api.dto.pay.SendHistoryDTO;
+import com.ssafy11.api.dto.pay.PayHistoryDTO;
 import com.ssafy11.domain.Account.Account;
 import com.ssafy11.domain.Pay.PayDao;
-import com.ssafy11.domain.Pay.ReceiveHistory;
-import com.ssafy11.domain.Pay.SendHistory;
+import com.ssafy11.domain.Pay.PayHistory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,58 +31,45 @@ public class PayServiceImpl implements PayService {
     }
 
     @Override
-    public ReceiveHistoryDTO chargeBalance(Integer accountId, Long amount) {
-        ReceiveHistory receiveHistory = payDao.chargeBalance(accountId, amount);
-        return new ReceiveHistoryDTO(
+    public PayHistoryDTO chargePayBalance(Integer userId, Long amount) {
+        PayHistory receiveHistory = payDao.chargePayBalance(userId, amount);
+        return new PayHistoryDTO(
                 receiveHistory.amount(),
-                receiveHistory.senderAccountNumber(),
-                receiveHistory.info(),
+                receiveHistory.balanceAfterTransaction(),
+                receiveHistory.transactionType(),
+                receiveHistory.counterpartyName(),
+                receiveHistory.counterpartyAccountNumber(),
+                receiveHistory.description(),
                 receiveHistory.transactionDate()
         );
     }
 
     @Override
-    public SendHistoryDTO sendMoney(Integer accountId, String target, String targetAccountNumber, Long amount, String info) {
-        SendHistory sendHistory = payDao.sendMoney(accountId, target, targetAccountNumber, amount, info);
-        return new SendHistoryDTO(
+    public PayHistoryDTO sendPayMoney(Integer userId, String info, String targetAccountNumber, Long amount) {
+        PayHistory sendHistory = payDao.sendPayMoney(userId, info, targetAccountNumber, amount);
+        return new PayHistoryDTO(
                 sendHistory.amount(),
-                sendHistory.targetAccountNumber(),
-                sendHistory.info(),
-                sendHistory.transactionDate()
-        );
-    }
-
-    @Override
-    public ReceiveHistoryDTO chargePayBalance(Integer userId, Long amount) {
-        ReceiveHistory receiveHistory = payDao.chargePayBalance(userId, amount);
-        return new ReceiveHistoryDTO(
-                receiveHistory.amount(),
-                receiveHistory.senderAccountNumber(),
-                receiveHistory.info(),
-                receiveHistory.transactionDate()
-        );
-    }
-
-    @Override
-    public SendHistoryDTO sendPayMoney(Integer userId, String targetAccountNumber, Long amount) {
-        SendHistory sendHistory = payDao.sendPayMoney(userId, targetAccountNumber, amount);
-        return new SendHistoryDTO(
-                sendHistory.amount(),
-                sendHistory.targetAccountNumber(),
-                sendHistory.info(),
+                sendHistory.balanceAfterTransaction(),
+                sendHistory.transactionType(),
+                sendHistory.counterpartyName(),
+                sendHistory.counterpartyAccountNumber(),
+                sendHistory.description(),
                 sendHistory.transactionDate()
         );
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<SendHistoryDTO> viewPayHistory(Integer userId) {
-        List<SendHistory> history = payDao.findSendHistoryByUserId(userId);
+    public List<PayHistoryDTO> viewPayHistory(Integer userId, LocalDate startDate, LocalDate endDate, String payType) {
+        List<PayHistory> history = payDao.findPayHistory(userId, startDate, endDate, payType);
         return history.stream()
-                .map(h -> new SendHistoryDTO(
+                .map(h -> new PayHistoryDTO(
                         h.amount(),
-                        h.targetAccountNumber(),
-                        h.info(),
+                        h.balanceAfterTransaction(),
+                        h.transactionType(),
+                        h.counterpartyName(),
+                        h.counterpartyAccountNumber(),
+                        h.description(),
                         h.transactionDate()
                 ))
                 .collect(Collectors.toList());

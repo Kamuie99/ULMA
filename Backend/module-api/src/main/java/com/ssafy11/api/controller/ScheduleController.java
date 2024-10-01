@@ -1,6 +1,7 @@
 package com.ssafy11.api.controller;
 
 import com.ssafy11.api.service.ScheduleService;
+import com.ssafy11.domain.schedule.dto.RecentSchedule;
 import com.ssafy11.domain.schedule.dto.Schedule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -50,5 +51,11 @@ public class ScheduleController {
         Assert.notNull(schedule, "schedule must not be null");
         int returnId = scheduleService.updateSchedule(schedule,user.getUsername());
         return ResponseEntity.ok(returnId);
+    }
+
+    @GetMapping("/recent") //최근 일정 조회
+    public ResponseEntity<List<RecentSchedule>> getRecentSchedule(@AuthenticationPrincipal User user) {
+        List<RecentSchedule> scheduleList = scheduleService.getRecentSchedule(user.getUsername());
+        return ResponseEntity.ok(scheduleList);
     }
 }

@@ -1,5 +1,6 @@
 package com.ssafy11.domain.schedule;
 
+import com.ssafy11.domain.schedule.dto.RecentSchedule;
 import com.ssafy11.domain.schedule.dto.Schedule;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -85,5 +87,22 @@ public class ScheduleDaoImpl implements ScheduleDao{
                         .and(USERS_RELATION.GUEST_ID.eq(guestId))
         );
     }
+
+    @Override
+    public List<RecentSchedule> getRecentSchedule(Integer userId) {
+        LocalDateTime now = LocalDate.now().atStartOfDay(); // 현재 시간
+        LocalDateTime twoWeeksLater = now.plusWeeks(2); // 2주 후 시간 계산
+
+        List<RecentSchedule> result = dsl.select(SCHEDULE.ID, SCHEDULE.DATE, SCHEDULE.NAME, GUEST.NAME)
+                .from(SCHEDULE)
+                .join(GUEST)
+                .on(SCHEDULE.GUEST_ID.eq(GUEST.ID))
+                .where(SCHEDULE.USERS_ID.eq(userId)
+                        .and(SCHEDULE.DATE.between(now, twoWeeksLater))) // LocalDateTime 사용
+                .fetchInto(RecentSchedule.class);
+
+        return result;
+    }
+
 
 }

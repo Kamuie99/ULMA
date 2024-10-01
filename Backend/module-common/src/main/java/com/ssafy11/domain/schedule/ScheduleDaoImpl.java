@@ -98,7 +98,8 @@ public class ScheduleDaoImpl implements ScheduleDao{
                 .join(GUEST)
                 .on(SCHEDULE.GUEST_ID.eq(GUEST.ID))
                 .where(SCHEDULE.USERS_ID.eq(userId)
-                        .and(SCHEDULE.DATE.between(now, twoWeeksLater))) // LocalDateTime 사용
+                        .and(SCHEDULE.DATE.between(now, twoWeeksLater)))
+                .orderBy(SCHEDULE.DATE.asc())
                 .fetchInto(RecentSchedule.class);
 
         return result;

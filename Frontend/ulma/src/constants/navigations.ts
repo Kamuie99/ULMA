@@ -14,13 +14,15 @@ const eventNavigations = {
   EVENT_ADD: 'EventAdd',
   EVENT_DATE: 'EventDate',
   EVENT: 'Event',
+  EVENT_COMMENT: 'EventComment',
+  EVENT_COMMENT_RESULT: 'EventCommentResult',
+  EVENT_DETAIL: 'EVENT_DETAIL',
 } as const;
 
 const payNavigations = {
   ACCOUNT_HISTORY: 'Accounthistory',
   ACCOUNT_INPUT: 'Accountinput',
   ADD_HISTORY: 'Addhistory',
-  ADDOPTION: 'Addoption',
   CHARGER_RESULT: 'Chargerresult',
   PAY_LIST: 'Paylist',
   PAY_RECHARGE: 'Payrecharge',
@@ -29,11 +31,19 @@ const payNavigations = {
   RECOMMEND_OPTION: 'RecommendOption',
   SENDING: 'Sending',
   SEND_RESULT: 'Sendresult',
+  INPUT_AMOUNT: 'InputAmount',
 } as const;
 
-const settingNavigations = {
-  SETTING_HOME: 'SettingHome',
+const mypageNavigations = {
+  MYPAGE_HOME: 'MyPageHome',
   USER_DETAIL: 'UserDetail',
+} as const;
+
+const friendsNavigations = {
+  FRIENDS_LIST: 'FriendsList',
+  FRIENDS_HOME: 'FriendsHome',
+  FRIENDS_ADD: 'FriendsAdd',
+  FREINDS_DETAIL: 'FriendsDetail',
 } as const;
 
 export {
@@ -41,5 +51,6 @@ export {
   authNavigations,
   eventNavigations,
   payNavigations,
-  settingNavigations,
+  mypageNavigations,
+  friendsNavigations,
 };

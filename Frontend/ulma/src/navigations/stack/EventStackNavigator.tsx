@@ -1,18 +1,20 @@
 import {eventNavigations} from '@/constants/navigations';
 import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
-
 import {colors} from '@/constants';
 import Icon from 'react-native-vector-icons/Entypo';
 import EventAddScreen from '@/screens/Events/EventAddScreen';
-import EventDateScreen from '@/screens/Events/EventDateScreen';
 import EventScreen from '@/screens/Events/EventScreen';
+// import EventCommentResult from '@/screens/Events/EventCommentResult';
+import EventDetailScreen from '@/screens/Events/EventDetailScreen';
 
+// eventStackParamList 정의
 export type eventStackParamList = {
   [eventNavigations.EVENT_ADD]: undefined;
-  [eventNavigations.EVENT_DATE]: undefined;
   [eventNavigations.EVENT]: undefined;
+  [eventNavigations.EVENT_COMMENT]: undefined;
+  [eventNavigations.EVENT_COMMENT_RESULT]: undefined;
+  [eventNavigations.EVENT_DETAIL]: {event_id: string}; // EVENT_DETAIL에 event_id 추가
 };
 
 const Stack = createStackNavigator<eventStackParamList>();
@@ -44,6 +46,13 @@ function EventStackNavigator() {
           headerShown: false,
         }}
       />
+      {/* <Stack.Screen
+        name={eventNavigations.EVENT_COMMENT_RESULT}
+        component={EventCommentResult}
+        options={{
+          headerTitle: '경조사 멘트 추천',
+        }}
+      /> */}
       <Stack.Screen
         name={eventNavigations.EVENT_ADD}
         component={EventAddScreen}
@@ -54,17 +63,16 @@ function EventStackNavigator() {
           },
         }}
       />
+      {/* EventDetailScreen에 event_id 전달 */}
       <Stack.Screen
-        name={eventNavigations.EVENT_DATE}
-        component={EventDateScreen}
+        name={eventNavigations.EVENT_DETAIL}
+        component={EventDetailScreen}
         options={{
-          headerTitle: '이벤트 추가하기',
+          headerTitle: '이벤트 상세 내역',
         }}
       />
     </Stack.Navigator>
   );
 }
-
-const styles = StyleSheet.create({});
 
 export default EventStackNavigator;

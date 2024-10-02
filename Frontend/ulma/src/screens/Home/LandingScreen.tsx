@@ -27,14 +27,6 @@ interface Birthday {
   name: string;
 }
 
-// 생일 데이터 예시
-// const birthdays: Birthday[] = [
-//   {id: '1', date: '09.11', event: '생일', name: '홍길동'},
-//   {id: '2', date: '09.12', event: '생일', name: '김철수'},
-//   {id: '3', date: '09.13', event: '생일', name: '이영희'},
-//   // 더 많은 데이터 추가
-// ];
-
 const eventList = [];
 
 const LandingPage: React.FC = () => {

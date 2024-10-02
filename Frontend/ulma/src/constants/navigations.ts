@@ -20,6 +20,7 @@ const eventNavigations = {
 } as const;
 
 const payNavigations = {
+  HOME: 'PayHome',
   ACCOUNT_HISTORY: 'Accounthistory',
   ACCOUNT_INPUT: 'Accountinput',
   ADD_HISTORY: 'Addhistory',

@@ -14,6 +14,9 @@ import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import EventScreen from '../Events/EventScreen';
 import axiosInstance from '@/api/axios';
 import useAuthStore from '@/store/useAuthStore';
+import {colors} from '@/constants';
+import Icon from 'react-native-vector-icons/Entypo';
+import CalendarComponent from '@/components/calendar/CalendarButton';
 
 const {width} = Dimensions.get('window');
 
@@ -25,12 +28,14 @@ interface Birthday {
 }
 
 // 생일 데이터 예시
-const birthdays: Birthday[] = [
-  {id: '1', date: '09.11', event: '생일', name: '홍길동'},
-  {id: '2', date: '09.12', event: '생일', name: '김철수'},
-  {id: '3', date: '09.13', event: '생일', name: '이영희'},
-  // 더 많은 데이터 추가
-];
+// const birthdays: Birthday[] = [
+//   {id: '1', date: '09.11', event: '생일', name: '홍길동'},
+//   {id: '2', date: '09.12', event: '생일', name: '김철수'},
+//   {id: '3', date: '09.13', event: '생일', name: '이영희'},
+//   // 더 많은 데이터 추가
+// ];
+
+const eventList = [];
 
 const LandingPage: React.FC = () => {
   const navigation = useNavigation();
@@ -45,7 +50,8 @@ const LandingPage: React.FC = () => {
               Authorization: `Bearer ${accessToken}`,
             },
           });
-          console.log(response.data.data); // API에서 받은 데이터로 상태 업데이트
+          console.log(response.data); // API에서 받은 데이터로 상태 업데이트
+          eventList.push(...response.data);
         } catch (error) {
           console.error('일정 목록을 불러오는 중 오류 발생:', error);
           console.log(accessToken);
@@ -63,45 +69,46 @@ const LandingPage: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* 친구 검색 박스 */}
-      <View style={styles.searchContainer}>
-        <TextInput style={styles.searchInput} placeholder="친구 검색" />
-      </View>
-
       {/* 일정 관리 바로가기 버튼 */}
-      <View style={styles.scheduleContainer}>
+      {/* <View style={styles.scheduleContainer}>
         <Text style={styles.scheduleText}>일정 관리 바로가기</Text>
         <TouchableOpacity onPress={handleScheduleNavigation}>
-          <Text style={styles.arrowText}> &gt; </Text>
+          <Icon name="chevron-right" size={24} color={colors.GREEN_700} />
         </TouchableOpacity>
+      </View> */}
+
+      {/* 캘린더 */}
+      <View>
+        <CalendarComponent />
       </View>
 
       {/* 가로 스크롤 가능한 생일 목록 */}
-      <FlatList
-        data={birthdays}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        renderItem={({item}) => (
+      <View>
+        {eventList.length > 0 ? (
+          <FlatList
+            data={eventList}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            renderItem={({item}) => (
+              <View style={styles.birthdayBox}>
+                <Text style={styles.dateText}>{item.date}</Text>
+                <Text style={styles.eventText}>{item.name}</Text>
+                <Text style={styles.nameText}>{item.guestName}</Text>
+              </View>
+            )}
+            keyExtractor={item => item.id}
+          />
+        ) : (
           <View style={styles.birthdayBox}>
-            <Text style={styles.dateText}>{item.date}</Text>
-            <Text style={styles.eventText}>{item.event}</Text>
-            <Text style={styles.nameText}>{item.name}</Text>
+            <Text style={styles.emptyMsg}>
+              등록된{'\n'}이벤트가{'\n'}없습니다👀
+            </Text>
           </View>
         )}
-        keyExtractor={item => item.id}
-      />
-
-      {/* 캘린더 */}
-      {/* <View>
-        <EventScreen />
-      </View> */}
+      </View>
 
       {/* ULMA 페이 바로가기 예시 */}
       <View style={styles.ulmaContainer}>
-        {/* <Image
-          source={require('./path_to_ulma_image.png')}
-          style={styles.ulmaImage}
-        /> */}
         <TouchableOpacity onPress={() => console.log('ULMA 페이로 이동')}>
           <Text style={styles.ulmaText}>ULMA 페이 바로가기 &gt;</Text>
         </TouchableOpacity>
@@ -113,11 +120,10 @@ const LandingPage: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
     padding: 16,
   },
   searchContainer: {
-    backgroundColor: '#f1f1f1',
+    backgroundColor: colors.LIGHTGRAY,
     padding: 10,
     borderRadius: 8,
     flexDirection: 'row',
@@ -139,10 +145,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  arrowText: {
-    fontSize: 16,
-    color: '#00C77F',
-  },
   birthdayBox: {
     backgroundColor: '#f9f9f9',
     padding: 10,
@@ -159,6 +161,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     marginTop: 4,
+  },
+  emptyMsg: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    padding: 10,
   },
   nameText: {
     fontSize: 12,

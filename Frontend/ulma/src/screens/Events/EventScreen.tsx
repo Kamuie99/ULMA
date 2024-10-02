@@ -134,9 +134,10 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
 
   return (
     <View style={styles.container}>
+      {/* 상단 헤더 부분 추가
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>내 행사</Text>
-      </View>
+        <Text style={styles.headerTitle}>내 이벤트 목록</Text>
+      </View> */}
 
       {events.length > 0 ? (
         <FlatList

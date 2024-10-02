@@ -290,7 +290,7 @@ public class PayDaoImpl implements PayDao {
                     .fetchInto(PayHistory.class);
         }
 
-        return List.of();
+        return null;
     }
 
 

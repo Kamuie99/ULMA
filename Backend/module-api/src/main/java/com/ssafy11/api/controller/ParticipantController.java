@@ -109,7 +109,7 @@ public class ParticipantController {
     //지인 등록
     @PostMapping
     public ResponseEntity<Integer> addGuestAndUserRelation(@AuthenticationPrincipal User user,
-                                                     @RequestBody AddGuestResponse addGuestResponse) {
+                                                     @RequestBody List<AddGuestResponse> addGuestResponse) {
         Assert.notNull(addGuestResponse, "addGuestResponse must not be null");
 
         Integer resultId = participantService.addGuestAndUserRelation(addGuestResponse, user.getUsername());

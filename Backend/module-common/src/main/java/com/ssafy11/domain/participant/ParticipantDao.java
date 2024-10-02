@@ -16,6 +16,6 @@ public interface ParticipantDao {
     Integer deleteParticipant(Participant participant);
     Boolean isPhoneNumber(String phoneNumber, Integer userId);
     Integer addGuests(String name, String category, String phoneNumber);
-    Integer addUserRelation(Integer guestId, Integer userId);
+    Integer addUserRelation(List<Integer> guestIds, Integer userId);
     PageResponse<UserRelation> getUserRelations(Integer userId, PageDto pageDto);
 }

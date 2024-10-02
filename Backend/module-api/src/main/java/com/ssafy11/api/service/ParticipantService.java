@@ -103,17 +103,27 @@ public class ParticipantService {
         return participantDao.isPhoneNumber(phoneNumber,userId);
     }
 
-    public Integer addGuestAndUserRelation(AddGuestResponse addGuestResponse, String userId){
+    public Integer addGuestAndUserRelation(List<AddGuestResponse> addGuestResponse, String userId){
         Assert.notNull(addGuestResponse, "addGuestResponse is required");
 
-        Assert.isTrue(!isPhoneNumber(addGuestResponse.phoneNumber(), Integer.parseInt(userId)), "중복되는 휴대폰 번호입니다.");
-        Integer guestId = participantDao.addGuests(addGuestResponse.name(), addGuestResponse.category(), addGuestResponse.phoneNumber());
-        Assert.notNull(guestId, "guestId is required");
-        Integer returnValue = participantDao.addUserRelation(guestId, Integer.parseInt(userId));
+        List<Integer> guestIds = new ArrayList<>();
+
+        for (AddGuestResponse response : addGuestResponse) {
+            Assert.isTrue(!isPhoneNumber(response.phoneNumber(), Integer.parseInt(userId)), "중복되는 휴대폰 번호가 존재합니다.");
+
+            Integer guestId = participantDao.addGuests(response.name(), response.category(), response.phoneNumber());
+            Assert.notNull(guestId, "guestId is required");
+            guestIds.add(guestId);
+        }
+
+        Integer returnValue = participantDao.addUserRelation(guestIds, Integer.parseInt(userId));
         Assert.notNull(returnValue, "returnValue is required");
+
+        Assert.isTrue(guestIds.size()==returnValue, "지인 등록에 실패하였습니다.");
         return returnValue;
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<UserRelation> getUserRelation(String userId, PageDto pagedto) {
         Assert.hasText(userId, "userId is required");
         PageResponse<UserRelation> userRelationList = participantDao.getUserRelations(Integer.parseInt(userId), pagedto);

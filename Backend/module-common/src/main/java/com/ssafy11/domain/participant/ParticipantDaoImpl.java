@@ -209,10 +209,14 @@ public class ParticipantDaoImpl implements ParticipantDao {
     }
 
     @Override
-    public Integer addUserRelation(Integer guestId, Integer userId) {
-        return dsl.insertInto(USERS_RELATION, USERS_RELATION.USERS_ID, USERS_RELATION.GUEST_ID, USERS_RELATION.CREATE_AT)
-                .values(userId, guestId, LocalDateTime.now())
-                .execute();
+    public Integer addUserRelation(List<Integer> guestIds, Integer userId) {
+        var query = dsl.insertInto(USERS_RELATION, USERS_RELATION.USERS_ID, USERS_RELATION.GUEST_ID, USERS_RELATION.CREATE_AT);
+
+        for (Integer guestId : guestIds) {
+            query = query.values(userId, guestId, LocalDateTime.now());
+        }
+
+        return query.execute();
     }
 
     @Transactional(readOnly = true)

@@ -1,5 +1,6 @@
 const homeNavigations = {
   LANDING: 'Landing',
+  SCHEDULE_MAIN: 'ScheduleMain',
 } as const;
 
 const authNavigations = {
@@ -35,6 +36,7 @@ const payNavigations = {
   SENDING: 'Sending',
   SEND_RESULT: 'Sendresult',
   INPUT_AMOUNT: 'InputAmount',
+  MAKE_PAY: 'MakePayAccount',
 } as const;
 
 const mypageNavigations = {

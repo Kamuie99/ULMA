@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput } from 'react-native';
 import axiosInstance from '@/api/axios';
 import { colors } from '@/constants';
-import { useNavigation, useFocusEffect } from '@react-navigation/native'; // useFocusEffect 추가
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { friendsNavigations } from '@/constants/navigations';
 
 interface Friend {
@@ -32,8 +32,8 @@ function FriendsListScreen({}: FriendsListScreenProps) {
         params: { size: 10, page },
       });
       const newFriends = response.data.data;
-      setFriends(prevFriends => (page === 1 ? newFriends : [...prevFriends, ...newFriends])); // 첫 페이지면 초기화
-      setFilteredFriends(prevFriends => (page === 1 ? newFriends : [...prevFriends, ...newFriends])); // 첫 페이지면 초기화
+      setFriends(prevFriends => (page === 1 ? newFriends : [...prevFriends, ...newFriends]));
+      setFilteredFriends(prevFriends => (page === 1 ? newFriends : [...prevFriends, ...newFriends]));
       setCurrentPage(page);
       setHasMore(newFriends.length === 10);
     } catch (error) {
@@ -62,11 +62,9 @@ function FriendsListScreen({}: FriendsListScreenProps) {
     }
   }, [friends]);
 
-
-  // 화면이 포커스를 받을 때마다 친구 목록을 다시 불러옴
   useFocusEffect(
     useCallback(() => {
-      fetchFriends(1); // 첫 페이지 데이터 새로 불러오기
+      fetchFriends(1); 
     }, [])
   );
 
@@ -78,10 +76,33 @@ function FriendsListScreen({}: FriendsListScreenProps) {
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery, searchFriends]);
 
-
   const formatPhoneNumber = (phoneNumber: string | null) => {
     if (!phoneNumber) return '등록된 번호가 없습니다.';
     return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`;
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case '가족':
+        return colors.PINK;
+      case '친구':
+        return colors.GREEN_700;
+      case '직장':
+        return colors.PASTEL_BLUE;
+      default:
+        return '#e0e0e0'; 
+    }
+  };
+
+  const getCategoryTextColor = (category: string) => {
+    switch (category) {
+      case '가족':
+      case '친구':
+      case '직장':
+        return colors.WHITE; // 가족, 친구, 직장의 경우 텍스트 색상을 흰색으로 설정
+      default:
+        return '#333'; // 기본 회색
+    }
   };
 
   const renderFriendCard = ({ item }: { item: Friend }) => (
@@ -96,8 +117,12 @@ function FriendsListScreen({}: FriendsListScreenProps) {
     >
       <View style={styles.cardHeader}>
         <Text style={styles.name}>{item.name}</Text>
-        <TouchableOpacity style={styles.categoryButton}>
-          <Text style={styles.categoryText}>{item.category}</Text>
+        <TouchableOpacity
+          style={[styles.categoryButton, { backgroundColor: getCategoryColor(item.category) }]}
+        >
+          <Text style={[styles.categoryText, { color: getCategoryTextColor(item.category) }]}>
+            {item.category}
+          </Text>
         </TouchableOpacity>
       </View>
       <Text style={styles.phoneNumber}>
@@ -122,7 +147,7 @@ function FriendsListScreen({}: FriendsListScreenProps) {
       <FlatList
         data={filteredFriends}
         renderItem={renderFriendCard}
-        keyExtractor={(item) => item.guestId.toString()} // guestId가 고유한 값인지 확인
+        keyExtractor={(item) => item.guestId.toString()}
         onEndReached={() => fetchFriends(currentPage + 1)}
         onEndReachedThreshold={0.1}
         ListFooterComponent={renderFooter}
@@ -135,26 +160,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#f5f5f5',
   },
   searchInput: {
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 15,
     paddingHorizontal: 10,
     marginBottom: 16,
     backgroundColor: 'white',
   },
   card: {
-    backgroundColor: 'white',
-    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 15,
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 15,
     elevation: 3,
   },
   name: {
@@ -164,7 +188,6 @@ const styles = StyleSheet.create({
     color: colors.BLACK,
   },
   categoryButton: {
-    backgroundColor: '#e0e0e0',
     borderRadius: 16,
     paddingVertical: 4,
     paddingHorizontal: 12,
@@ -173,7 +196,6 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 14,
-    color: '#333',
   },
   phoneNumber: {
     fontSize: 14,

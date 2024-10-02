@@ -5,6 +5,7 @@ import com.ssafy11.api.dto.account.ChargePayAmountRequest;
 import com.ssafy11.api.dto.account.ChargePayAmountResponse;
 import com.ssafy11.api.dto.account.SendPayMoneyRequest;
 import com.ssafy11.api.dto.pay.PayHistoryDTO;
+import com.ssafy11.api.exception.ErrorException;
 import com.ssafy11.api.service.PayService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -68,8 +69,12 @@ public class PayController {
     public ResponseEntity<ChargePayAmountResponse> viewPayBalance(
             @AuthenticationPrincipal User user) {
         int authenticatedUserId = Integer.parseInt(user.getUsername());
-        ChargePayAmountResponse balance = payService.viewPayBalance(authenticatedUserId);
-        return ResponseEntity.ok(balance);
+        try {
+            ChargePayAmountResponse balance = payService.viewPayBalance(authenticatedUserId);
+            return ResponseEntity.ok(balance);
+        } catch (ErrorException e) {
+            throw e;
+        }
     }
 
     // 4. Pay 충전하기

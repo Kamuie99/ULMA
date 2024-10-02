@@ -30,21 +30,19 @@ function EventStackNavigator() {
         headerStyle: {
           backgroundColor: colors.WHITE,
         },
-        headerTitleAlign: 'center',
+        headerTitleAlign: 'left',
         headerTitleStyle: {
-          fontSize: 15,
+          fontSize: 18,
+          fontWeight: 'bold',
         },
         headerTintColor: colors.BLACK,
-        headerBackImage: () => {
-          return <Icon name="chevron-left" size={24} color={colors.BLACK} />;
-        },
-      }}>
+      }}
+    >
       <Stack.Screen
         name={eventNavigations.EVENT}
         component={EventScreen}
         options={{
-          headerTitle: ' ',
-          headerShown: false,
+          headerTitle: '내 경조사 관리',
         }}
       />
       <Stack.Screen

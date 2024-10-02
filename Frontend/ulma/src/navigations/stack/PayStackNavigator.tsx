@@ -51,21 +51,19 @@ function PayStackNavigator() {
         headerStyle: {
           backgroundColor: colors.WHITE,
         },
-        headerTitleAlign: 'center',
+        headerTitleAlign: 'left',
         headerTitleStyle: {
-          fontSize: 15,
+          fontSize: 18,
+          fontWeight: 'bold',
         },
         headerTintColor: colors.BLACK,
-        headerBackImage: () => {
-          return <Icon name="chevron-left" size={24} color={colors.BLACK} />;
-        },
-      }}>
+      }}
+    >
       <Stack.Screen
         name={payNavigations.HOME}
         component={PayHomeScreen}
         options={{
-          headerTitle: '',
-          headerShown: false,
+          headerTitle: 'ULMA PAY',
         }}
       />
       <Stack.Screen

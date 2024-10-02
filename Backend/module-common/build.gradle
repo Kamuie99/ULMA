@@ -1,6 +1,7 @@
-import org.testcontainers.containers.MySQLContainer
-import org.gradle.api.services.BuildServiceParameters
-import org.gradle.api.services.BuildService
+import org.gradle.api.services.BuildServiceParameters;
+import org.gradle.api.services.BuildService;
+import org.testcontainers.containers.MySQLContainer;
+import java.nio.file.Paths;
 
 buildscript {
     repositories {
@@ -39,31 +40,26 @@ dependencies {
 
 Provider<MySqlService> dbContainerProvider = project.getGradle()
         .getSharedServices()
-        .registerIfAbsent("mysql", MySqlService.class, {})
+        .registerIfAbsent("mysql", MySqlService.class, spec -> {
+            spec.getParameters().getSchemaFilePath().set(
+                    Paths.get(project.getProjectDir().toString(), "src", "main", "resources", "schema.sql").toString()
+            );
+        });
 
 jooq {
-    def activeProfile = System.getProperty('spring.profiles.active', 'prod')
-
     configurations {
         main {
             generationTool {
                 logging = org.jooq.meta.jaxb.Logging.WARN
-                if (activeProfile.contains('test')) {
-                    def dbContainer = dbContainerProvider.get().getContainer()
-                    jdbc {
-                        driver = 'com.mysql.cj.jdbc.Driver'
-                        url = dbContainer.jdbcUrl
-                        user = dbContainer.username
-                        password = dbContainer.password
-                    }
-                } else {
-                    jdbc {
-                        driver = 'com.mysql.cj.jdbc.Driver'
-                        url = 'jdbc:mysql://j11e204.p.ssafy.io:3306/ulma'
-                        user = 'userm'
-                        password = 'userm1234'
-                    }
+
+                def dbContainer = dbContainerProvider.get().getContainer()
+                jdbc {
+                    driver = 'com.mysql.cj.jdbc.Driver'
+                    url = dbContainer.jdbcUrl
+                    user = dbContainer.username
+                    password = dbContainer.password
                 }
+
                 generator {
                     name = 'org.jooq.codegen.DefaultGenerator'
                     database {
@@ -110,39 +106,39 @@ sonar {
     }
 }
 
-abstract class MySqlService implements BuildService<BuildServiceParameters.None>, AutoCloseable {
+abstract class MySqlService implements BuildService<MySqlService.Params>, AutoCloseable {
 
-    private final MySQLContainer container;
+    interface Params extends BuildServiceParameters {
+        Property<String> getSchemaFilePath();  // Property<String> 사용
+    }
+
+    private final MySQLContainer<?> container;
 
     MySqlService() {
-        container = new MySQLContainer("mysql:8.0.33")
+        container = new MySQLContainer<>("mysql:8.0.33")
                 .withDatabaseName("ulma")
                 .withUsername("root")
                 .withPassword("1234");
         container.start();
 
-        // SQL 파일을 컨테이너로 복사
-        String schemaFilePath = "C:\\Users\\SSAFY\\workspace\\S11P21E204\\Backend\\module-common\\src\\main\\resources\\schema.sql"
-        print(schemaFilePath)
-        File schemaFile = new File(schemaFilePath)
+        String schemaFilePath = getParameters().getSchemaFilePath().get();  // get() 메서드로 값 가져옴
+        File schemaFile = new File(schemaFilePath);
 
         if (schemaFile.exists()) {
-            // 컨테이너 내부의 경로로 파일 복사
             container.copyFileToContainer(
                     org.testcontainers.utility.MountableFile.forHostPath(schemaFilePath),
                     "/schema.sql"
             );
-            // 복사된 schema.sql 파일을 MySQL에 적용
             container.execInContainer("mysql", "-u", "root", "-p1234", "ulma", "-e", "source /schema.sql");
         }
     }
 
     @Override
-    void close() {
+    public void close() {
         container.stop();
     }
 
-    MySQLContainer getContainer() {
+    public MySQLContainer<?> getContainer() {
         return container;
     }
 }

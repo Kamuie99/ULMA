@@ -2,6 +2,7 @@ package com.ssafy11.api.controller;
 
 import com.ssafy11.api.dto.account.AccountDTO;
 import com.ssafy11.api.dto.account.ChargePayAmountRequest;
+import com.ssafy11.api.dto.account.ChargePayAmountResponse;
 import com.ssafy11.api.dto.account.SendPayMoneyRequest;
 import com.ssafy11.api.dto.pay.PayHistoryDTO;
 import com.ssafy11.api.service.PayService;
@@ -60,9 +61,9 @@ public class PayController {
 
     // 3. Pay 잔액 보기
     @GetMapping("/balance")
-    public ResponseEntity<Long> viewPayBalance(
+    public ResponseEntity<ChargePayAmountResponse> viewPayBalance(
             @PathVariable("user_id") Integer userId) {
-        Long balance = payService.viewPayBalance(userId);
+        ChargePayAmountResponse balance = payService.viewPayBalance(userId);
         return ResponseEntity.ok(balance);
     }
 

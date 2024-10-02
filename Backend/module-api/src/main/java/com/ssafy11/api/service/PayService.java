@@ -1,6 +1,7 @@
 package com.ssafy11.api.service;
 
 import com.ssafy11.api.dto.account.AccountDTO;
+import com.ssafy11.api.dto.account.ChargePayAmountResponse;
 import com.ssafy11.api.dto.pay.PayHistoryDTO;
 
 import java.time.LocalDate;
@@ -16,5 +17,5 @@ public interface PayService {
 
     List<PayHistoryDTO> viewPayHistory(Integer userId, LocalDate startDate, LocalDate endDate, String payType);  // Pay 내역 조회
 
-    Long viewPayBalance(Integer userId);  // Pay 잔액 조회
+    ChargePayAmountResponse viewPayBalance(Integer userId);  // Pay 잔액 조회
 }

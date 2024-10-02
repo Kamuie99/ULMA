@@ -121,8 +121,8 @@ public class ParticipantDaoImpl implements ParticipantDao {
     @Transactional(readOnly = true)
     @Override
     public TransactionSummary getTransactionSummary(Integer userId, Integer guestId) {
-        // 내가 지인에게 준 총액 (참여 테이블에서)
-        Integer totalGiven = dsl.select(DSL.sum(PARTICIPATION.AMOUNT))
+
+        Integer totalReceived = dsl.select(DSL.sum(PARTICIPATION.AMOUNT))
                 .from(PARTICIPATION)
                 .join(EVENT)
                 .on(EVENT.ID.eq(PARTICIPATION.EVENT_ID))
@@ -130,8 +130,7 @@ public class ParticipantDaoImpl implements ParticipantDao {
                         .and(EVENT.USERS_ID.eq(userId)))
                 .fetchOne(0, Integer.class);
 
-        // 내가 지인에게서 받은 총액 (일정 테이블에서)
-        Integer totalReceived = dsl.select(DSL.sum(SCHEDULE.AMOUNT))
+        Integer totalGiven = dsl.select(DSL.sum(SCHEDULE.AMOUNT))
                 .from(SCHEDULE)
                 .where(SCHEDULE.GUEST_ID.eq(guestId)
                         .and(SCHEDULE.USERS_ID.eq(userId)))

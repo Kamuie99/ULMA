@@ -6,7 +6,9 @@ import com.ssafy11.api.service.AccountService;
 import com.ssafy11.domain.Account.Account;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.userdetails.User;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,38 +21,41 @@ public class AccountController {
     private final AccountService accountService;
 
     // 1. 계좌 만들기
-    @PostMapping("/{user_id}/account")
+    @PostMapping("/account")
     public ResponseEntity<Account> createAccount(
-            @PathVariable("user_id") Integer userId,
-            @RequestBody BankCodeDTO bankCodeDTO) {  // BankCodeDTO로 변경
-        String bankCode = bankCodeDTO.getBankCode();  // bankCode 값 추출
-        Account createdAccount = accountService.createAccount(userId, bankCode);
+            @AuthenticationPrincipal User user,
+            @RequestBody BankCodeDTO bankCodeDTO) {
+        int authenticatedUserId = Integer.parseInt(user.getUsername());
+        Account createdAccount = accountService.createAccount(authenticatedUserId, bankCodeDTO.getBankCode());
         return ResponseEntity.ok(createdAccount);
     }
 
     // 2. 내 계좌 등록하기
-    @PostMapping("/users/{user_id}/account")
+    @PostMapping("/users/account")
     public ResponseEntity<Account> registerAccount(
-            @PathVariable("user_id") Integer userId,
+            @AuthenticationPrincipal User user,
             @RequestBody AccountNumberRequest accountNumber) {
-        Account registeredAccount = accountService.connectAccount(userId, accountNumber.accountNumber());
+        int authenticatedUserId = Integer.parseInt(user.getUsername());
+        Account registeredAccount = accountService.connectAccount(authenticatedUserId, accountNumber.accountNumber());
         return ResponseEntity.ok(registeredAccount);
     }
 
     // 3. 내 계좌 보기
-    @GetMapping("/users/{user_id}/account")
+    @GetMapping("/users/account")
     public ResponseEntity<List<Account>> viewAccounts(
-            @PathVariable("user_id") Integer userId,
-            @RequestParam(value = "bankCode", required = false) String bankCode) {  // BankCode -> String
-        List<Account> accounts = accountService.findAllAccounts(userId, bankCode);
+            @AuthenticationPrincipal User user,
+            @RequestParam(value = "bankCode", required = false) String bankCode) {
+        int authenticatedUserId = Integer.parseInt(user.getUsername());
+        List<Account> accounts = accountService.findAllAccounts(authenticatedUserId, bankCode);
         return ResponseEntity.ok(accounts);
     }
 
     // 4. 연결 계좌 정보 보기
-    @GetMapping("/users/{user_id}/account/info")
+    @GetMapping("/users/account/info")
     public ResponseEntity<Account> viewConnectedAccountInfo(
-            @PathVariable("user_id") Integer userId) {
-        Account connectedAccount = accountService.connectedAccount(userId);
+            @AuthenticationPrincipal User user) {
+        int authenticatedUserId = Integer.parseInt(user.getUsername());
+        Account connectedAccount = accountService.connectedAccount(authenticatedUserId);
         return ResponseEntity.ok(connectedAccount);
     }
 

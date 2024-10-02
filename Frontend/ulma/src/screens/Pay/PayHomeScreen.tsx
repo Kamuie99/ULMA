@@ -3,10 +3,11 @@ import {colors} from '@/constants';
 import Icon from 'react-native-vector-icons/Entypo';
 import useAuthStore from '@/store/useAuthStore';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import React, {useCallback, useEffect} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   Dimensions,
   Image,
+  Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -14,72 +15,51 @@ import {
 } from 'react-native';
 import {ScrollView} from 'react-native-gesture-handler';
 import {payNavigations} from '@/constants/navigations';
+import Toast from 'react-native-toast-message';
+import usePayStore from '@/store/usePayStore';
 
 function PayHomeScreen() {
   const {accessToken} = useAuthStore();
-  const navigation = new useNavigation();
-  const payMoney = 0;
-  const isHaveAccount = false;
-  const bank = '하나은행';
-  const account = '351468468**';
+  const [modalVisible, setModalVisible] = useState(false);
+  const {accountNumber, balance, bankCode, getAccountInfo, makeAccount} =
+    usePayStore();
 
-  // useFocusEffect(
-  //   useCallback(() => {
-  //     const fetchBalance = async () => {
-  //       try {
-  //         const response = await axiosInstance.get('/users/pay/balance', {
-  //           headers: {
-  //             Authorization: `Bearer ${accessToken}`,
-  //           },
-  //         });
-  //         console.log(response.data);
-  //       } catch (error) {
-  //         console.error('error:', error);
-  //       }
-  //     };
+  useEffect(() => {
+    getAccountInfo();
+  }, [getAccountInfo]);
 
-  //     fetchBalance();
-  //   }, []),
-  // );
+  useEffect(() => {
+    console.log('계좌번호가 업데이트되었습니다:', accountNumber);
+  }, [accountNumber]);
 
-  // useEffect(() => {
-  //   const fetchAccount = async () => {
-  //     try {
-  //       const response = await axiosInstance.get('/users/account/info', {
-  //         headers: {
-  //           Authorization: `Bearer ${accessToken}`,
-  //         },
-  //       });
-  //       console.log(response.data);
-  //     } catch (error) {
-  //       console.error('error:', error);
-  //     }
-  //   };
+  const handleCreateAccount = async () => {
+    try {
+      await makeAccount();
+    } catch (error) {
+      console.error('계좌 생성 중 에러:', error);
+    }
+  };
 
-  //   fetchAccount();
-  // }, []);
+  const bankImages = {
+    하나은행: require('../../assets/Pay/banks/하나은행.png'),
+  };
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.boxContainer}>
         <Text style={styles.title}>페이머니</Text>
-        {isHaveAccount ? (
+        {balance ? (
           <>
-            <Image
-              source={require(`../../assets/Pay/banks/${bank}.png`)}
-              style={styles.bankImage}
-            />
-            <Text style={styles.accountText}>{account}</Text>
-            <Text style={styles.balance}>{payMoney}원</Text>
+            <Image source={bankImages[bankCode]} style={styles.bankImage} />
+            <Text style={styles.accountText}>{accountNumber}</Text>
+            <Text style={styles.balance}>{balance}원</Text>
           </>
         ) : (
           <>
             <Text>연결된 페이 서비스가 확인되지 않아요 😯</Text>
             <TouchableOpacity
               style={styles.connectButton}
-              onPress={() => {
-                navigation.navigate(payNavigations.MAKE_PAY);
-              }}>
+              onPress={() => setModalVisible(true)}>
               <Text style={styles.connectButtonText}>Ulma Pay 시작하기</Text>
               <Icon name="chevron-right" size={24} color={colors.GREEN_700} />
             </TouchableOpacity>
@@ -136,6 +116,36 @@ function PayHomeScreen() {
           <Text>내역 1</Text>
         </View>
       </View>
+
+      {/* 모달창 */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalText}>
+              Ulma Pay 서비스를 시작하시겠습니까?
+            </Text>
+            <View>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={async () => {
+                  handleCreateAccount;
+                  setModalVisible(false);
+                }}>
+                <Text style={styles.closeButtonText}>시작하기</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setModalVisible(false)}>
+                <Text style={styles.closeButtonText}>닫기</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -204,6 +214,34 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   historyContainer: {},
+
+  // modal
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    width: 300,
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalText: {
+    marginBottom: 20,
+  },
+  closeButton: {
+    backgroundColor: colors.GREEN_300,
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    fontWeight: 'bold',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 10,
+  },
 });
 
 export default PayHomeScreen;

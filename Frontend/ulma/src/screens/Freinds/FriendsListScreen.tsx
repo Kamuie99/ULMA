@@ -48,19 +48,28 @@ function FriendsListScreen({}: FriendsListScreenProps) {
       setFilteredFriends(friends);
       return;
     }
-
+  
     setLoading(true);
     try {
       const response = await axiosInstance.get(`/participant/same`, {
         params: { name: query },
       });
-      setFilteredFriends(response.data);
+  
+      // 검색 결과가 없으면 빈 배열로 설정
+      if (response.data.length === 0) {
+        setFilteredFriends([]);
+      } else {
+        setFilteredFriends(response.data); // 검색 결과가 있으면 설정
+      }
     } catch (error) {
       console.error('친구 검색에 실패했습니다:', error);
+      setFilteredFriends([]); // 에러 발생 시 빈 배열로 초기화
     } finally {
       setLoading(false);
     }
   }, [friends]);
+  
+
 
   useFocusEffect(
     useCallback(() => {
@@ -70,11 +79,13 @@ function FriendsListScreen({}: FriendsListScreenProps) {
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
+      console.log('검색 쿼리:', searchQuery);  // 검색 쿼리 로그
       searchFriends(searchQuery);
     }, 300);
-
+  
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery, searchFriends]);
+  
 
   const formatPhoneNumber = (phoneNumber: string | null) => {
     if (!phoneNumber) return '등록된 번호가 없습니다.';

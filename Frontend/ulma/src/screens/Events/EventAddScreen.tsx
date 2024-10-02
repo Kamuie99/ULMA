@@ -95,7 +95,7 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
           {formattedDate ? formattedDate : '날짜 선택'}
         </Text>
       </TouchableOpacity>
-
+      ///
       {/* CalendarComponent 모달 */}
       {calendarVisible && (
         <CalendarComponent

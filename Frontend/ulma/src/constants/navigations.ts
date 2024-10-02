@@ -17,6 +17,8 @@ const eventNavigations = {
   EVENT_COMMENT: 'EventComment',
   EVENT_COMMENT_RESULT: 'EventCommentResult',
   EVENT_DETAIL: 'EVENT_DETAIL',
+  AI_RECOMMEND_MESSAGE: 'AIRecommendMessage',
+  EVENT_FIX: 'EventFix',
 } as const;
 
 const payNavigations = {

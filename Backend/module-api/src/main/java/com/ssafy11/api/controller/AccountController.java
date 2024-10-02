@@ -1,12 +1,9 @@
 package com.ssafy11.api.controller;
 
-import com.ssafy11.api.dto.account.AccountNumberRequest;
-import com.ssafy11.api.dto.account.BankCodeDTO;
-import com.ssafy11.api.dto.account.ChargePayAmountRequest;
-import com.ssafy11.api.dto.account.SendPayMoneyRequest;
+import com.ssafy11.api.dto.account.*;
+import com.ssafy11.api.dto.pay.PayHistoryDTO;
 import com.ssafy11.api.service.AccountService;
 import com.ssafy11.domain.Account.Account;
-import com.ssafy11.domain.Pay.PayHistory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +27,6 @@ public class AccountController {
         Account createdAccount = accountService.createAccount(userId, bankCode);
         return ResponseEntity.ok(createdAccount);
     }
-
 
     // 2. 내 계좌 등록하기
     @PostMapping("/users/{user_id}/account")
@@ -60,30 +56,30 @@ public class AccountController {
 
     // 5. 계좌 잔액 충전
     @PostMapping("/account/{account_number}/charge")
-    public ResponseEntity<PayHistory> chargeBalance(
+    public ResponseEntity<PayHistoryDTO> chargeBalance(
             @PathVariable("account_number") String accountNumber,
             @RequestBody ChargePayAmountRequest request) {
-        PayHistory payHistory = accountService.chargeBalance(accountNumber, request.amount());
+        PayHistoryDTO payHistory = accountService.chargeBalance(accountNumber, request.amount());
         return ResponseEntity.ok(payHistory);
     }
 
     // 6. 송금하기
     @PostMapping("/account/{sender_account_number}/send")
-    public ResponseEntity<PayHistory> sendMoney(
+    public ResponseEntity<PayHistoryDTO> sendMoney(
             @PathVariable("sender_account_number") String senderAccountNumber,
             @RequestBody SendPayMoneyRequest request) {
-        PayHistory payHistory = accountService.sendMoney(senderAccountNumber, request.info(), request.targetAccountNumber(), request.amount());
-        return ResponseEntity.ok(payHistory);
+        PayHistoryDTO payHistoryDTO = accountService.sendMoney(senderAccountNumber, request.info(), request.targetAccountNumber(), request.amount());
+        return ResponseEntity.ok(payHistoryDTO);
     }
 
     // 7. 거래 내역 조회
     @GetMapping("/account/{account_number}/history")
-    public ResponseEntity<List<PayHistory>> getPayHistory(
+    public ResponseEntity<List<PayHistoryDTO>> getPayHistory(
             @PathVariable("account_number") String accountNumber,
             @RequestParam(value = "start_date", required = false) LocalDate startDate,
             @RequestParam(value = "end_date", required = false) LocalDate endDate,
             @RequestParam(value = "pay_type", required = false) String payType) {
-        List<PayHistory> payHistoryList = accountService.findPayHistory(accountNumber, startDate, endDate, payType);
+        List<PayHistoryDTO> payHistoryList = accountService.findPayHistory(accountNumber, startDate, endDate, payType);
         return ResponseEntity.ok(payHistoryList);
     }
 

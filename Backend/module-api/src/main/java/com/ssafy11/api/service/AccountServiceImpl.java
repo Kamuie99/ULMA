@@ -1,5 +1,6 @@
 package com.ssafy11.api.service;
 
+import com.ssafy11.api.dto.pay.PayHistoryDTO;
 import com.ssafy11.domain.Account.Account;
 import com.ssafy11.domain.Account.AccountDao;
 import com.ssafy11.domain.Pay.PayHistory;
@@ -9,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,18 +52,47 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public PayHistory chargeBalance(String accountNumber, Long amount) {
-        return accountDao.chargeBalance(accountNumber, amount);
+    public PayHistoryDTO chargeBalance(String accountNumber, Long amount) {
+        PayHistory payHistory = accountDao.chargeBalance(accountNumber, amount);
+
+        // PayHistory 엔티티를 PayHistoryDTO로 변환
+        return new PayHistoryDTO(
+                payHistory.amount(),
+                payHistory.balanceAfterTransaction(),
+                payHistory.transactionType(),
+                payHistory.counterpartyName(),
+                payHistory.counterpartyAccountNumber(),
+                payHistory.description(),
+                payHistory.transactionDate()
+        );
     }
+
 
     @Override
     @Transactional
-    public PayHistory sendMoney(String senderAccountNumber, String info, String targetAccountNumber, Long amount) {
-        return accountDao.sendMoney(senderAccountNumber, info, targetAccountNumber, amount);
+    public PayHistoryDTO sendMoney(String senderAccountNumber, String info, String targetAccountNumber, Long amount) {
+        PayHistory payHistory = accountDao.sendMoney(senderAccountNumber, info, targetAccountNumber, amount);
+        return convertToDTO(payHistory);
     }
 
     @Override
-    public List<PayHistory> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType) {
-        return accountDao.findPayHistory(accountNumber, startDate, endDate, payType);
+    public List<PayHistoryDTO> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType) {
+        List<PayHistory> payHistoryList = accountDao.findPayHistory(accountNumber, startDate, endDate, payType);
+        return payHistoryList.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    // PayHistory 엔티티를 PayHistoryDTO로 변환하는 메서드
+    private PayHistoryDTO convertToDTO(PayHistory payHistory) {
+        return new PayHistoryDTO(
+                payHistory.amount(),
+                payHistory.balanceAfterTransaction(),
+                payHistory.transactionType(),
+                payHistory.counterpartyName(),
+                payHistory.counterpartyAccountNumber(),
+                payHistory.description(),
+                payHistory.transactionDate()
+        );
     }
 }

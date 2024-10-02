@@ -6,10 +6,12 @@ import {StyleSheet, View} from 'react-native';
 import {colors} from '@/constants';
 import Icon from 'react-native-vector-icons/Entypo';
 import LandingPage from '@/screens/Home/LandingScreen';
+import ScheduleMainScreen from '@/screens/Home/ScheduleMainScreen';
 
 export type homeStackParamList = {
   [homeNavigations.HOME]: undefined;
   [homeNavigations.LANDING]: undefined;
+  [homeNavigations.SCHEDULE_MAIN]: undefined;
 };
 
 const Stack = createStackNavigator<homeStackParamList>();
@@ -17,28 +19,26 @@ const Stack = createStackNavigator<homeStackParamList>();
 function HomeStackNavigator() {
   return (
     <Stack.Navigator
-      screenOptions={{
-        cardStyle: {
-          backgroundColor: colors.WHITE,
-        },
-        headerStyle: {
-          backgroundColor: colors.WHITE,
-        },
-        headerTitleAlign: 'center',
-        headerTitleStyle: {
-          fontSize: 15,
-        },
-        headerTintColor: colors.BLACK,
-        headerBackImage: () => {
-          return <Icon name="chevron-left" size={24} color={colors.BLACK} />;
-        },
-      }}>
+    screenOptions={{
+      cardStyle: {
+        backgroundColor: colors.WHITE,
+      },
+      headerStyle: {
+        backgroundColor: colors.WHITE,
+      },
+      headerTitleAlign: 'left',
+      headerTitleStyle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+      },
+      headerTintColor: colors.BLACK,
+    }}
+  >
       <Stack.Screen
-        name={homeNavigations.LANDING}
-        component={LandingPage}
+        name={homeNavigations.SCHEDULE_MAIN}
+        component={ScheduleMainScreen}
         options={{
-          headerTitle: ' ',
-          headerShown: false,
+          headerTitle: '경조사 일정 관리',
         }}
       />
     </Stack.Navigator>

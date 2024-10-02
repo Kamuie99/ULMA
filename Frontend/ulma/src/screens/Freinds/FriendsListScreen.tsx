@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput } from 'react-native';
 import axiosInstance from '@/api/axios';
 import { colors } from '@/constants';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { friendsNavigations } from '@/constants/navigations';
 
 interface Friend {
   guestId: number;
@@ -19,6 +21,7 @@ function FriendsListScreen({}: FriendsListScreenProps) {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const navigation = useNavigation();
 
   const fetchFriends = useCallback(async (page: number) => {
     if (loading || !hasMore) return;
@@ -29,8 +32,8 @@ function FriendsListScreen({}: FriendsListScreenProps) {
         params: { size: 10, page },
       });
       const newFriends = response.data.data;
-      setFriends(prevFriends => [...prevFriends, ...newFriends]);
-      setFilteredFriends(prevFriends => [...prevFriends, ...newFriends]);
+      setFriends(prevFriends => (page === 1 ? newFriends : [...prevFriends, ...newFriends]));
+      setFilteredFriends(prevFriends => (page === 1 ? newFriends : [...prevFriends, ...newFriends]));
       setCurrentPage(page);
       setHasMore(newFriends.length === 10);
     } catch (error) {
@@ -59,9 +62,11 @@ function FriendsListScreen({}: FriendsListScreenProps) {
     }
   }, [friends]);
 
-  useEffect(() => {
-    fetchFriends(1);
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchFriends(1); 
+    }, [])
+  );
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -76,29 +81,59 @@ function FriendsListScreen({}: FriendsListScreenProps) {
     return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`;
   };
 
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case '가족':
+        return colors.PINK;
+      case '친구':
+        return colors.GREEN_700;
+      case '직장':
+        return colors.PASTEL_BLUE;
+      default:
+        return '#e0e0e0'; 
+    }
+  };
+
+  const getCategoryTextColor = (category: string) => {
+    switch (category) {
+      case '가족':
+      case '친구':
+      case '직장':
+        return colors.WHITE; // 가족, 친구, 직장의 경우 텍스트 색상을 흰색으로 설정
+      default:
+        return '#333'; // 기본 회색
+    }
+  };
+
   const renderFriendCard = ({ item }: { item: Friend }) => (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => navigation.navigate(friendsNavigations.FREINDS_DETAIL, {
+        guestId: item.guestId,
+        name: item.name,
+        category: item.category,
+        phoneNumber: item.phoneNumber
+      })}
+    >
       <View style={styles.cardHeader}>
         <Text style={styles.name}>{item.name}</Text>
-        <TouchableOpacity style={styles.categoryButton}>
-          <Text style={styles.categoryText}>{item.category}</Text>
+        <TouchableOpacity
+          style={[styles.categoryButton, { backgroundColor: getCategoryColor(item.category) }]}
+        >
+          <Text style={[styles.categoryText, { color: getCategoryTextColor(item.category) }]}>
+            {item.category}
+          </Text>
         </TouchableOpacity>
       </View>
       <Text style={styles.phoneNumber}>
         Phone <Text style={styles.colorGreen}>|</Text> {formatPhoneNumber(item.phoneNumber)}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 
   const renderFooter = () => {
     if (!loading) return null;
     return <ActivityIndicator size="large" color="#0000ff" />;
-  };
-
-  const handleLoadMore = () => {
-    if (!loading && hasMore && searchQuery === '') {
-      fetchFriends(currentPage + 1);
-    }
   };
 
   return (
@@ -112,11 +147,10 @@ function FriendsListScreen({}: FriendsListScreenProps) {
       <FlatList
         data={filteredFriends}
         renderItem={renderFriendCard}
-        keyExtractor={item => item.guestId.toString()}
-        onEndReached={handleLoadMore}
+        keyExtractor={(item) => item.guestId.toString()}
+        onEndReached={() => fetchFriends(currentPage + 1)}
         onEndReachedThreshold={0.1}
         ListFooterComponent={renderFooter}
-        extraData={filteredFriends}
       />
     </View>
   );
@@ -126,31 +160,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#f5f5f5',
   },
   searchInput: {
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: 15,
     paddingHorizontal: 10,
     marginBottom: 16,
     backgroundColor: 'white',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
   card: {
-    backgroundColor: 'white',
-    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 15,
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 15,
     elevation: 3,
   },
   name: {
@@ -160,7 +188,6 @@ const styles = StyleSheet.create({
     color: colors.BLACK,
   },
   categoryButton: {
-    backgroundColor: '#e0e0e0',
     borderRadius: 16,
     paddingVertical: 4,
     paddingHorizontal: 12,
@@ -169,7 +196,6 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 14,
-    color: '#333',
   },
   phoneNumber: {
     fontSize: 14,
@@ -181,7 +207,7 @@ const styles = StyleSheet.create({
   },
   colorGreen: {
     color: colors.GREEN_700
-  }
+  },
 });
 
 export default FriendsListScreen;

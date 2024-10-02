@@ -1,17 +1,30 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert, Modal, FlatList } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert, Modal, FlatList, ScrollView, TouchableWithoutFeedback } from 'react-native';
 import { colors } from '@/constants';
 import { useNavigation } from '@react-navigation/native';
 import axiosInstance from '@/api/axios';
 import Contacts from 'react-native-contacts';
+import Icon from 'react-native-vector-icons/Ionicons';
+
+const categories = ['가족', '친구', '친척', '직장', '학교', '지인', '기타'];
 
 function AddFriendScreen() {
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const [contactsModalVisible, setContactsModalVisible] = useState(false);
   const [contacts, setContacts] = useState([]);
+  const [filteredContacts, setFilteredContacts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const navigation = useNavigation();
+
+  useEffect(() => {
+    if (contacts.length > 0) {
+      const sortedContacts = contacts.sort((a, b) => a.givenName.localeCompare(b.givenName));
+      setFilteredContacts(sortedContacts);
+    }
+  }, [contacts]);
 
   const handleAddFriend = async () => {
     if (!name || !category || !phoneNumber) {
@@ -39,8 +52,10 @@ function AddFriendScreen() {
 
   const openContacts = () => {
     Contacts.getAll().then(contacts => {
-      setContacts(contacts);
-      setModalVisible(true);
+      const sortedContacts = contacts.sort((a, b) => a.givenName.localeCompare(b.givenName));
+      setContacts(sortedContacts);
+      setFilteredContacts(sortedContacts);
+      setContactsModalVisible(true);
     }).catch(error => {
       console.error('연락처를 불러오는 데 실패했습니다:', error);
       Alert.alert('오류', '연락처를 불러오는 데 실패했습니다.');
@@ -50,96 +65,191 @@ function AddFriendScreen() {
   const selectContact = (contact) => {
     setName(contact.givenName);
     setPhoneNumber(contact.phoneNumbers[0]?.number || '');
+    setContactsModalVisible(false);
+  };
+
+  const openCategoryModal = () => {
+    setModalVisible(true);
+  };
+
+  const selectCategory = (category) => {
+    setCategory(category);
     setModalVisible(false);
   };
 
+  const handleSearch = (text) => {
+    setSearchTerm(text);
+    if (text === '') {
+      setFilteredContacts(contacts);
+    } else {
+      const filtered = contacts.filter(contact => 
+        contact.givenName.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredContacts(filtered);
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>이름</Text>
-      <View style={styles.nameContainer}>
-        <TextInput
-          style={styles.input}
-          value={name}
-          onChangeText={setName}
-          placeholder="지인의 이름을 입력하세요"
-        />
-        <TouchableOpacity style={styles.contactButton} onPress={openContacts}>
-          <Text style={styles.contactButtonText}>연락처</Text>
-        </TouchableOpacity>
+    <ScrollView style={styles.container}>
+      <View style={styles.fieldContainer}>
+        <Text style={styles.label}>이름</Text>
+        <View style={styles.nameContainer}>
+          <TextInput
+            style={styles.input}
+            value={name}
+            onChangeText={setName}
+            placeholder="지인의 이름을 입력하세요"
+            placeholderTextColor={colors.GRAY_300}
+          />
+          <TouchableOpacity style={styles.iconButton} onPress={openContacts}>
+            <Icon name="person-circle-outline" size={28} color={colors.WHITE} />
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <Text style={styles.label}>전화번호</Text>
-      <TextInput
-        style={styles.input}
-        value={phoneNumber}
-        onChangeText={setPhoneNumber}
-        placeholder="전화번호를 입력하세요"
-      />
+      <View style={styles.fieldContainer}>
+        <Text style={styles.label}>전화번호</Text>
+        <TextInput
+          style={styles.input}
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
+          placeholder="전화번호를 입력하세요"
+          placeholderTextColor={colors.GRAY_300}
+          keyboardType="phone-pad"
+        />
+      </View>
 
-      <Text style={styles.label}>카테고리</Text>
-      <TextInput
-        style={styles.input}
-        value={category}
-        onChangeText={setCategory}
-        placeholder="카테고리를 입력하세요 (예: 친구, 가족)"
-      />
+      <View style={styles.fieldContainer}>
+        <Text style={styles.label}>카테고리</Text>
+        <TouchableOpacity style={styles.dropdown} onPress={openCategoryModal}>
+          <Text style={styles.dropdownText}>{category || '카테고리를 선택하세요'}</Text>
+          <Icon name="chevron-down-outline" size={24} color={colors.GRAY_700} />
+        </TouchableOpacity>
+      </View>
 
       <TouchableOpacity style={styles.button} onPress={handleAddFriend}>
         <Text style={styles.buttonText}>등록</Text>
       </TouchableOpacity>
 
+      {/* 카테고리 선택 모달 */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>카테고리 선택</Text>
+                <FlatList
+                  data={categories}
+                  keyExtractor={(item) => item}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity onPress={() => selectCategory(item)} style={styles.modalItem}>
+                      <Text style={styles.modalItemText}>{item}</Text>
+                    </TouchableOpacity>
+                  )}
+                />
+                <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeModalButton}>
+                  <Text style={styles.closeModalText}>닫기</Text>
+                </TouchableOpacity>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
       {/* 연락처 모달 */}
       <Modal
         animationType="slide"
         transparent={false}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+        visible={contactsModalVisible}
+        onRequestClose={() => setContactsModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <Text style={styles.modalTitle}>내 연락처 가져오기</Text>
+        <View style={styles.contactsContainer}>
+          <TextInput
+            style={styles.searchBar}
+            placeholder="연락처 검색"
+            placeholderTextColor={colors.GRAY_300}
+            value={searchTerm}
+            onChangeText={handleSearch}
+          />
           <FlatList
-            data={contacts}
+            data={filteredContacts}
             keyExtractor={item => item.recordID}
             renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => selectContact(item)}>
-                <Text style={styles.contactItem}>{item.givenName} - {item.phoneNumbers[0]?.number}</Text>
+              <TouchableOpacity onPress={() => selectContact(item)} style={styles.contactItem}>
+                <Text style={styles.contactItemText}>{item.givenName} - {item.phoneNumbers[0]?.number}</Text>
               </TouchableOpacity>
             )}
           />
-          <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeModalButton}>
+          <TouchableOpacity onPress={() => setContactsModalVisible(false)} style={styles.closeModalButton}>
             <Text style={styles.closeModalText}>닫기</Text>
           </TouchableOpacity>
         </View>
       </Modal>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: colors.WHITE,
+    padding: 20,
+  },
+  fieldContainer: {
+    marginBottom: 20,
   },
   label: {
     fontSize: 16,
-    fontWeight: 'bold',
+    color: colors.GRAY_700,
     marginBottom: 5,
-    color: colors.BLACK,
   },
   input: {
-    height: 50, // 높이 고정
+    height: 50,
+    flex: 1,
     borderWidth: 1,
     borderColor: colors.GRAY_300,
-    borderRadius: 5,
+    borderRadius: 8,
     padding: 10,
-    marginBottom: 20,
     fontSize: 16,
+    color: colors.BLACK,
+  },
+  nameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dropdown: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: 50,
+    borderWidth: 1,
+    borderColor: colors.GRAY_300,
+    borderRadius: 8,
+    padding: 10,
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: colors.GRAY_700,
+  },
+  iconButton: {
+    marginLeft: 10,
+    backgroundColor: colors.GREEN_700,
+    padding: 8,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 50,
+    width: 50,
   },
   button: {
     backgroundColor: colors.GREEN_700,
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 8,
     alignItems: 'center',
   },
   buttonText: {
@@ -147,50 +257,68 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  nameContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  contactButton: {
-    marginLeft: 10,
-    marginBottom: 20,
-    backgroundColor: colors.GREEN_700,
-    padding: 10,
-    borderRadius: 5,
-    width: 70,
-    height: 50,
-    alignItems: 'center',
-  },
-  contactButtonText: {
-    color: colors.WHITE,
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  modalContainer: {
+  modalOverlay: {
     flex: 1,
-    padding: 20,
-    backgroundColor: colors.WHITE,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  contactItem: {
-    fontSize: 18,
-    padding: 10,
+  modalContent: {
+    width: '80%',
+    backgroundColor: colors.WHITE,
+    padding: 20,
+    borderRadius: 10,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  modalItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.GRAY_100,
+  },
+  modalItemText: {
+    fontSize: 16,
+    color: colors.BLACK,
   },
   closeModalButton: {
+    marginTop: 20,
     padding: 15,
     backgroundColor: colors.GREEN_700,
+    borderRadius: 8,
     alignItems: 'center',
-    borderRadius: 5,
   },
   closeModalText: {
     color: colors.WHITE,
     fontSize: 16,
   },
-  modalTitle: {
-    textAlign: 'center',
-    fontSize: 20,
-    fontWeight: 'bold',
+  contactItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.GRAY_100,
+  },
+  contactItemText: {
+    fontSize: 18,
+  },
+  contactsContainer: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: colors.WHITE,
+  },
+  searchBar: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: colors.GRAY_300,
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 16,
+    color: colors.BLACK,
     marginBottom: 20,
-  }
+  },
 });
 
 export default AddFriendScreen;

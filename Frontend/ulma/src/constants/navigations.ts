@@ -22,6 +22,7 @@ const eventNavigations = {
 } as const;
 
 const payNavigations = {
+  HOME: 'PayHome',
   ACCOUNT_HISTORY: 'Accounthistory',
   ACCOUNT_INPUT: 'Accountinput',
   ADD_HISTORY: 'Addhistory',
@@ -45,6 +46,7 @@ const friendsNavigations = {
   FRIENDS_LIST: 'FriendsList',
   FRIENDS_HOME: 'FriendsHome',
   FRIENDS_ADD: 'FriendsAdd',
+  FREINDS_DETAIL: 'FriendsDetail',
 } as const;
 
 export {

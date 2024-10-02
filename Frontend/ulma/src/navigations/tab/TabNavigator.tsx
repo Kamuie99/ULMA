@@ -21,15 +21,15 @@ function TabNavigator() {
 
           // 탭 이름에 따라 아이콘 이름 설정
           if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home-outline';
+            iconName = focused ? 'calendar' : 'calendar-outline';
           } else if (route.name === 'Pay') {
             iconName = focused ? 'wallet' : 'wallet-outline';
           } else if (route.name === 'Friends') {
             iconName = focused ? 'people' : 'people-outline';
           } else if (route.name === 'Event') {
-            iconName = focused ? 'calendar' : 'calendar-outline';
-          } else if (route.name === 'MyPage') {
             iconName = focused ? 'person' : 'person-outline';
+          } else if (route.name === 'MyPage') {
+            iconName = focused ? 'apps' : 'apps-outline';
           }
 
           // Icon 컴포넌트 반환

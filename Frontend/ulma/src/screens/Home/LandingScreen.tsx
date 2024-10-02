@@ -1,5 +1,5 @@
 //홈 화면 다음 랜딩 페이지(패스오더카피 페이지)
-import React from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,10 @@ import {
   Image,
   Dimensions,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import EventScreen from '../Events/EventScreen';
+import axiosInstance from '@/api/axios';
+import useAuthStore from '@/store/useAuthStore';
 
 const {width} = Dimensions.get('window');
 
@@ -31,6 +34,27 @@ const birthdays: Birthday[] = [
 
 const LandingPage: React.FC = () => {
   const navigation = useNavigation();
+
+  const {accessToken} = useAuthStore();
+  useFocusEffect(
+    useCallback(() => {
+      const fetchRecentSchedule = async () => {
+        try {
+          const response = await axiosInstance.get('/schedule/recent', {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+          console.log(response.data.data); // API에서 받은 데이터로 상태 업데이트
+        } catch (error) {
+          console.error('일정 목록을 불러오는 중 오류 발생:', error);
+          console.log(accessToken);
+        }
+      };
+
+      fetchRecentSchedule();
+    }, []),
+  );
 
   // 일정 관리 바로가기 버튼 핸들러
   const handleScheduleNavigation = () => {
@@ -66,6 +90,11 @@ const LandingPage: React.FC = () => {
         )}
         keyExtractor={item => item.id}
       />
+
+      {/* 캘린더 */}
+      {/* <View>
+        <EventScreen />
+      </View> */}
 
       {/* ULMA 페이 바로가기 예시 */}
       <View style={styles.ulmaContainer}>

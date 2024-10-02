@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput } from 'react-native';
 import axiosInstance from '@/api/axios';
 import { colors } from '@/constants';
+import { useNavigation } from '@react-navigation/native';
+import { friendsNavigations } from '@/constants/navigations';
 
 interface Friend {
   guestId: number;
@@ -19,6 +21,7 @@ function FriendsListScreen({}: FriendsListScreenProps) {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const navigation = useNavigation();
 
   const fetchFriends = useCallback(async (page: number) => {
     if (loading || !hasMore) return;
@@ -40,36 +43,9 @@ function FriendsListScreen({}: FriendsListScreenProps) {
     }
   }, [loading, hasMore]);
 
-  const searchFriends = useCallback(async (query: string) => {
-    if (!query) {
-      setFilteredFriends(friends);
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await axiosInstance.get(`/participant/same`, {
-        params: { name: query },
-      });
-      setFilteredFriends(response.data);
-    } catch (error) {
-      console.error('친구 검색에 실패했습니다:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [friends]);
-
   useEffect(() => {
     fetchFriends(1);
   }, []);
-
-  useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      searchFriends(searchQuery);
-    }, 300);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery, searchFriends]);
 
   const formatPhoneNumber = (phoneNumber: string | null) => {
     if (!phoneNumber) return '등록된 번호가 없습니다.';
@@ -77,7 +53,15 @@ function FriendsListScreen({}: FriendsListScreenProps) {
   };
 
   const renderFriendCard = ({ item }: { item: Friend }) => (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => navigation.navigate(friendsNavigations.FREINDS_DETAIL, {
+        guestId: item.guestId,
+        name: item.name,
+        category: item.category,
+        phoneNumber: item.phoneNumber
+      })}
+    >
       <View style={styles.cardHeader}>
         <Text style={styles.name}>{item.name}</Text>
         <TouchableOpacity style={styles.categoryButton}>
@@ -87,18 +71,12 @@ function FriendsListScreen({}: FriendsListScreenProps) {
       <Text style={styles.phoneNumber}>
         Phone <Text style={styles.colorGreen}>|</Text> {formatPhoneNumber(item.phoneNumber)}
       </Text>
-    </View>
+    </TouchableOpacity>
   );
 
   const renderFooter = () => {
     if (!loading) return null;
     return <ActivityIndicator size="large" color="#0000ff" />;
-  };
-
-  const handleLoadMore = () => {
-    if (!loading && hasMore && searchQuery === '') {
-      fetchFriends(currentPage + 1);
-    }
   };
 
   return (
@@ -112,11 +90,10 @@ function FriendsListScreen({}: FriendsListScreenProps) {
       <FlatList
         data={filteredFriends}
         renderItem={renderFriendCard}
-        keyExtractor={item => item.guestId.toString()}
-        onEndReached={handleLoadMore}
+        keyExtractor={(item, index) => `${item.guestId}-${index}`}
+        onEndReached={() => fetchFriends(currentPage + 1)}
         onEndReachedThreshold={0.1}
         ListFooterComponent={renderFooter}
-        extraData={filteredFriends}
       />
     </View>
   );
@@ -136,11 +113,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 16,
     backgroundColor: 'white',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
   },
   card: {
     backgroundColor: 'white',
@@ -181,7 +153,7 @@ const styles = StyleSheet.create({
   },
   colorGreen: {
     color: colors.GREEN_700
-  }
+  },
 });
 
 export default FriendsListScreen;

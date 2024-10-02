@@ -150,7 +150,10 @@ function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
           <Icon name="chevron-forward" size={15} color="#666" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.InfoBoxInner}>
+        <TouchableOpacity
+          style={styles.InfoBoxInner}
+          onPress={() => navigation.navigate(payNavigations.RECOMMEND_OPTION)} // AiRecommendScreen으로 이동
+        >
           <View style={styles.MenuBar}>
             <Icon3 name="attach-money" size={24} color="#000" />
             <Text style={styles.InfoMenu}>GPT-4o 금액추천</Text>

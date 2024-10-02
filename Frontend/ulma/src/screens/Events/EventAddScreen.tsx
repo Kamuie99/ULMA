@@ -6,17 +6,18 @@ import axiosInstance from '@/api/axios';
 import InputField from '@/components/common/InputField';
 import {NavigationProp} from '@react-navigation/native';
 import {eventNavigations} from '@/constants/navigations';
-import CalendarComponent from '@/components/calendar/CalendarButton'; // CalendarComponent 추가
-import {format} from 'date-fns'; // 날짜 형식 변환을 위한 라이브러리 추가
-import {ko} from 'date-fns/locale'; // 한글 로케일
+import CalendarComponent from '@/components/calendar/CalendarButton';
+import {format} from 'date-fns';
+import {ko} from 'date-fns/locale';
 
 const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
   const [eventTitle, setEventTitle] = useState<string>(''); // 행사 제목
   const [selectedEventType, setSelectedEventType] = useState<string | null>(
     null,
   ); // 행사 유형
-  const [eventDate, setEventDate] = useState<string>(''); // 행사 날짜 선택 (string 형태로 변경)
+  const [eventDate, setEventDate] = useState<string>(''); // 행사 날짜 선택
   const [calendarVisible, setCalendarVisible] = useState(false); // 달력 모달 상태
+  const [isConfirmVisible, setConfirmVisible] = useState(true); // 확인 버튼 상태
 
   // 행사 저장 처리 함수
   const handleSaveEvent = async () => {
@@ -26,11 +27,12 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     }
 
     try {
-      // ISO 형식으로 날짜 전송
+      const isoDate = new Date(eventDate).toISOString(); // ISO 형식으로 변환
+
       const response = await axiosInstance.post('/events', {
         category: selectedEventType,
         name: eventTitle,
-        date: new Date(eventDate).toISOString(), // 날짜를 ISO 형식으로 변환하여 전송
+        date: isoDate, // ISO 형식으로 변환하여 전송
       });
 
       console.log('성공:', response.data);
@@ -44,13 +46,10 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     }
   };
 
-  // 사용자에게 보여줄 때는 "년/월/일 오전/오후 시간 분" 형식으로 변환
+  // 사용자에게 보여줄 때는 "년/월/일" 형식으로 변환
   const formattedDate = eventDate
-    ? format(new Date(eventDate), 'yyyy년 M월 d일 a h시 mm분', {locale: ko})
+    ? format(new Date(eventDate), 'yyyy년 M월 d일', {locale: ko})
     : '';
-
-  // 이벤트 유형 옵션
-  const eventTypes = ['결혼', '돌잔치', '장례식', '생일', '기타'];
 
   return (
     <View style={styles.container}>
@@ -65,7 +64,7 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
 
       {/* 이벤트 유형 선택 */}
       <View style={styles.buttonContainer}>
-        {eventTypes.map(type => (
+        {['결혼', '돌잔치', '장례식', '생일', '기타'].map(type => (
           <TouchableOpacity
             key={type}
             style={[
@@ -87,10 +86,13 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
 
       {/* 달력 모달 열기 */}
       <TouchableOpacity
-        onPress={() => setCalendarVisible(true)}
+        onPress={() => {
+          setCalendarVisible(true);
+          setConfirmVisible(false); // 달력이 열리면 확인 버튼 숨기기
+        }}
         style={styles.dateButton}>
         <Text style={styles.dateButtonText}>
-          {formattedDate ? formattedDate : '날짜 및 시간 선택'}
+          {formattedDate ? formattedDate : '날짜 선택'}
         </Text>
       </TouchableOpacity>
 
@@ -99,14 +101,21 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
         <CalendarComponent
           selectedDate={eventDate}
           onDateSelected={date => {
-            setEventDate(date); // 선택한 날짜 설정
-            setCalendarVisible(false); // 모달 닫기
+            setEventDate(format(new Date(date), 'yyyy-MM-dd', {locale: ko}));
+            setCalendarVisible(false);
+            setConfirmVisible(true); // 날짜 선택 후 확인 버튼 다시 나타내기
           }}
         />
       )}
 
-      {/* 확인 버튼 */}
-      <CustomButton label="확인" variant="outlined" onPress={handleSaveEvent} />
+      {/* 확인 버튼 - 달력이 열려 있을 때 숨김 */}
+      {isConfirmVisible && (
+        <CustomButton
+          label="확인"
+          variant="outlined"
+          onPress={handleSaveEvent}
+        />
+      )}
     </View>
   );
 };
@@ -142,7 +151,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 1,
     borderColor: '#00C77F',
-    marginBottom: 24,
+    marginBottom: 10, // 달력 아래 여백을 줄였습니다
     justifyContent: 'center',
     alignItems: 'center',
   },

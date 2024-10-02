@@ -11,7 +11,7 @@ import {
   Dimensions,
 } from 'react-native';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import EventScreen from '../Events/EventScreen';
+import EventScreen from '../Events/EventScreen.1';
 import axiosInstance from '@/api/axios';
 import useAuthStore from '@/store/useAuthStore';
 import {colors} from '@/constants';

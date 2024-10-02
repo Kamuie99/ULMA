@@ -1,8 +1,15 @@
 package com.ssafy11.domain.participant;
 
+import java.util.List;
+import java.util.Optional;
+
 import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.common.PageResponse;
-import com.ssafy11.domain.participant.dto.*;
+import com.ssafy11.domain.guest.Guest;
+import com.ssafy11.domain.participant.dto.Participant;
+import com.ssafy11.domain.participant.dto.Transaction;
+import com.ssafy11.domain.participant.dto.TransactionSummary;
+import com.ssafy11.domain.participant.dto.UserRelation;
 
 import java.util.List;
 
@@ -18,4 +25,6 @@ public interface ParticipantDao {
     Integer addGuests(String name, String category, String phoneNumber);
     Integer addUserRelation(List<Integer> guestIds, Integer userId);
     PageResponse<UserRelation> getUserRelations(Integer userId, PageDto pageDto);
+    PageResponse<UserRelation> getCategoryUserRelation(Integer userId, String category, PageDto pageDto);
+    Optional<Guest> getGuest(Integer guestId);
 }

@@ -10,6 +10,7 @@ import {
 import {NavigationProp, useFocusEffect} from '@react-navigation/native';
 import axiosInstance from '@/api/axios'; // axiosInstance 불러오기
 import {eventNavigations} from '@/constants/navigations';
+import Icon from 'react-native-vector-icons/Ionicons'; // 연필 아이콘을 사용하기 위해 추가
 
 interface Event {
   id: string;
@@ -43,41 +44,58 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     }, []),
   );
 
-  // 이벤트 카테고리에 따른 색상을 설정하는 함수
-  const getEventTypeStyle = (name: string) => {
-    // 디버깅용으로 name 값을 출력
-    console.log(`name: '${name}'`);
-    // name에 따라 배경색을 결정
-    switch (name.trim().toLowerCase()) {
-      case '결혼':
-        return {backgroundColor: '#ffc0cb'}; // 분홍색
+  // 이벤트 제목에 따른 배경색 설정 (eventTitle에 적용)
+  const getEventTitleStyle = (eventTitle: string) => {
+    switch (eventTitle.trim().toLowerCase()) {
+      case '친구 결혼':
+        return {backgroundColor: '#ffc0cb', color: '#fff'}; // 분홍색 배경, 흰색 글자
+      case '내 생일':
+        return {backgroundColor: '#97deb3', color: '#fff'}; // 옅은 연두색 배경, 흰색 글자
       case '돌잔치':
-        return {backgroundColor: '#87CEFA'}; // 하늘색
+        return {backgroundColor: '#87CEFA', color: '#fff'}; // 하늘색 배경, 흰색 글자
       case '장례식':
-        return {backgroundColor: '#A9A9A9'}; // 옅은 검은색
-      case '생일':
-        return {backgroundColor: '#97deb3'}; // 옅은 연두색
+        return {backgroundColor: '#A9A9A9', color: '#fff'}; // 옅은 검은색 배경, 흰색 글자
       default:
-        return {backgroundColor: '#9aa160'}; // 기본값 노란색
+        return {backgroundColor: '#9aa160', color: '#fff'}; // 기본값 노란색 배경, 흰색 글자
     }
   };
-  const renderItem = ({item}: {item: Event}) => (
-    <TouchableOpacity
-      style={styles.eventBox}
-      onPress={() =>
-        navigation.navigate(eventNavigations.EVENT_DETAIL, {event_id: item.id})
-      }>
-      <Text style={[styles.eventType, getEventTypeStyle(item.name)]}>
-        {item.category}
-      </Text>
-      <View style={styles.eventDetails}>
-        <Text style={styles.eventTitle}>{item.name}</Text>
+
+  // 렌더링할 이벤트 아이템을 정의
+  const renderItem = ({item}: {item: Event}) => {
+    return (
+      <View style={styles.eventBox}>
+        {/* 행사 이름과 연필 아이콘을 수평으로 배치 */}
+        <View style={styles.eventHeader}>
+          <View
+            style={[
+              styles.eventTitleContainer,
+              getEventTitleStyle(item.category),
+            ]}>
+            <Text style={styles.eventTitle}>{item.name}</Text>
+          </View>
+          {/* 연필 모양의 수정 아이콘 추가 */}
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => {
+              console.log('수정 버튼 클릭됨');
+              // 이후 수정 화면으로 이동하는 코드를 추가할 수 있음
+            }}>
+            <Icon name="pencil" size={20} color="#808080" />
+          </TouchableOpacity>
+        </View>
+
+        {/* 카테고리 (배경색 없음) */}
+        <View style={styles.eventCategoryContainer}>
+          <Text style={styles.eventCategory}>{item.category}</Text>
+        </View>
+
+        {/* 날짜 정보 */}
         <Text style={styles.eventDate}>
           {new Date(item.eventTime).toLocaleString()}
         </Text>
       </View>
-    </TouchableOpacity>
-  );
+    );
+  };
 
   if (loading) {
     return (
@@ -99,6 +117,8 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
           data={events}
           keyExtractor={item => item.id}
           renderItem={renderItem}
+          numColumns={2} // 2개의 열로 이벤트를 배치
+          columnWrapperStyle={styles.row} // 각 행의 스타일 설정
         />
       ) : (
         <View style={styles.emptyContainer}>
@@ -149,34 +169,47 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 16,
     marginBottom: 16,
+    flex: 1, // Flexbox를 사용하여 각 이벤트가 동일한 비율로 크기를 차지하도록 설정
+    marginHorizontal: 8, // 좌우 간격 추가
   },
-  eventType: {
-    paddingVertical: 5, // 상하 패딩
-    paddingHorizontal: 15, // 좌우 패딩을 따로 설정하여 조절 가능
-    borderRadius: 4,
-    color: '#fff',
+  row: {
+    justifyContent: 'space-between', // 각 행의 이벤트들이 양쪽에 배치되도록 설정
+  },
+  eventHeader: {
+    flexDirection: 'row', // 행으로 배치하여 제목과 수정 아이콘을 수평으로 배치
+    justifyContent: 'space-between', // 수정 버튼과 제목을 양 끝에 배치
+    alignItems: 'center',
+  },
+  eventCategoryContainer: {
+    borderRadius: 4, // 배경색 없음
+    padding: 4, // 텍스트 주위에 여백 추가
+    marginBottom: 8, // 카테고리와 제목 사이 여백
+  },
+  eventCategory: {
+    fontSize: 18, // 카테고리를 작게
     fontWeight: 'bold',
-    marginBottom: 12,
-    alignSelf: 'flex-start', // 내용에 맞게 좌우 길이를 줄임
+    color: '#000', // 검은색 글자
   },
-  eventDetails: {
-    flexDirection: 'row', // 같은 줄에 텍스트 배치
-    justifyContent: 'space-between', // 텍스트 사이에 공간 배치
-    alignItems: 'center', // 텍스트 높이 맞춤
-    marginBottom: 4, // 필요하면 하단 여백 추가
+  eventTitleContainer: {
+    borderRadius: 4, // 배경색 영역의 모서리를 둥글게 처리
+    paddingVertical: 5, // 세로 방향 여백
+    paddingHorizontal: 16, // 가로 방향 여백
+    marginBottom: 8, // 아래쪽 여백
+    justifyContent: 'center', // 세로 방향 중앙 정렬
+    alignItems: 'center', // 가로 방향 중앙 정렬
   },
   eventTitle: {
-    fontSize: 18,
+    fontSize: 15, // 행사 제목을 더 크게 설정
     fontWeight: 'bold',
-    flex: 1, // flex를 통해 공간을 차지하도록 설정
-    paddingLeft: 10,
   },
   eventDate: {
     fontSize: 15,
     color: '#888',
     fontWeight: 'bold',
-    textAlign: 'right', // 날짜를 오른쪽 정렬
-    flex: 1, // flex를 통해 남은 공간을 차지
+    marginTop: 4, // 날짜와의 간격을 추가
+  },
+  editButton: {
+    paddingHorizontal: 8, // 수정 아이콘의 좌우 여백
   },
   loadingContainer: {
     flex: 1,
@@ -191,3 +224,4 @@ const styles = StyleSheet.create({
 });
 
 export default EventScreen;
+///

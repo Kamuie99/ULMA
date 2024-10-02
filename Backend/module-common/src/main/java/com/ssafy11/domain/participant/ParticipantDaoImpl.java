@@ -2,20 +2,21 @@ package com.ssafy11.domain.participant;
 
 import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.common.PageResponse;
-import com.ssafy11.domain.participant.dto.Participant;
+import com.ssafy11.domain.participant.dto.*;
 import com.ssafy11.domain.participant.dto.Transaction;
-import com.ssafy11.domain.participant.dto.TransactionSummary;
-import com.ssafy11.domain.participant.dto.UserRelation;
 import lombok.RequiredArgsConstructor;
-import org.jooq.DSLContext;
-import org.jooq.Record1;
+import org.jooq.*;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.ssafy11.ulma.generated.Tables.*;
 import static org.jooq.impl.DSL.field;
@@ -105,7 +106,7 @@ public class ParticipantDaoImpl implements ParticipantDao {
                 .fetchOne(0, Integer.class);
 
         // 총계 계산
-        int totalBalance = (totalReceived != null ? totalReceived : 0)+(totalGiven != null ? totalGiven : 0);
+        Integer totalBalance = (totalReceived != null ? totalReceived : 0)+(totalGiven != null ? totalGiven : 0);
 
         return new TransactionSummary(totalGiven != null ? totalGiven : 0,
                 totalReceived != null ? totalReceived : 0,
@@ -201,7 +202,7 @@ public class ParticipantDaoImpl implements ParticipantDao {
 
         int offset = (page-1) * size;
 
-        List<UserRelation> result = dsl.select(USERS_RELATION.GUEST_ID, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER)
+        List<UserRelation> result = dsl.select(USERS_RELATION.GUEST_ID, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER, DSL.val(-1))
                 .from(USERS_RELATION)
                 .join(GUEST)
                 .on(USERS_RELATION.GUEST_ID.eq(GUEST.ID))
@@ -211,8 +212,11 @@ public class ParticipantDaoImpl implements ParticipantDao {
                 .offset(offset)
                 .fetchInto(UserRelation.class);
 
+
+
         return new PageResponse<>(result, page, totalItems, totalPages);
     }
+
 
     @Override
     public PageResponse<UserRelation> getCategoryUserRelation(Integer userId, String category, PageDto pageDto) {
@@ -232,7 +236,7 @@ public class ParticipantDaoImpl implements ParticipantDao {
 
         int offset = (page-1) * size;
 
-        List<UserRelation> result = dsl.select(USERS_RELATION.GUEST_ID, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER)
+        List<UserRelation> result = dsl.select(USERS_RELATION.GUEST_ID, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER, DSL.val(-1))
                 .from(USERS_RELATION)
                 .join(GUEST)
                 .on(USERS_RELATION.GUEST_ID.eq(GUEST.ID))
@@ -245,5 +249,4 @@ public class ParticipantDaoImpl implements ParticipantDao {
 
         return new PageResponse<>(result, page, totalItems, totalPages);
     }
-
 }

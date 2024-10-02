@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -107,16 +108,42 @@ public class ParticipantService {
     public PageResponse<UserRelation> getUserRelation(String userId, PageDto pagedto) {
         Assert.hasText(userId, "userId is required");
         PageResponse<UserRelation> userRelationList = participantDao.getUserRelations(Integer.parseInt(userId), pagedto);
+        List<UserRelation> list = userRelationList(userRelationList.data(), userId);
+        Assert.notNull(list, "list is required");
+
+        int page = userRelationList.currentPage();
+        int totalItems = userRelationList.totalItemsCount();
+        int totalPages = userRelationList.totalPages();
         Assert.notNull(userRelationList, "userRelationList is required");
-        return userRelationList;
+        return new PageResponse<>(list, page, totalItems, totalPages);
     }
 
     public PageResponse<UserRelation> getCategoryUserRelation(String userId, String category, PageDto pagedto) {
         Assert.hasText(userId, "userId is required");
         Assert.hasText(category, "category is required");
         PageResponse<UserRelation> userRelationList = participantDao.getCategoryUserRelation(Integer.parseInt(userId),category, pagedto);
-        Assert.notNull(userRelationList, "userRelationList is required");
-        return userRelationList;
+        List<UserRelation> list = userRelationList(userRelationList.data(), userId);
+        Assert.notNull(list, "list is required");
+
+        int page = userRelationList.currentPage();
+        int totalItems = userRelationList.totalItemsCount();
+        int totalPages = userRelationList.totalPages();
+        return new PageResponse<>(list, page, totalItems, totalPages);
+    }
+
+    public List<UserRelation> userRelationList(List<UserRelation> result, String userId){
+        List<UserRelation> UserRelations = new ArrayList<>();
+        for (UserRelation relation : result) {
+            TransactionSummary summary = getTransactionSummary(userId, relation.guestId());
+            UserRelations.add(new UserRelation(
+                    relation.guestId(),
+                    relation.name(),
+                    relation.category(),
+                    relation.phoneNumber(),
+                    summary.totalBalance()
+            ));
+        }
+        return UserRelations;
     }
 
 }

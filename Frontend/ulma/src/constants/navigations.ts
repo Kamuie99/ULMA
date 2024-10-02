@@ -35,6 +35,7 @@ const payNavigations = {
   SENDING: 'Sending',
   SEND_RESULT: 'Sendresult',
   INPUT_AMOUNT: 'InputAmount',
+  MAKE_PAY: 'MakePayAccount',
 } as const;
 
 const mypageNavigations = {

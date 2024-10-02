@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert, Modal, FlatList, ScrollView, TouchableWithoutFeedback } from 'react-native';
 import { colors } from '@/constants';
 import { useNavigation } from '@react-navigation/native';
@@ -15,7 +15,16 @@ function AddFriendScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [contactsModalVisible, setContactsModalVisible] = useState(false);
   const [contacts, setContacts] = useState([]);
+  const [filteredContacts, setFilteredContacts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const navigation = useNavigation();
+
+  useEffect(() => {
+    if (contacts.length > 0) {
+      const sortedContacts = contacts.sort((a, b) => a.givenName.localeCompare(b.givenName));
+      setFilteredContacts(sortedContacts);
+    }
+  }, [contacts]);
 
   const handleAddFriend = async () => {
     if (!name || !category || !phoneNumber) {
@@ -43,7 +52,9 @@ function AddFriendScreen() {
 
   const openContacts = () => {
     Contacts.getAll().then(contacts => {
-      setContacts(contacts);
+      const sortedContacts = contacts.sort((a, b) => a.givenName.localeCompare(b.givenName));
+      setContacts(sortedContacts);
+      setFilteredContacts(sortedContacts);
       setContactsModalVisible(true);
     }).catch(error => {
       console.error('연락처를 불러오는 데 실패했습니다:', error);
@@ -64,6 +75,18 @@ function AddFriendScreen() {
   const selectCategory = (category) => {
     setCategory(category);
     setModalVisible(false);
+  };
+
+  const handleSearch = (text) => {
+    setSearchTerm(text);
+    if (text === '') {
+      setFilteredContacts(contacts);
+    } else {
+      const filtered = contacts.filter(contact => 
+        contact.givenName.toLowerCase().includes(text.toLowerCase())
+      );
+      setFilteredContacts(filtered);
+    }
   };
 
   return (
@@ -145,10 +168,16 @@ function AddFriendScreen() {
         visible={contactsModalVisible}
         onRequestClose={() => setContactsModalVisible(false)}
       >
-        <View>
-          <Text style={styles.modalTitle}>내 연락처 가져오기</Text>
+        <View style={styles.contactsContainer}>
+          <TextInput
+            style={styles.searchBar}
+            placeholder="연락처 검색"
+            placeholderTextColor={colors.GRAY_300}
+            value={searchTerm}
+            onChangeText={handleSearch}
+          />
           <FlatList
-            data={contacts}
+            data={filteredContacts}
             keyExtractor={item => item.recordID}
             renderItem={({ item }) => (
               <TouchableOpacity onPress={() => selectContact(item)} style={styles.contactItem}>
@@ -274,6 +303,21 @@ const styles = StyleSheet.create({
   },
   contactItemText: {
     fontSize: 18,
+  },
+  contactsContainer: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: colors.WHITE,
+  },
+  searchBar: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: colors.GRAY_300,
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 16,
+    color: colors.BLACK,
+    marginBottom: 20,
   },
 });
 

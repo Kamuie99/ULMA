@@ -116,7 +116,7 @@ public class ParticipantService {
             guestIds.add(guestId);
         }
 
-        Integer returnValue = participantDao.addUserRelation(guestIds, Integer.parseInt(userId));
+        Integer returnValue = participantDao.addUserRelations(guestIds, Integer.parseInt(userId));
         Assert.notNull(returnValue, "returnValue is required");
 
         Assert.isTrue(guestIds.size()==returnValue, "지인 등록에 실패하였습니다.");

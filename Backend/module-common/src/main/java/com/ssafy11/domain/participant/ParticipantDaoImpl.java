@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 
 import org.jooq.DSLContext;
 import org.jooq.Record1;
+import org.jooq.Record5;
+import org.jooq.SelectConditionStep;
 import org.jooq.impl.DSL;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Repository;
@@ -225,9 +227,10 @@ public class ParticipantDaoImpl implements ParticipantDao {
 			.where(GUEST.ID.eq(guestId))
 			.fetchOne();
 		return Optional.ofNullable(modelMapper.map(guestRecord, Guest.class));
+	}
 
     @Override
-    public Integer addUserRelation(List<Integer> guestIds, Integer userId) {
+    public Integer addUserRelations(List<Integer> guestIds, Integer userId) {
         var query = dsl.insertInto(USERS_RELATION, USERS_RELATION.USERS_ID, USERS_RELATION.GUEST_ID, USERS_RELATION.CREATE_AT);
 
         for (Integer guestId : guestIds) {
@@ -259,17 +262,19 @@ public class ParticipantDaoImpl implements ParticipantDao {
 			.fetchOne(0, Integer.class);
 
 		int totalItems = (count != null) ? count : 0;
-		int totalPages = (int)Math.ceil((double)totalItems / size);
+		int totalPages = (int) Math.ceil((double) totalItems/size);
 
-        List<UserRelation> result = dsl.select(USERS_RELATION.GUEST_ID, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER, DSL.val(-1))
-                .from(USERS_RELATION)
-                .join(GUEST)
-                .on(USERS_RELATION.GUEST_ID.eq(GUEST.ID))
-                .where(USERS_RELATION.USERS_ID.eq(userId))
-                .orderBy(GUEST.NAME.asc())
-                .limit(size)
-                .offset(offset)
-                .fetchInto(UserRelation.class);
-        return new PageResponse<>(result, page, totalItems, totalPages);
-    }
+		int offset = (page-1) * size;
+
+		List<UserRelation> result = dsl.select(USERS_RELATION.GUEST_ID, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER, DSL.val(-1))
+			.from(USERS_RELATION)
+			.join(GUEST)
+			.on(USERS_RELATION.GUEST_ID.eq(GUEST.ID))
+			.where(USERS_RELATION.USERS_ID.eq(userId))
+			.orderBy(GUEST.NAME.asc())
+			.limit(size)
+			.offset(offset)
+			.fetchInto(UserRelation.class);
+		return new PageResponse<>(result, page, totalItems, totalPages);
+	}
 }

@@ -1,7 +1,7 @@
 import {payNavigations} from '@/constants/navigations';
 import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, Text} from 'react-native';
 
 import {colors} from '@/constants';
 import Icon from 'react-native-vector-icons/Entypo';
@@ -63,7 +63,12 @@ function PayStackNavigator() {
         name={payNavigations.HOME}
         component={PayHomeScreen}
         options={{
-          headerTitle: 'ULMA PAY',
+          headerTitle: () => (
+            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+              <Text style={{ color: colors.GREEN_700 }}>ULMA</Text>
+              <Text style={{ color: colors.BLACK }}> PAY</Text>
+            </Text>
+          ),
         }}
       />
       <Stack.Screen

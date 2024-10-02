@@ -2,6 +2,7 @@ package com.ssafy11.api.controller;
 
 import com.ssafy11.api.dto.account.AccountDTO;
 import com.ssafy11.api.dto.account.ChargePayAmountRequest;
+import com.ssafy11.api.dto.account.ChargePayAmountResponse;
 import com.ssafy11.api.dto.account.SendPayMoneyRequest;
 import com.ssafy11.api.dto.pay.PayHistoryDTO;
 import com.ssafy11.api.service.PayService;
@@ -33,9 +34,9 @@ public class PayController {
     @GetMapping
     public ResponseEntity<List<PayHistoryDTO>> viewPayHistory(
             @PathVariable("user_id") Integer userId,
-            @RequestParam(required = false) String startDate,  // 시작 날짜 (optional)
-            @RequestParam(required = false) String endDate,    // 종료 날짜 (optional)
-            @RequestParam(required = false) String payType     // SEND 또는 RECEIVE (optional)
+            @RequestParam(value = "start_date", required = false) String startDate,  // 시작 날짜 (optional)
+            @RequestParam(value = "end_date", required = false) String endDate,    // 종료 날짜 (optional)
+            @RequestParam(value = "pay_type", required = false) String payType     // SEND 또는 RECEIVE (optional)
     ) {
         // 문자열 날짜를 LocalDate로 변환
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -58,13 +59,11 @@ public class PayController {
         return ResponseEntity.ok(history);
     }
 
-
-
     // 3. Pay 잔액 보기
     @GetMapping("/balance")
-    public ResponseEntity<Long> viewPayBalance(
+    public ResponseEntity<ChargePayAmountResponse> viewPayBalance(
             @PathVariable("user_id") Integer userId) {
-        Long balance = payService.viewPayBalance(userId);
+        ChargePayAmountResponse balance = payService.viewPayBalance(userId);
         return ResponseEntity.ok(balance);
     }
 

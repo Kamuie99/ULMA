@@ -1,6 +1,7 @@
 package com.ssafy11.api.service;
 
 import com.ssafy11.api.dto.account.AccountDTO;
+import com.ssafy11.api.dto.account.ChargePayAmountResponse;
 import com.ssafy11.api.dto.pay.PayHistoryDTO;
 import com.ssafy11.domain.Account.Account;
 import com.ssafy11.domain.Pay.PayDao;
@@ -77,8 +78,8 @@ public class PayServiceImpl implements PayService {
 
     @Override
     @Transactional(readOnly = true)
-    public Long viewPayBalance(Integer userId) {
+    public ChargePayAmountResponse viewPayBalance(Integer userId) {
         Account payAccount = payDao.findPayAccountByUserId(userId);
-        return payAccount != null ? payAccount.balance() : 0L;
+        return new ChargePayAmountResponse(payAccount.balance());
     }
 }

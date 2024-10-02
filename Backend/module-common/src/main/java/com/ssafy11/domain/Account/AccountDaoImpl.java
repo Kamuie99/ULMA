@@ -1,13 +1,17 @@
 package com.ssafy11.domain.Account;
 
+import com.ssafy11.domain.Pay.PayHistory;
+import com.ssafy11.domain.Pay.PayType;
 import com.ssafy11.domain.users.Users;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import static com.ssafy11.ulma.generated.Tables.PAYHISTORY;
 import static com.ssafy11.ulma.generated.tables.Account.ACCOUNT;
 import static com.ssafy11.ulma.generated.tables.Users.USERS;
 
@@ -70,7 +74,6 @@ public class AccountDaoImpl implements AccountDao {
                 .where(USERS.ID.eq(userId))
                 .fetchOneInto(Users.class);
 
-        System.out.println(user);
         return dsl.selectFrom(ACCOUNT)
                 .where(ACCOUNT.ACCOUNT_NUMBER.eq(user.getAccountNumber()))
                 .fetchOneInto(Account.class);
@@ -89,4 +92,167 @@ public class AccountDaoImpl implements AccountDao {
                 .where(ACCOUNT.ID.eq(accountId))
                 .fetchOneInto(Account.class);
     }
+
+    @Override
+    public PayHistory chargeBalance(String accountNumber, Long amount) {
+        // 계좌를 조회 (계좌번호로 찾음)
+        Account account = dsl.selectFrom(ACCOUNT)
+                .where(ACCOUNT.ACCOUNT_NUMBER.eq(accountNumber))
+                .fetchOneInto(Account.class);
+        // 계좌가 존재하고 유효한 경우
+        if (account != null) {
+            // 1. 계좌에 잔액 충전
+            dsl.update(ACCOUNT)
+                    .set(ACCOUNT.BALANCE, ACCOUNT.BALANCE.add(amount))
+                    .where(ACCOUNT.ID.eq(account.id()))
+                    .execute();
+            // 2. PayHistory 생성 (ATM 충전 기록)
+            PayHistory receiveHistory = createReceiveHistory(
+                    accountNumber,
+                    amount,
+                    "ATM",
+                    "ATM"
+            );
+            return receiveHistory;
+        }
+
+        return null;
+    }
+
+
+    @Override
+    public PayHistory sendMoney(String senderAccountNumber, String info, String targetAccountNumber, Long amount) {
+        // 1. 보내는 사람의 계좌를 조회
+        Account senderAccount = this.findByAccountNumber(senderAccountNumber);
+        // 2. 받는 사람의 계좌를 조회
+        Account targetAccount = this.findByAccountNumber(targetAccountNumber);
+
+        // 3. 송금 대상 사용자의 이름을 조회
+        String targetUserName = dsl.select(USERS.NAME)
+                .from(USERS)
+                .where(USERS.ID.eq(targetAccount.userId()))
+                .fetchOneInto(String.class);
+
+        // 4. 보내는 사람의 이름을 조회
+        String senderUserName = dsl.select(USERS.NAME)
+                .from(USERS)
+                .where(USERS.ID.eq(senderAccount.userId()))
+                .fetchOneInto(String.class);
+
+        // 5. 송금 처리
+        if (senderAccount != null && targetAccount != null && senderAccount.balance() >= amount) {
+            // 6. 보내는 사람의 계좌에서 잔액 차감
+            dsl.update(ACCOUNT)
+                    .set(ACCOUNT.BALANCE, ACCOUNT.BALANCE.subtract(amount))
+                    .where(ACCOUNT.ID.eq(senderAccount.id()))
+                    .execute();
+
+            // 7. 받는 사람의 계좌에 잔액 추가
+            dsl.update(ACCOUNT)
+                    .set(ACCOUNT.BALANCE, ACCOUNT.BALANCE.add(amount))
+                    .where(ACCOUNT.ID.eq(targetAccount.id()))
+                    .execute();
+
+            // 8. 송금 내역(PayHistory) 생성
+            PayHistory sendHistory = createSendHistory(
+                    senderAccount.accountNumber(),
+                    amount,
+                    targetUserName,
+                    targetAccountNumber,
+                    info
+            );
+
+            // 9. 수신 내역(PayHistory) 생성
+            createReceiveHistory(
+                    targetAccount.accountNumber(),
+                    amount,
+                    senderUserName,
+                    senderAccount.accountNumber()
+            );
+
+            return sendHistory;
+        }
+
+        return null;
+    }
+
+    public PayHistory createSendHistory(String accountNumber, Long amount, String target, String targetAccountNumber, String info) {
+        Account sendAccount = this.findByAccountNumber(accountNumber);
+
+        if (sendAccount != null) {
+            // 송금 내역 생성
+            int sendId = dsl.insertInto(PAYHISTORY)
+                    .set(PAYHISTORY.ACCOUNT_ID, sendAccount.id())
+                    .set(PAYHISTORY.AMOUNT, amount)
+                    .set(PAYHISTORY.BALANCE_AFTER_TRANSACTION, sendAccount.balance() - amount)
+                    .set(PAYHISTORY.TRANSACTION_TYPE, PayType.SEND.name())
+                    .set(PAYHISTORY.COUNTERPARTY_NAME, target)
+                    .set(PAYHISTORY.COUNTERPARTY_ACCOUNT_NUMBER, targetAccountNumber)
+                    .set(PAYHISTORY.DESCRIPTION, info)
+                    .returning(PAYHISTORY.ID)
+                    .fetchOne()
+                    .getValue(PAYHISTORY.ID);
+
+            return dsl.selectFrom(PAYHISTORY)
+                    .where(PAYHISTORY.ID.eq(sendId))
+                    .fetchOneInto(PayHistory.class);
+        }
+        return null;
+    }
+
+
+    public PayHistory createReceiveHistory(String accountNumber, Long amount, String sender, String senderAccountNumber) {
+        Account receiveAccount = this.findByAccountNumber(accountNumber);
+        if (receiveAccount != null) {
+            int receiveId = dsl.insertInto(PAYHISTORY)
+                    .set(PAYHISTORY.ACCOUNT_ID, receiveAccount.id())
+                    .set(PAYHISTORY.AMOUNT, amount)
+                    .set(PAYHISTORY.BALANCE_AFTER_TRANSACTION, receiveAccount.balance() + amount)
+                    .set(PAYHISTORY.TRANSACTION_TYPE, PayType.RECEIVE.name())
+                    .set(PAYHISTORY.COUNTERPARTY_NAME, sender)
+                    .set(PAYHISTORY.COUNTERPARTY_ACCOUNT_NUMBER, senderAccountNumber)
+                    .set(PAYHISTORY.DESCRIPTION, sender)
+                    .returning(PAYHISTORY.ID)
+                    .fetchOne()
+                    .getValue(PAYHISTORY.ID);
+            return dsl.selectFrom(PAYHISTORY)
+                    .where(PAYHISTORY.ID.eq(receiveId))
+                    .fetchOneInto(PayHistory.class);
+        }
+        return null;
+    }
+
+    @Override
+    public List<PayHistory> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType) {
+        // 1. 계좌번호로 계좌 조회
+        Account account = dsl.selectFrom(ACCOUNT)
+                .where(ACCOUNT.ACCOUNT_NUMBER.eq(accountNumber))
+                .fetchOneInto(Account.class);
+
+        // 2. 해당 계좌의 PayHistory 내역 조회
+        if (account != null) {
+            var query = dsl.selectFrom(PAYHISTORY)
+                    .where(PAYHISTORY.ACCOUNT_ID.eq(account.id()));
+
+            // 3. 시작날짜와 끝날짜가 지정된 경우 필터링 추가
+            if (startDate != null) {
+                query.and(PAYHISTORY.TRANSACTION_DATE.greaterOrEqual(startDate.atStartOfDay()));
+            }
+            if (endDate != null) {
+                query.and(PAYHISTORY.TRANSACTION_DATE.lessThan(endDate.plusDays(1).atStartOfDay()));
+            }
+
+            // 4. payType이 지정된 경우 필터링 추가 ("SEND" 또는 "RECEIVE")
+            if (payType != null && (payType.equals("SEND") || payType.equals("RECEIVE"))) {
+                query.and(PAYHISTORY.TRANSACTION_TYPE.eq(payType));
+            }
+
+            // 5. 결과를 날짜순으로 정렬하여 반환
+            return query.orderBy(PAYHISTORY.TRANSACTION_DATE.desc())
+                    .fetchInto(PayHistory.class);
+        }
+
+        return List.of();
+    }
+
 }

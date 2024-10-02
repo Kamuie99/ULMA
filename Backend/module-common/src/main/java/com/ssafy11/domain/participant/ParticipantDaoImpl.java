@@ -6,17 +6,14 @@ import com.ssafy11.domain.participant.dto.*;
 import com.ssafy11.domain.participant.dto.Transaction;
 import lombok.RequiredArgsConstructor;
 import org.jooq.*;
+import org.jooq.Record;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.ssafy11.ulma.generated.Tables.*;
 import static org.jooq.impl.DSL.field;
@@ -30,17 +27,52 @@ public class ParticipantDaoImpl implements ParticipantDao {
 
     @Transactional(readOnly = true)
     @Override
-    public List<UserRelation> sameName(Integer userId, String name) {
-        List<UserRelation> result = dsl.select(GUEST.ID, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER)
+    public PageResponse<UserRelation> sameName(Integer userId, String name, String category, PageDto pageDto) {
+        int size = pageDto.getSize();
+        int page = pageDto.getPage();
+
+        SelectConditionStep<Record1<Integer>> pageQuery = dsl.selectCount()
+                .from(USERS)
+                .join(USERS_RELATION)
+                .on(USERS.ID.eq(USERS_RELATION.USERS_ID))
+                .join(GUEST)
+                .on(USERS_RELATION.GUEST_ID.eq(GUEST.ID))
+                .where(USERS.ID.eq(userId));
+
+        if(name!=null && !name.isEmpty()){
+            pageQuery = pageQuery.and(GUEST.NAME.like("%" + name + "%"));
+        }
+
+        if (category != null && !category.isEmpty()) {
+            pageQuery = pageQuery.and(GUEST.CATEGORY.eq(category));
+        }
+        Integer count = pageQuery.fetchOne(0, Integer.class);
+
+        int totalItems = (count != null) ? count : 0;
+        int totalPages = (int) Math.ceil((double) totalItems/size);
+
+        int offset = (page-1) * size;
+
+        SelectConditionStep<Record5<Integer, String, String, String, Integer>> query = (SelectConditionStep<Record5<Integer, String, String, String, Integer>>) dsl.select(GUEST.ID, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER, DSL.val(-1))
                 .from(USERS)
                 .join(USERS_RELATION)
                 .on(USERS.ID.eq(USERS_RELATION.USERS_ID))
                 .join(GUEST)
                 .on(USERS_RELATION.GUEST_ID.eq(GUEST.ID))
                 .where(USERS.ID.eq(userId))
-                .and(GUEST.NAME.like("%"+name+"%"))
-                .fetchInto(UserRelation.class);
-        return result;
+                .orderBy(GUEST.NAME.asc())
+                .limit(size)
+                .offset(offset);
+
+        if(name!=null && !name.isEmpty()){
+            query = query.and(GUEST.NAME.like("%" + name + "%"));
+        }
+
+        if (category != null && !category.isEmpty()) {
+            query = query.and(GUEST.CATEGORY.eq(category));
+        }
+
+        return new PageResponse<>(query.fetchInto(UserRelation.class), page, totalItems, totalPages);
     }
 
     @Transactional(readOnly = true)
@@ -211,42 +243,6 @@ public class ParticipantDaoImpl implements ParticipantDao {
                 .limit(size)
                 .offset(offset)
                 .fetchInto(UserRelation.class);
-
-
-
-        return new PageResponse<>(result, page, totalItems, totalPages);
-    }
-
-
-    @Override
-    public PageResponse<UserRelation> getCategoryUserRelation(Integer userId, String category, PageDto pageDto) {
-        int size = pageDto.getSize();
-        int page = pageDto.getPage();
-
-        Integer count = dsl.selectCount()
-                .from(USERS_RELATION)
-                .join(GUEST)
-                .on(USERS_RELATION.GUEST_ID.eq(GUEST.ID))
-                .where(USERS_RELATION.USERS_ID.eq(userId))
-                .and(GUEST.CATEGORY.like(category))
-                .fetchOne(0, Integer.class);
-
-        int totalItems = (count != null) ? count : 0;
-        int totalPages = (int) Math.ceil((double) totalItems/size);
-
-        int offset = (page-1) * size;
-
-        List<UserRelation> result = dsl.select(USERS_RELATION.GUEST_ID, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER, DSL.val(-1))
-                .from(USERS_RELATION)
-                .join(GUEST)
-                .on(USERS_RELATION.GUEST_ID.eq(GUEST.ID))
-                .where(USERS_RELATION.USERS_ID.eq(userId))
-                .and(GUEST.CATEGORY.like(category))
-                .orderBy(GUEST.NAME.asc())
-                .limit(size)
-                .offset(offset)
-                .fetchInto(UserRelation.class);
-
         return new PageResponse<>(result, page, totalItems, totalPages);
     }
 }

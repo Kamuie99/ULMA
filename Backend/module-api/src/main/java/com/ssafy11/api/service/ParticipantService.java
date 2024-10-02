@@ -26,12 +26,19 @@ public class ParticipantService {
 
 
     @Transactional(readOnly = true)
-    public List<UserRelation> sameName(String userId, String name){
+    public PageResponse<UserRelation> sameName(String userId, String name, String category, PageDto pagedto){
         Assert.hasText(userId, "UserId must not be null");
-        Assert.notNull(name, " name is required");
-        List<UserRelation> userRelationList = participantDao.sameName(Integer.parseInt(userId), name);
+        PageResponse<UserRelation> userRelationList = participantDao.sameName(Integer.parseInt(userId), name, category, pagedto);
         Assert.notNull(userRelationList, "userRelationList is required");
-        return userRelationList;
+        List<UserRelation> list = userRelationList(userRelationList.data(), userId);
+        Assert.notNull(list, "list is required");
+
+        int page = userRelationList.currentPage();
+        int totalItems = userRelationList.totalItemsCount();
+        int totalPages = userRelationList.totalPages();
+        Assert.notNull(userRelationList, "userRelationList is required");
+        return new PageResponse<>(list, page, totalItems, totalPages);
+
     }
 
     @Transactional(readOnly = true)
@@ -115,19 +122,6 @@ public class ParticipantService {
         int totalItems = userRelationList.totalItemsCount();
         int totalPages = userRelationList.totalPages();
         Assert.notNull(userRelationList, "userRelationList is required");
-        return new PageResponse<>(list, page, totalItems, totalPages);
-    }
-
-    public PageResponse<UserRelation> getCategoryUserRelation(String userId, String category, PageDto pagedto) {
-        Assert.hasText(userId, "userId is required");
-        Assert.hasText(category, "category is required");
-        PageResponse<UserRelation> userRelationList = participantDao.getCategoryUserRelation(Integer.parseInt(userId),category, pagedto);
-        List<UserRelation> list = userRelationList(userRelationList.data(), userId);
-        Assert.notNull(list, "list is required");
-
-        int page = userRelationList.currentPage();
-        int totalItems = userRelationList.totalItemsCount();
-        int totalPages = userRelationList.totalPages();
         return new PageResponse<>(list, page, totalItems, totalPages);
     }
 

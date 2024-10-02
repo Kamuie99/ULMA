@@ -1,7 +1,7 @@
 import {mypageNavigations} from '@/constants/navigations';
 import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, TouchableOpacity} from 'react-native';
 
 import {colors} from '@/constants';
 import Icon from 'react-native-vector-icons/Entypo';
@@ -23,31 +23,36 @@ function MyPageStackNavigator() {
           backgroundColor: colors.WHITE,
         },
         headerStyle: {
-          backgroundColor: colors.WHITE,
+          backgroundColor: '#F8F8F8',
         },
-        headerTitleAlign: 'center',
+        headerTitleAlign: 'left', // Align title to the left
         headerTitleStyle: {
-          fontSize: 15,
+          fontSize: 18, // Adjust font size to match style
+          fontWeight: 'bold',
         },
         headerTintColor: colors.BLACK,
-        headerBackImage: () => {
-          return <Icon name="chevron-left" size={24} color={colors.BLACK} />;
-        },
       }}>
       <Stack.Screen
         name={mypageNavigations.MYPAGE_HOME}
         component={MyPageHomeScreen}
-        options={{
-          headerTitle: ' ',
-          headerShown: false,
-        }}
+        options={({navigation}) => ({
+          headerTitle: '더보기',
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => {
+                // Add action for gear icon press here
+              }}
+              style={{ marginRight: 15 }}>
+              <Icon name="cog" size={24} color={colors.BLACK} />
+            </TouchableOpacity>
+          ),
+        })}
       />
       <Stack.Screen
         name={mypageNavigations.USER_DETAIL}
         component={UserDetailScreen}
         options={{
-          headerTitle: ' ',
-          headerShown: true,
+          headerTitle: '사용자 정보',
         }}
       />
     </Stack.Navigator>

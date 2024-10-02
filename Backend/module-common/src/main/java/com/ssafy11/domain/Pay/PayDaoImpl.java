@@ -236,8 +236,6 @@ public class PayDaoImpl implements PayDao {
     }
 
 
-
-
     public PayHistory createReceiveHistory(String accountNumber, Long amount, String sender, String senderAccountNumber) {
         Account receiveAccount = accountDao.findByAccountNumber(accountNumber);
 
@@ -292,7 +290,7 @@ public class PayDaoImpl implements PayDao {
                     .fetchInto(PayHistory.class);
         }
 
-        return List.of();
+        return null;
     }
 
 

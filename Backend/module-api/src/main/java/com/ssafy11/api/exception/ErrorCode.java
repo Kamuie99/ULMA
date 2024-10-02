@@ -29,7 +29,8 @@ public enum ErrorCode {
 	// Excel
 	EXCEL_PARSING_FAILED(HttpStatus.BAD_REQUEST,"엑셀 파싱에 실패했습니다."),
 	NOT_EXCEL(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "파일 형식을 확인해주세요"),
-	NO_CONTENT(HttpStatus.NO_CONTENT, "파일 내용을 확인해주세요");
+	NO_CONTENT(HttpStatus.NO_CONTENT, "파일 내용을 확인해주세요"),
+	ACCOUNT_NOT_FOUND_EXCEPTION(HttpStatus.NOT_FOUND, "계좌가 존재하지 않습니다.");
 
 	private final HttpStatus status;
 	private final String message;

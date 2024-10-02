@@ -1,7 +1,10 @@
 package com.ssafy11.api.service;
 
 import com.ssafy11.api.dto.account.AccountDTO;
+import com.ssafy11.api.dto.account.ChargePayAmountResponse;
 import com.ssafy11.api.dto.pay.PayHistoryDTO;
+import com.ssafy11.api.exception.ErrorCode;
+import com.ssafy11.api.exception.ErrorException;
 import com.ssafy11.domain.Account.Account;
 import com.ssafy11.domain.Pay.PayDao;
 import com.ssafy11.domain.Pay.PayHistory;
@@ -77,8 +80,11 @@ public class PayServiceImpl implements PayService {
 
     @Override
     @Transactional(readOnly = true)
-    public Long viewPayBalance(Integer userId) {
+    public ChargePayAmountResponse viewPayBalance(Integer userId) {
         Account payAccount = payDao.findPayAccountByUserId(userId);
-        return payAccount != null ? payAccount.balance() : 0L;
+        if (payAccount == null) {
+            throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND_EXCEPTION);
+        }
+        return new ChargePayAmountResponse(payAccount.balance());
     }
 }

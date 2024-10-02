@@ -1,9 +1,5 @@
 package com.ssafy11.domain.Account;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonValue;
-@JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum BankCode {
     한국은행("001"),
     산업은행("002"),
@@ -55,7 +51,6 @@ public enum BankCode {
         this.code = code;
     }
 
-    @JsonValue
     public String getCode() {
         return code;
     }

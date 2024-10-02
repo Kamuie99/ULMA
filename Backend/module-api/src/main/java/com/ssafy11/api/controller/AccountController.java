@@ -80,10 +80,11 @@ public class AccountController {
     @GetMapping("/account/{account_number}/history")
     public ResponseEntity<List<PayHistory>> getPayHistory(
             @PathVariable("account_number") String accountNumber,
-            @RequestParam(required = false) LocalDate startDate,
-            @RequestParam(required = false) LocalDate endDate,
-            @RequestParam(required = false) String payType) {
+            @RequestParam(value = "start_date", required = false) LocalDate startDate,
+            @RequestParam(value = "end_date", required = false) LocalDate endDate,
+            @RequestParam(value = "pay_type", required = false) String payType) {
         List<PayHistory> payHistoryList = accountService.findPayHistory(accountNumber, startDate, endDate, payType);
         return ResponseEntity.ok(payHistoryList);
     }
+
 }

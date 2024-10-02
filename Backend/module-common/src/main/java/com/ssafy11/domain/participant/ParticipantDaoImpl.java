@@ -89,7 +89,7 @@ public class ParticipantDaoImpl implements ParticipantDao {
                                 .join(EVENT).on(PARTICIPATION.EVENT_ID.eq(EVENT.ID))
                                 .where(PARTICIPATION.GUEST_ID.eq(guestId).and(EVENT.USERS_ID.eq(userId)))
                                 .unionAll(
-                                        dsl.select(SCHEDULE.GUEST_ID, SCHEDULE.NAME, SCHEDULE.DATE, SCHEDULE.AMOUNT.neg().as("amount"))
+                                        dsl.select(SCHEDULE.GUEST_ID, SCHEDULE.NAME, SCHEDULE.DATE, SCHEDULE.AMOUNT)
                                                 .from(SCHEDULE)
                                                 .where(SCHEDULE.GUEST_ID.eq(guestId).and(SCHEDULE.USERS_ID.eq(userId)))
                                 )
@@ -131,7 +131,7 @@ public class ParticipantDaoImpl implements ParticipantDao {
                 .fetchOne(0, Integer.class);
 
         // 내가 지인에게서 받은 총액 (일정 테이블에서)
-        Integer totalReceived = dsl.select(DSL.sum(SCHEDULE.AMOUNT).neg())
+        Integer totalReceived = dsl.select(DSL.sum(SCHEDULE.AMOUNT))
                 .from(SCHEDULE)
                 .where(SCHEDULE.GUEST_ID.eq(guestId)
                         .and(SCHEDULE.USERS_ID.eq(userId)))

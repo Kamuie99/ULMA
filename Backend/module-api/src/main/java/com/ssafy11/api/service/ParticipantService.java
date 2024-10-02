@@ -74,6 +74,8 @@ public class ParticipantService {
             throw new ErrorException(ErrorCode.Duplicated);
         }
 
+        Assert.isTrue(participant.amount()>0, "값이 양수여야 합니다.");
+
         Integer participantId = participantDao.addParticipant(participant);
         Assert.notNull(participantId, "participantId is required");
         return participantId;

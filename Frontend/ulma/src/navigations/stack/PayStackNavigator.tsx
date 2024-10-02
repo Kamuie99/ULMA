@@ -19,8 +19,10 @@ import AccounthistoryScreen from '@/screens/Pay/AccounthistoryScreen';
 import FriendsearchScreen from '@/screens/Pay/FriendsearchScreen';
 import InputAmountScreen from '@/screens/Pay/InputAmountScreen';
 import AiRecommendScreen from '@/screens/Pay/AiRecommendScreen'; // '.1'을 제거한 경로
+import PayHomeScreen from '@/screens/Pay/PayHomeScreen';
 
 export type payStackParamList = {
+  [payNavigations.HOME]: undefined;
   [payNavigations.ACCOUNT_HISTORY]: undefined;
   [payNavigations.ACCOUNT_INPUT]: undefined;
   [payNavigations.ADD_HISTORY]: undefined;
@@ -32,7 +34,6 @@ export type payStackParamList = {
   [payNavigations.RECOMMEND_OPTION]: undefined;
   [payNavigations.SENDING]: undefined;
   [payNavigations.SEND_RESULT]: undefined;
-  LandingScreen: undefined;
   [payNavigations.INPUT_AMOUNT]: {guestId: number};
 };
 
@@ -57,6 +58,14 @@ function PayStackNavigator() {
           return <Icon name="chevron-left" size={24} color={colors.BLACK} />;
         },
       }}>
+      <Stack.Screen
+        name={payNavigations.HOME}
+        component={PayHomeScreen}
+        options={{
+          headerTitle: '',
+          headerShown: false,
+        }}
+      />
       <Stack.Screen
         name={payNavigations.ADD_HISTORY}
         component={AddhistoryScreen}

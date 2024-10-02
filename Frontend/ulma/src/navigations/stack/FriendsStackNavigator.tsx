@@ -8,11 +8,13 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import FriendsListScreen from '@/screens/Freinds/FriendsListScreen';
 import FriendsHomeScreen from '@/screens/Freinds/FriendsHomeScreen';
 import FriendsAddScreen from '@/screens/Freinds/FriendsAddScreen';
+import FriendsDetailScreen from '@/screens/Freinds/FriendsDeatilScreen';
 
 export type freindsStackParamList = {
   [friendsNavigations.FRIENDS_HOME]: undefined;
   [friendsNavigations.FRIENDS_LIST]: undefined;
   [friendsNavigations.FRIENDS_ADD]: undefined;
+  [friendsNavigations.FREINDS_DETAIL]: { guestId: number }; // guestId를 받아오는 상세 페이지
 };
 
 const Stack = createStackNavigator<freindsStackParamList>();
@@ -25,7 +27,7 @@ function FriendsStackNavigator() {
           backgroundColor: colors.WHITE,
         },
         headerStyle: {
-          backgroundColor: colors.GRAY_100,
+          backgroundColor: colors.WHITE,
         },
         headerTitleAlign: 'left',
         headerTitleStyle: {
@@ -62,6 +64,13 @@ function FriendsStackNavigator() {
         component={FriendsAddScreen}
         options={{
           headerTitle: '지인 추가',
+        }}
+      />
+      <Stack.Screen
+        name={friendsNavigations.FREINDS_DETAIL}
+        component={FriendsDetailScreen}
+        options={{
+          headerTitle: '지인 상세 정보',
         }}
       />
     </Stack.Navigator>

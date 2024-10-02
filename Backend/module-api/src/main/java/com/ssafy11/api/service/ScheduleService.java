@@ -28,7 +28,10 @@ public class ScheduleService {
         Assert.notNull(schedule, " name is required");
 
         Assert.isTrue(isMyGuest(userId, schedule.guestId()),"지인관계가 아닙니다.");
-        Assert.isTrue(schedule.paidAmount()<0, "값이 음수여야 합니다.");
+
+        if(schedule.paidAmount()!=0){
+            Assert.isTrue(schedule.paidAmount()<0, "값이 음수여야 합니다.");
+        }
 
         Integer resultId = scheduleDao.addSchedule(schedule, Integer.parseInt(userId));
         Assert.notNull(resultId, "resultId is required");

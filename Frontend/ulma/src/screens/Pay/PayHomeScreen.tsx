@@ -34,7 +34,10 @@ function PayHomeScreen() {
 
   const handleCreateAccount = async () => {
     try {
-      await makeAccount();
+      console.log('호출은 됨');
+      makeAccount();
+      console.log('모달은 꺼짐');
+      setModalVisible(false);
     } catch (error) {
       console.error('계좌 생성 중 에러:', error);
     }
@@ -132,11 +135,11 @@ function PayHomeScreen() {
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={async () => {
-                  handleCreateAccount;
-                  setModalVisible(false);
+                  await handleCreateAccount(); // 함수 호출
                 }}>
                 <Text style={styles.closeButtonText}>시작하기</Text>
               </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => setModalVisible(false)}>

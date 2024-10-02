@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, Alert, Modal } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axiosInstance from '@/api/axios';
@@ -10,6 +10,7 @@ const ScheduleMainScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState('');
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [currentMonth, setCurrentMonth] = useState({ year: 2024, month: 10 });
+  const [modalVisible, setModalVisible] = useState(false);
 
   const fetchEvents = async (year, month) => {
     try {
@@ -69,7 +70,6 @@ const ScheduleMainScreen = ({ navigation }) => {
         style={styles.deleteButton}
         onPress={() => confirmDelete(scheduleId)}
       >
-        {/* Icon은 <Text>로 감싸지 않을 필요가 없지만, 모든 텍스트를 확인하기 위해 추가적인 점검이 필요할 수 있음 */}
         <Icon name="trash-outline" size={28} color={colors.RED} />
       </TouchableOpacity>
     );
@@ -86,6 +86,28 @@ const ScheduleMainScreen = ({ navigation }) => {
         <Text style={styles.eventStatus}>상태: {item.paidAmount < 0 ? '미지급' : '지급 완료'}</Text>
       </View>
     </Swipeable>
+  );
+
+  const AddEventModal = () => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={modalVisible}
+      onRequestClose={() => setModalVisible(false)}
+    >
+      <View style={styles.centeredView}>
+        <View style={styles.modalView}>
+          <Text style={styles.modalText}>새 경조사 추가</Text>
+          {/* 여기에 새 경조사 추가를 위한 폼을 구현하세요 */}
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={styles.textStyle}>닫기</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
   );
 
   return (
@@ -121,9 +143,11 @@ const ScheduleMainScreen = ({ navigation }) => {
         />
       </View>
 
-      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('AddEvent')}>
+      <TouchableOpacity style={styles.fab} onPress={() => setModalVisible(true)}>
         <Icon name="add-outline" size={28} color={colors.WHITE} />
       </TouchableOpacity>
+
+      <AddEventModal />
     </View>
   );
 };
@@ -192,6 +216,42 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: 80,
     height: '100%',
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 22,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  closeButton: {
+    backgroundColor: colors.GREEN_700,
+    borderRadius: 20,
+    padding: 10,
+    elevation: 2,
+  },
+  textStyle: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
   },
 });
 

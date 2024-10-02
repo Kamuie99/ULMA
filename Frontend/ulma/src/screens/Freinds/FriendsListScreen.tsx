@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, View, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput } from 'react-native';
+import { Picker } from '@react-native-picker/picker';  // Picker를 올바른 경로에서 가져오기
 import axiosInstance from '@/api/axios';
 import { colors } from '@/constants';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -21,6 +22,7 @@ function FriendsListScreen({}: FriendsListScreenProps) {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('전체'); // 기본값 '전체'로 설정
   const navigation = useNavigation();
 
   const fetchFriends = useCallback(async (page: number) => {
@@ -43,24 +45,23 @@ function FriendsListScreen({}: FriendsListScreenProps) {
     }
   }, [loading, hasMore]);
 
-  const searchFriends = useCallback(async (query: string) => {
-    if (!query) {
+  const searchFriends = useCallback(async (query: string, category: string) => {
+    if (!query && category === '전체') {
       setFilteredFriends(friends);
       return;
     }
-  
+
     setLoading(true);
     try {
+      const params: { name?: string; category?: string } = {};
+      if (query) params.name = query;
+      if (category !== '전체') params.category = category;
+
       const response = await axiosInstance.get(`/participant/same`, {
-        params: { name: query },
+        params,
       });
-  
-      // 검색 결과가 없으면 빈 배열로 설정
-      if (response.data.length === 0) {
-        setFilteredFriends([]);
-      } else {
-        setFilteredFriends(response.data); // 검색 결과가 있으면 설정
-      }
+
+      setFilteredFriends(response.data.data || []); // 검색 결과 반영
     } catch (error) {
       console.error('친구 검색에 실패했습니다:', error);
       setFilteredFriends([]); // 에러 발생 시 빈 배열로 초기화
@@ -68,8 +69,6 @@ function FriendsListScreen({}: FriendsListScreenProps) {
       setLoading(false);
     }
   }, [friends]);
-  
-
 
   useFocusEffect(
     useCallback(() => {
@@ -79,13 +78,12 @@ function FriendsListScreen({}: FriendsListScreenProps) {
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
-      console.log('검색 쿼리:', searchQuery);  // 검색 쿼리 로그
-      searchFriends(searchQuery);
+      console.log('검색 쿼리:', searchQuery, '카테고리:', selectedCategory);  // 검색 쿼리 로그
+      searchFriends(searchQuery, selectedCategory);
     }, 300);
   
     return () => clearTimeout(delayDebounceFn);
-  }, [searchQuery, searchFriends]);
-  
+  }, [searchQuery, selectedCategory, searchFriends]);
 
   const formatPhoneNumber = (phoneNumber: string | null) => {
     if (!phoneNumber) return '등록된 번호가 없습니다.';
@@ -110,9 +108,9 @@ function FriendsListScreen({}: FriendsListScreenProps) {
       case '가족':
       case '친구':
       case '직장':
-        return colors.WHITE; // 가족, 친구, 직장의 경우 텍스트 색상을 흰색으로 설정
+        return colors.WHITE;
       default:
-        return '#333'; // 기본 회색
+        return '#333';
     }
   };
 
@@ -149,12 +147,27 @@ function FriendsListScreen({}: FriendsListScreenProps) {
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.searchInput}
-        placeholder="지인 이름 또는 전화번호로 검색"
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-      />
+      <View style={styles.searchContainer}>
+        <Picker
+          selectedValue={selectedCategory}
+          style={styles.categoryPicker}
+          onValueChange={(itemValue) => setSelectedCategory(itemValue)}
+        >
+          <Picker.Item label="전체" value="전체" />
+          <Picker.Item label="가족" value="가족" />
+          <Picker.Item label="친구" value="친구" />
+          <Picker.Item label="직장" value="직장" />
+          <Picker.Item label="학교" value="학교" />
+          <Picker.Item label="지인" value="지인" />
+          <Picker.Item label="기타" value="기타" />
+        </Picker>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="지인 이름 또는 전화번호로 검색"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+        />
+      </View>
       <FlatList
         data={filteredFriends}
         renderItem={renderFriendCard}
@@ -172,14 +185,25 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
-  searchInput: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 15,
-    paddingHorizontal: 10,
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 16,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    borderBottomColor: colors.GREEN_700,  // 아래 테두리만 초록색으로
+    borderBottomWidth: 2,  // 아래 테두리 두께
+    borderLeftWidth: 0,    // 왼쪽 테두리 없애기
+    borderRightWidth: 0,   // 오른쪽 테두리 없애기
+    borderTopWidth: 0,     // 위쪽 테두리 없애기
+    paddingHorizontal: 10,
     backgroundColor: 'white',
+  },
+  categoryPicker: {
+    height: 40,
+    width: 150,
   },
   card: {
     backgroundColor: '#f5f5f5',
@@ -220,5 +244,6 @@ const styles = StyleSheet.create({
     color: colors.GREEN_700
   },
 });
+
 
 export default FriendsListScreen;

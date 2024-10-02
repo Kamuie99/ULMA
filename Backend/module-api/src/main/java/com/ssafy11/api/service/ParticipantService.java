@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -25,12 +26,19 @@ public class ParticipantService {
 
 
     @Transactional(readOnly = true)
-    public List<UserRelation> sameName(String userId, String name){
+    public PageResponse<UserRelation> sameName(String userId, String name, String category, PageDto pagedto){
         Assert.hasText(userId, "UserId must not be null");
-        Assert.notNull(name, " name is required");
-        List<UserRelation> userRelationList = participantDao.sameName(Integer.parseInt(userId), name);
+        PageResponse<UserRelation> userRelationList = participantDao.sameName(Integer.parseInt(userId), name, category, pagedto);
         Assert.notNull(userRelationList, "userRelationList is required");
-        return userRelationList;
+        List<UserRelation> list = userRelationList(userRelationList.data(), userId);
+        Assert.notNull(list, "list is required");
+
+        int page = userRelationList.currentPage();
+        int totalItems = userRelationList.totalItemsCount();
+        int totalPages = userRelationList.totalPages();
+        Assert.notNull(userRelationList, "userRelationList is required");
+        return new PageResponse<>(list, page, totalItems, totalPages);
+
     }
 
     @Transactional(readOnly = true)
@@ -65,6 +73,8 @@ public class ParticipantService {
         if(isParticipant(participant.eventId(), participant.guestId())){
             throw new ErrorException(ErrorCode.Duplicated);
         }
+
+        Assert.isTrue(participant.amount()>0, "값이 양수여야 합니다.");
 
         Integer participantId = participantDao.addParticipant(participant);
         Assert.notNull(participantId, "participantId is required");
@@ -107,16 +117,29 @@ public class ParticipantService {
     public PageResponse<UserRelation> getUserRelation(String userId, PageDto pagedto) {
         Assert.hasText(userId, "userId is required");
         PageResponse<UserRelation> userRelationList = participantDao.getUserRelations(Integer.parseInt(userId), pagedto);
+        List<UserRelation> list = userRelationList(userRelationList.data(), userId);
+        Assert.notNull(list, "list is required");
+
+        int page = userRelationList.currentPage();
+        int totalItems = userRelationList.totalItemsCount();
+        int totalPages = userRelationList.totalPages();
         Assert.notNull(userRelationList, "userRelationList is required");
-        return userRelationList;
+        return new PageResponse<>(list, page, totalItems, totalPages);
     }
 
-    public PageResponse<UserRelation> getCategoryUserRelation(String userId, String category, PageDto pagedto) {
-        Assert.hasText(userId, "userId is required");
-        Assert.hasText(category, "category is required");
-        PageResponse<UserRelation> userRelationList = participantDao.getCategoryUserRelation(Integer.parseInt(userId),category, pagedto);
-        Assert.notNull(userRelationList, "userRelationList is required");
-        return userRelationList;
+    public List<UserRelation> userRelationList(List<UserRelation> result, String userId){
+        List<UserRelation> UserRelations = new ArrayList<>();
+        for (UserRelation relation : result) {
+            TransactionSummary summary = getTransactionSummary(userId, relation.guestId());
+            UserRelations.add(new UserRelation(
+                    relation.guestId(),
+                    relation.name(),
+                    relation.category(),
+                    relation.phoneNumber(),
+                    summary.totalBalance()
+            ));
+        }
+        return UserRelations;
     }
 
 }

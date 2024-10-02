@@ -28,11 +28,12 @@ public class ParticipantController {
 
     //동명이인
     @GetMapping("/same")
-    public ResponseEntity<List<UserRelation>> sameName(@AuthenticationPrincipal User user,
-                                      @RequestParam("name") String name) {
-        Assert.hasText(name, "name must not be null");
+    public ResponseEntity<PageResponse<UserRelation>> sameName(@AuthenticationPrincipal User user,
+                                      @RequestParam(value = "name", required = false) String name,
+                                      @RequestParam(value = "category", required = false) String category,
+                                      @ModelAttribute PageDto pagedto) {
 
-        List<UserRelation> userRelationList = participantService.sameName(user.getUsername(), name);
+        PageResponse<UserRelation> userRelationList = participantService.sameName(user.getUsername(), name, category, pagedto);
         return ResponseEntity.ok(userRelationList);
     }
 
@@ -120,16 +121,6 @@ public class ParticipantController {
     public ResponseEntity<PageResponse<UserRelation>> getParticipants(@AuthenticationPrincipal User user,
                                              @ModelAttribute PageDto pagedto) {
         PageResponse<UserRelation> transactions = participantService.getUserRelation(user.getUsername(), pagedto);
-        return ResponseEntity.ok(transactions);
-    }
-    
-    //카테고리별 지인 정보 반환
-    @GetMapping("/category")
-    public ResponseEntity<PageResponse<UserRelation>> getCategoryParticipants(@AuthenticationPrincipal User user,
-                                                                      @RequestParam("category") String category,
-                                                                      @ModelAttribute PageDto pagedto) {
-        Assert.hasText(category, "category must not be null");
-        PageResponse<UserRelation> transactions = participantService.getCategoryUserRelation(user.getUsername(), category, pagedto);
         return ResponseEntity.ok(transactions);
     }
 

@@ -42,9 +42,9 @@ function TabNavigator() {
         tabBarLabel: '' // 탭 레이블을 빈 문자열로 설정하여 이름을 숨깁니다.
       })}>
       <Tab.Screen name="Home" component={HomeStackNavigator} />
-      <Tab.Screen name="Friends" component={FriendsStackNavigator} />
-      <Tab.Screen name="Pay" component={PayStackNavigator} />
       <Tab.Screen name="Event" component={EventStackNavigator} />
+      <Tab.Screen name="Pay" component={PayStackNavigator} />
+      <Tab.Screen name="Friends" component={FriendsStackNavigator} />
       <Tab.Screen name="MyPage" component={MyPageStackNavigator} />
     </Tab.Navigator>
   );

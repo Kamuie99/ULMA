@@ -33,11 +33,11 @@ function AddFriendScreen() {
     }
 
     try {
-      const response = await axiosInstance.post('/participant', {
+      const response = await axiosInstance.post('/participant', [{
         name,
         category,
         phoneNumber,
-      });
+      }]);
 
       if (response.status === 200) {
         Alert.alert('성공', '지인이 성공적으로 등록되었습니다.', [

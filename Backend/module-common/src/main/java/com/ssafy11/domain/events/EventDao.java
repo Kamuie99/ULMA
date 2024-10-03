@@ -13,4 +13,5 @@ public interface EventDao {
     PageResponse<Event> getEvents(Integer userId, PageDto pageDto);
     PageResponse<EventParticipant> getEvent(Integer eventId, PageDto pageDto);
     Integer getEventByUserId(Integer eventId);
+    Integer deleteEvent(Integer eventId, Integer userId);
 }

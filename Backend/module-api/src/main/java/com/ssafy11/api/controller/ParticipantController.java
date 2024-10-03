@@ -59,11 +59,11 @@ public class ParticipantController {
 
     //경조사비 추가(직접)
     @PostMapping("/money")
-    public ResponseEntity<Integer> addParticipant(@AuthenticationPrincipal User user,
-                                            @RequestBody Participant participant) {
+    public ResponseEntity<Integer> addParticipants(@AuthenticationPrincipal User user,
+                                            @RequestBody List<Participant> participant) {
         Assert.notNull(participant, "participant must not be null");
 
-        Integer resultId = participantService.addParticipant(participant, user.getUsername());
+        Integer resultId = participantService.addParticipants(participant, user.getUsername());
         return ResponseEntity.ok(resultId);
     }
 

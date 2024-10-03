@@ -64,4 +64,14 @@ public class EventService {
         return guestsList;
     }
 
+    public Integer deleteEvent(Integer eventId, String userId) {
+        Assert.notNull(eventId, "eventId must not be null");
+        Assert.hasText(userId, "UserId must not be null");
+        Assert.isTrue(Integer.parseInt(userId)==(eventDao.getEventByUserId(eventId)), "유저가 만든 이벤트가 아닙니다.");
+
+        Integer resultId = eventDao.deleteEvent(eventId, Integer.parseInt(userId));
+        Assert.notNull(resultId, "Event id must not be null");
+        return resultId;
+
+    }
 }

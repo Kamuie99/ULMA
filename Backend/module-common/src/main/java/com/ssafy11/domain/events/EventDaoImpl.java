@@ -20,6 +20,7 @@ import java.util.Map;
 
 import static com.ssafy11.ulma.generated.Tables.*;
 
+@Transactional
 @RequiredArgsConstructor
 @Repository
 public class EventDaoImpl implements EventDao{
@@ -126,5 +127,19 @@ public class EventDaoImpl implements EventDao{
                 .where(EVENT.ID.eq(eventId))
                 .fetchOne();
         return eventUserId != null ? eventUserId.value1() : null;
+    }
+
+    @Override
+    public Integer deleteEvent(Integer eventId, Integer userId) {
+        Integer participationUpdateCount = dsl.update(PARTICIPATION)
+                .set(PARTICIPATION.GUEST_ID, (Integer)null)
+                .where(PARTICIPATION.EVENT_ID.eq(eventId))
+                .and(PARTICIPATION.GUEST_ID.eq(userId))
+                .execute();
+
+        return dsl.update(EVENT)
+                .set(EVENT.USERS_ID, (Integer)null)
+                .where(EVENT.ID.eq(eventId))
+                .execute();
     }
 }

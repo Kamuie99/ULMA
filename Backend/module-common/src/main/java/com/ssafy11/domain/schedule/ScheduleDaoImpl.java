@@ -68,8 +68,10 @@ public class ScheduleDaoImpl implements ScheduleDao{
     @Transactional(readOnly = true)
     @Override
     public List<Schedule> getSchedule(Integer userId, Integer year, Integer month) {
-        List<Schedule> result = dsl.select(SCHEDULE.ID, SCHEDULE.GUEST_ID, SCHEDULE.DATE, SCHEDULE.AMOUNT, SCHEDULE.NAME)
+        List<Schedule> result = dsl.select(SCHEDULE.ID, SCHEDULE.GUEST_ID, SCHEDULE.DATE, SCHEDULE.AMOUNT, SCHEDULE.NAME, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER)
                 .from(SCHEDULE)
+                .join(GUEST)
+                .on(SCHEDULE.GUEST_ID.eq(GUEST.ID))
                 .where(SCHEDULE.USERS_ID.eq(userId))
                 .and(extract(SCHEDULE.DATE, DatePart.YEAR).eq(year))
                 .and(extract(SCHEDULE.DATE, DatePart.MONTH).eq(month))

@@ -60,6 +60,15 @@ public class EventController {
         return ResponseEntity.ok(guests);
     }
 
+    //이벤트 삭제
+    @DeleteMapping("/{eventId}")
+    public ResponseEntity<Integer> deleteEvent(@AuthenticationPrincipal User user,
+                                               @PathVariable("eventId") Integer eventId) {
+        Assert.notNull(eventId, "eventId must not be null");
+        Integer resultId = eventService.deleteEvent(eventId, user.getUsername());
+        return ResponseEntity.ok(resultId);
+    }
+
     //자체 금액 추천 <- 배치 사용하기
 
     //경조사 AI 축하 메시지 추천

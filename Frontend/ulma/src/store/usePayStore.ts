@@ -21,7 +21,6 @@ const usePayStore = create<PayStore>(set => ({
 
   setAccountInfo: (data: Partial<AccountInfo>) =>
     set(state => ({
-      ...state,
       accountNumber: data.accountNumber || state.accountNumber,
       balance: data.balance || state.balance,
       bankCode: data.bankCode || state.bankCode,
@@ -65,6 +64,24 @@ const usePayStore = create<PayStore>(set => ({
       usePayStore.getState().setAccountInfo(data);
     } catch (error) {
       console.error('계좌 생성을 하는 중 에러가 발생했습니다:', error);
+      throw error;
+    }
+  },
+
+  getHistory: async () => {
+    try {
+      console.log('hi');
+      const {accessToken} = useAuthStore.getState();
+
+      const response = await axiosInstance.post<AccountInfo>('/users/pay', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      console.log(response);
+    } catch (error) {
+      console.error('페이 이력 불러오기 실패', error);
       throw error;
     }
   },

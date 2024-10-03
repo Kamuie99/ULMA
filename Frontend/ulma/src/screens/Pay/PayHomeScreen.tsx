@@ -34,9 +34,8 @@ function PayHomeScreen() {
 
   const handleCreateAccount = async () => {
     try {
-      console.log('호출은 됨');
       makeAccount();
-      console.log('모달은 꺼짐');
+      getAccountInfo();
       setModalVisible(false);
     } catch (error) {
       console.error('계좌 생성 중 에러:', error);
@@ -46,6 +45,8 @@ function PayHomeScreen() {
   const bankImages = {
     하나은행: require('../../assets/Pay/banks/하나은행.png'),
   };
+
+  const navigation = useNavigation();
 
   return (
     <ScrollView style={styles.container}>
@@ -72,13 +73,15 @@ function PayHomeScreen() {
       <View style={styles.boxContainer}>
         <Text style={styles.title}>Pay 설정</Text>
         <View style={styles.buttonContainer}>
-          <View style={styles.button}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate(payNavigations.ACCOUNT_INFO)}>
             <Image
               source={require('@/assets/Pay/menu/accountInfo.png')}
               style={styles.buttonImage}
             />
             <Text>계좌 정보</Text>
-          </View>
+          </TouchableOpacity>
           <View style={styles.button}>
             <Image
               source={require('@/assets/Pay/menu/accountEdit.png')}
@@ -93,20 +96,24 @@ function PayHomeScreen() {
             />
             <Text>계좌 삭제</Text>
           </View>
-          <View style={styles.button}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate(payNavigations.SENDING)}>
             <Image
               source={require('@/assets/Pay/menu/sendMoney.png')}
               style={styles.buttonImage}
             />
             <Text>송금하기</Text>
-          </View>
-          <View style={styles.button}>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate(payNavigations.PAY_RECHARGE)}>
             <Image
               source={require('@/assets/Pay/menu/chargePay.png')}
               style={styles.buttonImage}
             />
             <Text>Pay 충전</Text>
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
       <View style={styles.boxContainer}>
@@ -135,7 +142,7 @@ function PayHomeScreen() {
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={async () => {
-                  await handleCreateAccount(); // 함수 호출
+                  await handleCreateAccount();
                 }}>
                 <Text style={styles.closeButtonText}>시작하기</Text>
               </TouchableOpacity>

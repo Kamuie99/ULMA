@@ -21,6 +21,7 @@ import InputAmountScreen from '@/screens/Pay/InputAmountScreen';
 import AiRecommendScreen from '@/screens/Pay/AiRecommendScreen'; // '.1'을 제거한 경로
 import PayHomeScreen from '@/screens/Pay/PayHomeScreen';
 import MakePayAccountScreen from '@/screens/Pay/MakePayAccountScreen';
+import AccountInfoScreen from '@/screens/Pay/AccountInfoScreen';
 
 export type payStackParamList = {
   [payNavigations.HOME]: undefined;
@@ -36,7 +37,7 @@ export type payStackParamList = {
   [payNavigations.SENDING]: undefined;
   [payNavigations.SEND_RESULT]: undefined;
   [payNavigations.INPUT_AMOUNT]: {guestId: number};
-  [payNavigations.MAKE_PAY]: undefined;
+  [payNavigations.ACCOUNT_INFO]: undefined;
 };
 
 const Stack = createStackNavigator<payStackParamList>();
@@ -57,16 +58,15 @@ function PayStackNavigator() {
           fontWeight: 'bold',
         },
         headerTintColor: colors.BLACK,
-      }}
-    >
+      }}>
       <Stack.Screen
         name={payNavigations.HOME}
         component={PayHomeScreen}
         options={{
           headerTitle: () => (
-            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-              <Text style={{ color: colors.GREEN_700 }}>ULMA</Text>
-              <Text style={{ color: colors.BLACK }}> PAY</Text>
+            <Text style={{fontSize: 18, fontWeight: 'bold'}}>
+              <Text style={{color: colors.GREEN_700}}>ULMA</Text>
+              <Text style={{color: colors.BLACK}}> PAY</Text>
             </Text>
           ),
         }}
@@ -183,10 +183,10 @@ function PayStackNavigator() {
         }}
       />
       <Stack.Screen
-        name={payNavigations.MAKE_PAY}
-        component={MakePayAccountScreen}
+        name={payNavigations.ACCOUNT_INFO}
+        component={AccountInfoScreen}
         options={{
-          headerTitle: 'Pay 시작하기',
+          headerTitle: '계좌 정보 보기',
         }}
       />
     </Stack.Navigator>

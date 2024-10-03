@@ -11,7 +11,7 @@ public interface ParticipantDao {
     PageResponse<Transaction> getTransactions(Integer userId, Integer guestId, PageDto pageDto);
     TransactionSummary getTransactionSummary(Integer userId, Integer guestId);
     Boolean isParticipant(Integer eventId, Integer participantId);
-    Integer addParticipant(Participant participant);
+    Integer addParticipants(List<Participant> participants);
     Integer updateParticipant(Participant participant);
     Integer deleteParticipant(Participant participant);
     Boolean isPhoneNumber(String phoneNumber, Integer userId);

@@ -66,19 +66,26 @@ public class ParticipantService {
         return participantDao.isParticipant(eventId, participantId);
     }
 
-    public Integer addParticipant(Participant participant, String userId){
-        Assert.notNull(participant, "participant is required");
-        Assert.isTrue(eventDao.isUserEventCreated(participant.eventId(), Integer.parseInt(userId)), "사용자가 만든 이벤트가 아닙니다.");
+    public Integer addParticipants(List<Participant> participants, String userId) {
+        Assert.notNull(participants, "participants is required");
 
-        if(isParticipant(participant.eventId(), participant.guestId())){
-            throw new ErrorException(ErrorCode.Duplicated);
+        for (Participant participant : participants) {
+            Assert.isTrue(eventDao.isUserEventCreated(participant.eventId(), Integer.parseInt(userId)), "사용자가 만든 이벤트가 아닙니다.");
+
+            if (isParticipant(participant.eventId(), participant.guestId())) {
+                throw new ErrorException(ErrorCode.Duplicated);
+            }
+
+            Assert.isTrue(scheduleDao.isMyGuest(Integer.parseInt(userId), participant.guestId()), "지인 관계가 아닙니다.");
+            Assert.isTrue(participant.amount() > 0, "값이 양수여야 합니다.");
         }
 
-        Assert.isTrue(participant.amount()>0, "값이 양수여야 합니다.");
+        // 모든 유효성 검사가 끝나면 한꺼번에 저장
+        Integer savedParticipantsCount = participantDao.addParticipants(participants); // 여러 참가자 한꺼번에 저장하는 메서드
+        Assert.notNull(savedParticipantsCount, "savedParticipantsCount is required");
+        Assert.isTrue(savedParticipantsCount == participants.size(), "일부 참가자 등록에 실패하였습니다.");
 
-        Integer participantId = participantDao.addParticipant(participant);
-        Assert.notNull(participantId, "participantId is required");
-        return participantId;
+        return savedParticipantsCount;
     }
 
     public Integer updateParticipant(Participant participant, String userId) {

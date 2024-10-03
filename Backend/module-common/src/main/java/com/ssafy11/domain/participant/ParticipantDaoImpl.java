@@ -156,10 +156,21 @@ public class ParticipantDaoImpl implements ParticipantDao {
     }
 
     @Override
-    public Integer addParticipant(Participant participant) {
-        return dsl.insertInto(PARTICIPATION, PARTICIPATION.EVENT_ID, PARTICIPATION.GUEST_ID, PARTICIPATION.AMOUNT, PARTICIPATION.CREATE_AT)
-                .values(participant.eventId(), participant.guestId(), participant.amount(), LocalDateTime.now())
-                .execute();
+    public Integer addParticipants(List<Participant> participants) {
+        var query = dsl.insertInto(PARTICIPATION,
+                PARTICIPATION.EVENT_ID,
+                PARTICIPATION.GUEST_ID,
+                PARTICIPATION.AMOUNT,
+                PARTICIPATION.CREATE_AT);
+
+        for (Participant participant : participants) {
+            query = query.values(participant.eventId(),
+                    participant.guestId(),
+                    participant.amount(),
+                    LocalDateTime.now());
+        }
+
+        return query.execute();
     }
 
     @Override

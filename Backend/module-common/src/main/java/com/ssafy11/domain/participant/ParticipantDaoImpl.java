@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 
 import org.jooq.DSLContext;
 import org.jooq.Record1;
+import org.jooq.Record5;
+import org.jooq.SelectConditionStep;
 import org.jooq.impl.DSL;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Repository;
@@ -164,13 +166,23 @@ public class ParticipantDaoImpl implements ParticipantDao {
 		);
 	}
 
-	@Override
-	public Integer addParticipant(Participant participant) {
-		return dsl.insertInto(PARTICIPATION, PARTICIPATION.EVENT_ID, PARTICIPATION.GUEST_ID, PARTICIPATION.AMOUNT,
-				PARTICIPATION.CREATE_AT)
-			.values(participant.eventId(), participant.guestId(), participant.amount(), LocalDateTime.now())
-			.execute();
-	}
+    @Override
+    public Integer addParticipants(List<Participant> participants) {
+        var query = dsl.insertInto(PARTICIPATION,
+                PARTICIPATION.EVENT_ID,
+                PARTICIPATION.GUEST_ID,
+                PARTICIPATION.AMOUNT,
+                PARTICIPATION.CREATE_AT);
+
+        for (Participant participant : participants) {
+            query = query.values(participant.eventId(),
+                    participant.guestId(),
+                    participant.amount(),
+                    LocalDateTime.now());
+        }
+
+        return query.execute();
+    }
 
 	@Override
 	public Integer updateParticipant(Participant participant) {
@@ -222,12 +234,13 @@ public class ParticipantDaoImpl implements ParticipantDao {
 	@Override
 	public Optional<Guest> getGuest(Integer guestId) {
 		GuestRecord guestRecord = this.dsl.selectFrom(GUEST)
-			.where(GUEST.ID.eq(guestId))
-			.fetchOne();
+				.where(GUEST.ID.eq(guestId))
+				.fetchOne();
 		return Optional.ofNullable(modelMapper.map(guestRecord, Guest.class));
+	}
 
     @Override
-    public Integer addUserRelation(List<Integer> guestIds, Integer userId) {
+    public Integer addUserRelations(List<Integer> guestIds, Integer userId) {
         var query = dsl.insertInto(USERS_RELATION, USERS_RELATION.USERS_ID, USERS_RELATION.GUEST_ID, USERS_RELATION.CREATE_AT);
 
         for (Integer guestId : guestIds) {
@@ -260,6 +273,7 @@ public class ParticipantDaoImpl implements ParticipantDao {
 
 		int totalItems = (count != null) ? count : 0;
 		int totalPages = (int)Math.ceil((double)totalItems / size);
+		int offset = (page-1) * size;
 
         List<UserRelation> result = dsl.select(USERS_RELATION.GUEST_ID, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER, DSL.val(-1))
                 .from(USERS_RELATION)

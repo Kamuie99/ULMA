@@ -2,12 +2,15 @@ package com.ssafy11.domain.participant;
 
 import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.common.PageResponse;
+import com.ssafy11.domain.guest.Guest;
 import com.ssafy11.domain.participant.dto.*;
 import com.ssafy11.domain.participant.dto.Transaction;
+import com.ssafy11.ulma.generated.tables.records.GuestRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.*;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;

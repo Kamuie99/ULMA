@@ -6,6 +6,7 @@ import axiosInstance from '@/api/axios';
 import { colors } from '@/constants';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useFocusEffect } from '@react-navigation/native';
+import { friendsNavigations, homeNavigations } from '@/constants/navigations';
 
 const ScheduleMainScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState('');
@@ -125,11 +126,22 @@ const ScheduleMainScreen = ({ navigation }) => {
         <Text style={styles.eventDate}>{item.date.split('T')[0]}</Text>
         <View style={styles.eventCardInner}>
           <Text style={styles.eventExpense}>₩ {-item.paidAmount}</Text>
-          <Text>{item.guestName}님과의 거래내역 조회 -></Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate(friendsNavigations.FREINDS_DETAIL, {
+              guestId: item.guestId, // guestId 전달
+              name: item.guestName, // 이름 전달
+              category: item.category, // 카테고리 전달
+              phoneNumber: item.phoneNumber, // 전화번호 전달
+            })}
+          >
+            <Text>{`${item.guestName}님과의 거래내역 조회 ->`}</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </Swipeable>
   );
+  
+  
 
   // 날짜 형식을 '10월 4일' 형식으로 변환
   const formatDateToKorean = (dateString) => {

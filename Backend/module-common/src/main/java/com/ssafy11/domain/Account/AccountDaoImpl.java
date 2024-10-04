@@ -41,8 +41,9 @@ public class AccountDaoImpl implements AccountDao {
 
     private String generateAccountNumber() {
         String uuidNumeric = UUID.randomUUID().toString().replaceAll("[^0-9]", "");
-        return uuidNumeric.substring(0, 4) + "-" + uuidNumeric.substring(4, 8);
+        return uuidNumeric.substring(0, 6) + "-" + uuidNumeric.substring(6, 8) + "-" + uuidNumeric.substring(8, 14);
     }
+
 
     @Override
     public Account connectAccount(Integer userid, String accountNumber) {

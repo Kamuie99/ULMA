@@ -5,6 +5,7 @@ import com.ssafy11.domain.Account.AccountDao;
 import com.ssafy11.ulma.generated.tables.records.AccountRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
+import org.jooq.SelectConditionStep;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;

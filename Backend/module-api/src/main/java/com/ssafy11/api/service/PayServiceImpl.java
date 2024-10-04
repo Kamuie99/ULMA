@@ -25,6 +25,12 @@ public class PayServiceImpl implements PayService {
 
     @Override
     public AccountDTO createPayAccount(Integer userId) {
+        Account payAccountByUserId = payDao.findPayAccountByUserId(userId);
+
+        if (payAccountByUserId != null) {
+            throw new ErrorException(ErrorCode.ALREADY_EXIST_PAY_ACCOUNT);
+        }
+        
         Account createdAccount = payDao.createPayAccount(userId);
         return new AccountDTO(
                 createdAccount.accountNumber(),

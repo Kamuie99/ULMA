@@ -87,7 +87,7 @@ public class AccountServiceImpl implements AccountService {
                 .collect(Collectors.toList());
 
         // PayHistoryDTO 타입의 PaginatedHistory 반환
-        return new PaginatedHistory<>(payHistoryDTOList, paginatedHistory.totalItemsCount(), paginatedHistory.totalPages());
+        return new PaginatedHistory<>(payHistoryDTOList, page, paginatedHistory.totalItemsCount(), paginatedHistory.totalPages());
     }
 
 

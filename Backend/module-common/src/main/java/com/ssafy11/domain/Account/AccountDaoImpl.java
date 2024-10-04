@@ -268,10 +268,10 @@ public class AccountDaoImpl implements AccountDao {
                     .fetchInto(PayHistory.class);
 
             // 5. 결과를 날짜순으로 정렬하여 반환
-            return new PaginatedHistory(payHistories, totalItemsCount, totalPages);
+            return new PaginatedHistory(payHistories, page, totalItemsCount, totalPages);
         }
 
-        return new PaginatedHistory(List.of(), 0, 0);
+        return new PaginatedHistory(List.of(), 0, 0, 0);
     }
 
 }

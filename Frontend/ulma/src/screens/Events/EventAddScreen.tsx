@@ -1,25 +1,23 @@
 import React, {useState} from 'react';
-import {View, TouchableOpacity, StyleSheet, Alert, Text} from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet, Alert} from 'react-native';
 import TitleTextField from '@/components/common/TitleTextField';
 import CustomButton from '@/components/common/CustomButton';
 import axiosInstance from '@/api/axios';
-import InputField from '@/components/common/InputField';
-import {NavigationProp} from '@react-navigation/native';
-import {eventNavigations} from '@/constants/navigations';
+import { NavigationProp } from '@react-navigation/native';
+import { eventNavigations } from '@/constants/navigations';
 import CalendarComponent from '@/components/calendar/CalendarButton';
-import {format} from 'date-fns';
-import {ko} from 'date-fns/locale';
+import { format } from 'date-fns';
+import { ko } from 'date-fns/locale';
+import InputField from '@/components/common/InputField';
 
 const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
   const [eventTitle, setEventTitle] = useState<string>(''); // 행사 제목
-  const [selectedEventType, setSelectedEventType] = useState<string | null>(
-    null,
-  ); // 행사 유형
-  const [eventDate, setEventDate] = useState<string>(''); // 행사 날짜 선택
+  const [selectedEventType, setSelectedEventType] = useState<string | null>(null); // 행사 유형
+  const [eventDate, setEventDate] = useState<string>(''); // 행사 날짜 및 시간
   const [calendarVisible, setCalendarVisible] = useState(false); // 달력 모달 상태
   const [isConfirmVisible, setConfirmVisible] = useState(true); // 확인 버튼 상태
 
-  // 행사 저장 처리 함수
+  // 이벤트 저장 처리 함수
   const handleSaveEvent = async () => {
     if (!eventTitle || !selectedEventType || !eventDate) {
       Alert.alert('경고', '이벤트 제목, 유형, 날짜를 모두 입력하세요.');
@@ -27,12 +25,10 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     }
 
     try {
-      const isoDate = new Date(eventDate).toISOString(); // ISO 형식으로 변환
-
       const response = await axiosInstance.post('/events', {
         category: selectedEventType,
         name: eventTitle,
-        date: isoDate, // ISO 형식으로 변환하여 전송
+        date: eventDate, // 이미 ISO 형식으로 변환된 날짜 전송
       });
 
       console.log('성공:', response.data);
@@ -48,7 +44,7 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
 
   // 사용자에게 보여줄 때는 "년/월/일" 형식으로 변환
   const formattedDate = eventDate
-    ? format(new Date(eventDate), 'yyyy년 M월 d일', {locale: ko})
+    ? format(new Date(eventDate), 'yyyy년 M월 d일 HH:mm', { locale: ko })
     : '';
 
   return (
@@ -95,13 +91,13 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
           {formattedDate ? formattedDate : '날짜 선택'}
         </Text>
       </TouchableOpacity>
-      ///
+
       {/* CalendarComponent 모달 */}
       {calendarVisible && (
         <CalendarComponent
           selectedDate={eventDate}
           onDateSelected={date => {
-            setEventDate(format(new Date(date), 'yyyy-MM-dd', {locale: ko}));
+            setEventDate(date); // ISO 형식으로 전달받은 값을 저장
             setCalendarVisible(false);
             setConfirmVisible(true); // 날짜 선택 후 확인 버튼 다시 나타내기
           }}
@@ -111,7 +107,7 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
       {/* 확인 버튼 - 달력이 열려 있을 때 숨김 */}
       {isConfirmVisible && (
         <CustomButton
-          label="확인"
+          label="저장"
           variant="outlined"
           onPress={handleSaveEvent}
         />
@@ -151,7 +147,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 1,
     borderColor: '#00C77F',
-    marginBottom: 10, // 달력 아래 여백을 줄였습니다
+    marginBottom: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },

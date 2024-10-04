@@ -21,6 +21,9 @@ import InputAmountScreen from '@/screens/Pay/InputAmountScreen';
 import AiRecommendScreen from '@/screens/Pay/AiRecommendScreen'; // '.1'을 제거한 경로
 import PayHomeScreen from '@/screens/Pay/PayHomeScreen';
 import MakePayAccountScreen from '@/screens/Pay/MakePayAccountScreen';
+import AccountInfoScreen from '@/screens/Pay/AccountInfoScreen';
+import AddAccountScreen from '@/screens/Pay/AddAccountScreen';
+import SendAccountScreen from '@/screens/Pay/SendAccountScreen';
 
 export type payStackParamList = {
   [payNavigations.HOME]: undefined;
@@ -33,10 +36,12 @@ export type payStackParamList = {
   [payNavigations.PAY_LIST]: undefined;
   [payNavigations.PAY_RECHARGE]: undefined;
   [payNavigations.RECOMMEND_OPTION]: undefined;
-  [payNavigations.SENDING]: undefined;
+  [payNavigations.SENDING]: {targetAccountNumber: string};
   [payNavigations.SEND_RESULT]: undefined;
   [payNavigations.INPUT_AMOUNT]: {guestId: number};
-  [payNavigations.MAKE_PAY]: undefined;
+  [payNavigations.ACCOUNT_INFO]: undefined;
+  [payNavigations.ADD_ACCOUNT]: undefined;
+  [payNavigations.SEND_ACCOUNT]: undefined;
 };
 
 const Stack = createStackNavigator<payStackParamList>();
@@ -182,10 +187,24 @@ function PayStackNavigator() {
         }}
       />
       <Stack.Screen
-        name={payNavigations.MAKE_PAY}
-        component={MakePayAccountScreen}
+        name={payNavigations.ACCOUNT_INFO}
+        component={AccountInfoScreen}
         options={{
-          headerTitle: 'Pay 시작하기',
+          headerTitle: '계좌 정보 보기',
+        }}
+      />
+      <Stack.Screen
+        name={payNavigations.ADD_ACCOUNT}
+        component={AddAccountScreen}
+        options={{
+          headerTitle: '연결 계좌 추가하기',
+        }}
+      />
+      <Stack.Screen
+        name={payNavigations.SEND_ACCOUNT}
+        component={SendAccountScreen}
+        options={{
+          headerTitle: '송금하기',
         }}
       />
     </Stack.Navigator>

@@ -1,5 +1,6 @@
 import CustomButton from '@/components/common/CustomButton';
 import {colors} from '@/constants';
+import {payNavigations} from '@/constants/navigations';
 import usePayStore from '@/store/usePayStore';
 import {useFocusEffect, useRoute} from '@react-navigation/native';
 import React, {useCallback, useEffect} from 'react';
@@ -19,15 +20,7 @@ function SendresultScreen({navigation}) {
 
   return (
     <View style={styles.container}>
-      {/* Transfer Details */}
       <View style={styles.resultContainer}>
-        {/* <Text style={styles.resultTitle}>송금 결과</Text> */}
-        {/* 
-        <View style={styles.detailRow}>
-          <Text style={styles.label}>송금 계좌</Text>
-          <Text style={styles.value}>{accountNumber}</Text>
-        </View> */}
-
         <View style={styles.detailRow}>
           <Text style={styles.label}>송금 금액</Text>
           <Text style={styles.value}>{amount} 원</Text>
@@ -44,7 +37,11 @@ function SendresultScreen({navigation}) {
       </View>
 
       {/* Confirm Button */}
-      <CustomButton variant="outlined" label="확인" />
+      <CustomButton
+        variant="outlined"
+        label="확인"
+        onPress={() => navigation.navigate(payNavigations.HOME)}
+      />
     </View>
   );
 }

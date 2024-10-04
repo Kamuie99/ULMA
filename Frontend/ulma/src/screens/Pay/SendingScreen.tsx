@@ -68,8 +68,9 @@ function SendingScreen({route}: SendingScreenProps) {
       );
 
       console.log('송금 성공:', response.data);
+      const payAmount = response.data.amount;
       // 송금 성공 후 다음 화면으로 이동 또는 성공 메시지 표시
-      navigation.navigate(payNavigations.SEND_RESULT);
+      navigation.navigate(payNavigations.SEND_RESULT, {payAmount});
     } catch (error) {
       console.error('송금 중 오류 발생:', error);
     }

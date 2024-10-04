@@ -15,6 +15,7 @@ import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -80,8 +81,7 @@ public class ParticipantService {
             Assert.isTrue(participant.amount() > 0, "값이 양수여야 합니다.");
         }
 
-        // 모든 유효성 검사가 끝나면 한꺼번에 저장
-        Integer savedParticipantsCount = participantDao.addParticipants(participants); // 여러 참가자 한꺼번에 저장하는 메서드
+        Integer savedParticipantsCount = participantDao.addParticipants(participants);
         Assert.notNull(savedParticipantsCount, "savedParticipantsCount is required");
         Assert.isTrue(savedParticipantsCount == participants.size(), "일부 참가자 등록에 실패하였습니다.");
 
@@ -91,6 +91,12 @@ public class ParticipantService {
     public Integer updateParticipant(Participant participant, String userId) {
         Assert.notNull(participant, "participant is required");
         Assert.isTrue(eventDao.isUserEventCreated(participant.eventId(), Integer.parseInt(userId)), "사용자가 만든 이벤트가 아닙니다.");
+
+        Assert.isTrue(scheduleDao.isMyGuest(Integer.valueOf(userId), participant.guestId()),"지인관계가 아닙니다.");
+
+        if(!Objects.equals(participant.guestId(), participant.preGuestId())){
+            Assert.isTrue(!isParticipant(participant.eventId(), participant.guestId()), "이미 등록된 참가자입니다. 해당 참가자를 수정해주세요.");
+        }
 
         Integer resultId = participantDao.updateParticipant(participant);
         Assert.notNull(resultId, "resultId must not be null");

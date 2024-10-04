@@ -85,10 +85,14 @@ public class ParticipantController {
     }
 
     //경조사비 수정
-    @PatchMapping //이벤트 수정
+    @PutMapping //이벤트 수정
     public ResponseEntity<Integer> updateParticipant(@AuthenticationPrincipal User user,
                                                @RequestBody Participant participant) {
         Assert.notNull(participant, "participant must not be null");
+        Assert.notNull(participant.guestId(), "participant.guestId must not be null");
+        Assert.notNull(participant.amount(), "participant.amount must not be null");
+        Assert.notNull(participant.preGuestId(), "participant.preGuestId must not be null");
+        Assert.notNull(participant.eventId(), "participant.eventId must not be null");
 
         int returnId = participantService.updateParticipant(participant, user.getUsername());
         return ResponseEntity.ok(returnId);

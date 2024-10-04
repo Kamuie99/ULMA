@@ -4,6 +4,8 @@ import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import {useRoute} from '@react-navigation/native';
 import CustomButton from '@/components/common/CustomButton';
 import {colors} from '@/constants';
+import {payNavigations} from '@/constants/navigations';
+import usePayStore from '@/store/usePayStore';
 
 function ChangeresultScreen({navigation}) {
   useEffect(() => {
@@ -11,10 +13,18 @@ function ChangeresultScreen({navigation}) {
     navigation.getParent()?.setOptions({
       tabBarStyle: {display: 'none'},
     });
+
+    // 컴포넌트가 unmount 될 때 탭바를 다시 보이도록 설정
+    return () => {
+      navigation.getParent()?.setOptions({
+        tabBarStyle: {display: ''},
+      });
+    };
   }, [navigation]);
 
   const route = useRoute();
   const {amount} = route.params as {amount: string};
+  const {accountNumber, balance} = usePayStore();
 
   return (
     <View style={styles.container}>
@@ -22,7 +32,7 @@ function ChangeresultScreen({navigation}) {
       <View style={styles.resultContainer}>
         <View style={styles.detailRow}>
           <Text style={styles.label}>충전 계좌</Text>
-          <Text style={styles.value}>000-1111-00-1111</Text>
+          <Text style={styles.value}>{accountNumber}</Text>
         </View>
 
         <View style={styles.detailRow}>
@@ -32,7 +42,7 @@ function ChangeresultScreen({navigation}) {
 
         <View style={styles.detailRow}>
           <Text style={styles.label}>충전 후 잔액</Text>
-          <Text style={styles.value}>54,000 원</Text>
+          <Text style={styles.value}>{balance}</Text>
         </View>
 
         <Text style={styles.successMessage}>
@@ -41,7 +51,10 @@ function ChangeresultScreen({navigation}) {
       </View>
 
       {/* Confirm Button */}
-      <CustomButton label="확인" />
+      <CustomButton
+        label="확인"
+        onPress={() => navigation.navigate(payNavigations.HOME)}
+      />
     </View>
   );
 }

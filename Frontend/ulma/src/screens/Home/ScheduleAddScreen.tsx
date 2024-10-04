@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, TextInput, Button, StyleSheet, Text, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import axiosInstance from '@/api/axios';
 import CheckBox from '@react-native-community/checkbox';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import axiosInstance from '@/api/axios';
+import { homeNavigations } from '@/constants/navigations';
 
-const ScheduleAddScreen = ({ navigation }) => {
-  const [guestId, setGuestId] = useState('');
+const ScheduleAddScreen = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const [selectedUser, setSelectedUser] = useState(null);  // 지인 선택 상태
   const [name, setName] = useState('');
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState(new Date());
@@ -14,23 +18,42 @@ const ScheduleAddScreen = ({ navigation }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
 
-  // 날짜 선택
+  useEffect(() => {
+    if (route.params?.selectedUser && selectedUser !== route.params.selectedUser) {
+      setSelectedUser(route.params.selectedUser);
+    }
+  }, [route.params, selectedUser]);
+  
+
+  // 날짜 변경 핸들러
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShowDatePicker(false);
     setDate(currentDate);
   };
 
-  // 시간 선택
+  // 시간 변경 핸들러
   const onTimeChange = (event, selectedTime) => {
     const currentTime = selectedTime || time;
     setShowTimePicker(false);
     setTime(currentTime);
   };
 
+  // 세자리마다 콤마 넣기
+  const formatNumberWithCommas = (number) => {
+    return number.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
+  // 금액 입력 시 콤마 포맷 적용
+  const handlePaidAmountChange = (text) => {
+    const cleaned = text.replace(/,/g, ''); // 기존 콤마 제거
+    const formatted = formatNumberWithCommas(cleaned); // 새롭게 포맷
+    setPaidAmount(formatted);
+  };
+
   // POST 요청 함수
   const addSchedule = async () => {
-    if (!guestId || !name || (!paidAmount && !isPaidUndefined)) {
+    if (!selectedUser || !name || (!paidAmount && !isPaidUndefined)) {
       Alert.alert('모든 필드를 입력해주세요.');
       return;
     }
@@ -46,9 +69,9 @@ const ScheduleAddScreen = ({ navigation }) => {
       );
 
       const response = await axiosInstance.post('/schedule', {
-        guestId: parseInt(guestId),
+        guestId: selectedUser.guestId,  // 선택된 지인의 ID 사용
         date: combinedDateTime.toISOString(),
-        paidAmount: isPaidUndefined ? 0 : -Math.abs(parseInt(paidAmount.replace(/,/g, ''))), // 음수 처리
+        paidAmount: isPaidUndefined ? 0 : -Math.abs(parseInt(paidAmount.replace(/,/g, ''))),
         name,
       });
 
@@ -60,25 +83,11 @@ const ScheduleAddScreen = ({ navigation }) => {
     }
   };
 
-  // 세자리마다 콤마 넣기
-  const formatNumberWithCommas = (number) => {
-    return number.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-  };
-
-  const handlePaidAmountChange = (text) => {
-    const cleaned = text.replace(/,/g, ''); // 기존 콤마 제거
-    const formatted = formatNumberWithCommas(cleaned); // 새롭게 포맷
-    setPaidAmount(formatted);
-  };
-
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="게스트 ID"
-        value={guestId}
-        onChangeText={setGuestId}
-        keyboardType="numeric"
+      <Button
+        title={selectedUser ? `선택된 지인: ${selectedUser.name}` : "지인 선택"}
+        onPress={() => navigation.navigate(homeNavigations.SELECT_FRIEND)}
       />
       <TextInput
         style={styles.memoInput}
@@ -93,7 +102,7 @@ const ScheduleAddScreen = ({ navigation }) => {
       {showDatePicker && (
         <DateTimePicker
           value={date}
-          mode="date" // 날짜 선택 모드
+          mode="date"
           display="default"
           onChange={onDateChange}
         />
@@ -105,7 +114,7 @@ const ScheduleAddScreen = ({ navigation }) => {
       {showTimePicker && (
         <DateTimePicker
           value={time}
-          mode="time" // 시간 선택 모드
+          mode="time"
           display="default"
           onChange={onTimeChange}
         />

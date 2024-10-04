@@ -8,11 +8,13 @@ import { homeNavigations } from '@/constants/navigations';
 import ScheduleMainScreen from '@/screens/Home/ScheduleMainScreen';
 import ScheduleAddScreen from '@/screens/Home/ScheduleAddScreen';
 import FriendsListScreen from '@/screens/Freinds/FriendsListScreen';
+import FriendsDetailScreen from '@/screens/Freinds/FriendsDeatilScreen';
 
 export type homeStackParamList = {
   [homeNavigations.SCHEDULE_MAIN]: undefined;
   [homeNavigations.SCHEDULE_ADD]: { selectedUser?: { guestId: number; name: string } };
   [homeNavigations.SELECT_FRIEND]: undefined;
+  [homeNavigations.FRIENDS_DETAIL]: { guestId: number }; // guestId를 받아오는 디테일 페이지
 };
 
 const Stack = createStackNavigator<homeStackParamList>();
@@ -55,6 +57,13 @@ function HomeStackNavigator() {
         component={FriendsListScreen}
         options={{
           headerTitle: '지인 선택',
+        }}
+      />
+      <Stack.Screen
+        name={homeNavigations.FRIENDS_DETAIL}
+        component={FriendsDetailScreen}
+        options={{
+          headerTitle: '거래내역 조회',
         }}
       />
     </Stack.Navigator>

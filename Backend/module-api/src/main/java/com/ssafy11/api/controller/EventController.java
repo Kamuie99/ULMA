@@ -6,6 +6,7 @@ import com.ssafy11.domain.events.dto.EventCommand;
 import com.ssafy11.api.service.EventService;
 import com.ssafy11.domain.events.dto.Event;
 import com.ssafy11.domain.common.PageResponse;
+import com.ssafy11.domain.events.dto.recommendAmount;
 import com.ssafy11.domain.participant.dto.EventParticipant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -69,7 +70,14 @@ public class EventController {
         return ResponseEntity.ok(resultId);
     }
 
-    //자체 금액 추천 <- 배치 사용하기
+    //자체 금액 추천
+    @GetMapping("recommend/money")
+    public ResponseEntity<recommendAmount> getEventRecommend(@AuthenticationPrincipal User user,
+                                             @RequestParam ("category") String category) {
+        Assert.hasText(category, "category must not be null");
+        recommendAmount recommendAmount = eventService.getRecommendAmount(category, user.getUsername());
+        return ResponseEntity.ok(recommendAmount);
+    }
 
     //경조사 AI 축하 메시지 추천
     @PostMapping("/ai/recommend/message")

@@ -183,7 +183,8 @@ public class ParticipantDaoImpl implements ParticipantDao {
 
 		int result = dsl.update(PARTICIPATION)
 			.set(PARTICIPATION.AMOUNT, participant.amount())
-			.where(PARTICIPATION.GUEST_ID.eq(participant.guestId()))
+			.set(PARTICIPATION.GUEST_ID, participant.guestId())
+			.where(PARTICIPATION.GUEST_ID.eq(participant.preGuestId()))
 			.and(PARTICIPATION.EVENT_ID.eq(participant.eventId()))
 			.execute();
 

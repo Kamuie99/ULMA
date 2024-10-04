@@ -6,7 +6,8 @@ import lombok.Builder;
 public record Participant(
         Integer eventId,
         Integer guestId,
-        Integer amount
+        Integer amount,
+        Integer preGuestId
 ) {
 
 }

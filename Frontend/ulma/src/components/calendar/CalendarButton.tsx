@@ -36,7 +36,7 @@ const CalendarComponent: React.FC<CalendarComponentProps> = ({
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [localSelectedDate, setLocalSelectedDate] = useState<string | null>(
     selectedDate,
-  ); // 내부에서 날짜를 관리하기 위한 상태
+  );
   const [timeInput, setTimeInput] = useState(''); // 시간 입력 필드 상태
 
   // 사용자에게 보여줄 형식
@@ -51,7 +51,7 @@ const CalendarComponent: React.FC<CalendarComponentProps> = ({
     const cleaned = text.replace(/\D/g, ''); // 숫자만 남김
     let formatted = cleaned;
 
-    if (cleaned.length > 2) {
+    if (cleaned.length >= 3) {
       formatted = cleaned.slice(0, 2) + '시 ' + cleaned.slice(2, 4) + '분';
     } else if (cleaned.length > 0) {
       formatted = cleaned.slice(0, 2) + '시';
@@ -62,18 +62,22 @@ const CalendarComponent: React.FC<CalendarComponentProps> = ({
 
   // 저장 시 ISO 형식으로 변환
   const handleSave = () => {
-    if (!localSelectedDate || !timeInput) {
-      Alert.alert('경고', '날짜와 시간을 입력하세요.');
+    if (!localSelectedDate || timeInput.length < 7) {
+      Alert.alert('경고', '날짜와 정확한 시간을 입력하세요.');
       return;
     }
 
+    // 날짜와 시간을 합쳐서 ISO 형식으로 변환
     const selectedDateTime = new Date(localSelectedDate);
-    const hours = parseInt(timeInput.slice(0, 2), 10);
-    const minutes = parseInt(timeInput.slice(4, 6), 10);
+    const hours = parseInt(timeInput.slice(0, 2), 10); // 시 정보 추출
+    const minutes = parseInt(timeInput.slice(4, 6), 10); // 분 정보 추출
+
+    // 시간과 분을 설정
     selectedDateTime.setHours(hours);
     selectedDateTime.setMinutes(minutes);
     selectedDateTime.setSeconds(0); // 초는 항상 00초로 설정
 
+    // 최종 ISO 형식으로 변환하여 상위 컴포넌트에 전달
     onDateSelected(selectedDateTime.toISOString());
   };
 

@@ -1,7 +1,6 @@
 package com.ssafy11.api.service;
 
 import com.ssafy11.api.dto.account.AccountDTO;
-import com.ssafy11.api.dto.account.ChargePayAmountResponse;
 import com.ssafy11.api.dto.account.ChargePayBalanceResponse;
 import com.ssafy11.api.dto.pay.PayHistoryDTO;
 import com.ssafy11.api.exception.ErrorCode;
@@ -43,6 +42,9 @@ public class PayServiceImpl implements PayService {
     @Override
     public PayHistoryDTO chargePayBalance(Integer userId, Long amount) {
         PayHistory receiveHistory = payDao.chargePayBalance(userId, amount);
+        if (receiveHistory == null) {
+            throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND);
+        }
         return new PayHistoryDTO(
                 receiveHistory.amount(),
                 receiveHistory.balanceAfterTransaction(),

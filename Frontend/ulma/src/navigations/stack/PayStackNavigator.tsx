@@ -57,16 +57,15 @@ function PayStackNavigator() {
           fontWeight: 'bold',
         },
         headerTintColor: colors.BLACK,
-      }}
-    >
+      }}>
       <Stack.Screen
         name={payNavigations.HOME}
         component={PayHomeScreen}
         options={{
           headerTitle: () => (
-            <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-              <Text style={{ color: colors.GREEN_700 }}>ULMA</Text>
-              <Text style={{ color: colors.BLACK }}> PAY</Text>
+            <Text style={{fontSize: 18, fontWeight: 'bold'}}>
+              <Text style={{color: colors.GREEN_700}}>ULMA</Text>
+              <Text style={{color: colors.BLACK}}> PAY</Text>
             </Text>
           ),
         }}

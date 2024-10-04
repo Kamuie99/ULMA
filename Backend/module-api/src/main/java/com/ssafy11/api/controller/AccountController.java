@@ -71,10 +71,10 @@ public class AccountController {
     @PostMapping("/account/{account_number}/charge")
     public ResponseEntity<PayHistoryDTO> chargeBalance(
             @PathVariable("account_number") String accountNumber,
-            @RequestBody ChargePayAmountRequest request) {
+            @RequestBody ChargePayBalanceRequest request) {
         Assert.hasText(accountNumber, "AccountNumber must not be null");
-        Assert.notNull(request, "ChargePayAmount must not be null");
-        PayHistoryDTO payHistory = accountService.chargeBalance(accountNumber, request.amount());
+        Assert.notNull(request, "ChargePayBalanceRequest must not be null");
+        PayHistoryDTO payHistory = accountService.chargeBalance(accountNumber, request.balance());
         return ResponseEntity.ok(payHistory);
     }
 

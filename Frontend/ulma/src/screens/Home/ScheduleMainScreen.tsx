@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, Alert, Modal } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, Alert } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axiosInstance from '@/api/axios';
 import { colors } from '@/constants';
 import { Swipeable } from 'react-native-gesture-handler';
+import { useFocusEffect } from '@react-navigation/native';
 
 const ScheduleMainScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState('');
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [currentMonth, setCurrentMonth] = useState({ year: 2024, month: 10 });
-  const [modalVisible, setModalVisible] = useState(false);
 
   const fetchEvents = async (year, month) => {
     try {
@@ -26,6 +26,13 @@ const ScheduleMainScreen = ({ navigation }) => {
   useEffect(() => {
     fetchEvents(currentMonth.year, currentMonth.month);
   }, [currentMonth]);
+
+  // 화면 포커스 시 데이터 다시 불러오기
+  useFocusEffect(
+    useCallback(() => {
+      fetchEvents(currentMonth.year, currentMonth.month);
+    }, [currentMonth])
+  );
 
   const markedDates = upcomingEvents.reduce((acc, event) => {
     const date = event.date.split('T')[0];
@@ -80,34 +87,17 @@ const ScheduleMainScreen = ({ navigation }) => {
       renderRightActions={() => renderRightActions(item.scheduleId)}
     >
       <View style={styles.eventCard}>
-        <Text style={styles.eventName}>{item.name}</Text>
+        <View style={styles.eventCardInner}>
+          <Text style={styles.eventName}>{item.name}</Text>
+          <Text>{item.category}</Text>
+        </View>
         <Text style={styles.eventDate}>{item.date.split('T')[0]}</Text>
-        <Text style={styles.eventExpense}>예상 금액: ₩{-item.paidAmount}</Text>
-        <Text style={styles.eventStatus}>상태: {item.paidAmount < 0 ? '미지급' : '지급 완료'}</Text>
-      </View>
-    </Swipeable>
-  );
-
-  const AddEventModal = () => (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={modalVisible}
-      onRequestClose={() => setModalVisible(false)}
-    >
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <Text style={styles.modalText}>새 경조사 추가</Text>
-          {/* 여기에 새 경조사 추가를 위한 폼을 구현하세요 */}
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setModalVisible(false)}
-          >
-            <Text style={styles.textStyle}>닫기</Text>
-          </TouchableOpacity>
+        <View style={styles.eventCardInner}>
+          <Text style={styles.eventExpense}>₩ {-item.paidAmount}</Text>
+          <Text>{item.guestName}님과의 거래내역 조회 -></Text>
         </View>
       </View>
-    </Modal>
+    </Swipeable>
   );
 
   return (
@@ -142,12 +132,6 @@ const ScheduleMainScreen = ({ navigation }) => {
           contentContainerStyle={styles.eventListContent}
         />
       </View>
-
-      <TouchableOpacity style={styles.fab} onPress={() => setModalVisible(true)}>
-        <Icon name="add-outline" size={28} color={colors.WHITE} />
-      </TouchableOpacity>
-
-      <AddEventModal />
     </View>
   );
 };
@@ -184,20 +168,13 @@ const styles = StyleSheet.create({
   },
   eventExpense: {
     fontSize: 14,
-    color: colors.BLACK,
-  },
-  eventStatus: {
-    fontSize: 14,
     color: colors.PINK,
   },
-  fab: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: colors.GREEN_700,
-    padding: 15,
-    borderRadius: 30,
-    elevation: 3,
+  deleteButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    height: '100%',
   },
   noEventsText: {
     textAlign: 'center',
@@ -211,47 +188,9 @@ const styles = StyleSheet.create({
   eventListContent: {
     paddingBottom: 20,
   },
-  deleteButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 80,
-    height: '100%',
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  closeButton: {
-    backgroundColor: colors.GREEN_700,
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-  },
-  textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
+  eventCardInner: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   },
 });
 

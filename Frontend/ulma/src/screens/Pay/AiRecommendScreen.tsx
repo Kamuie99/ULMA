@@ -22,6 +22,7 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
   const [step, setStep] = useState(1); // 질문 단계
   const [event, setEvent] = useState(''); // 이벤트 종류
   const [relationship, setRelationship] = useState(''); // 관계
+  const [income, setIncome] = useState(''); // 연 소득
   const [userInfo, setUserInfo] = useState<{
     name: string;
     age: number;
@@ -33,16 +34,21 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
   // 페이지가 다시 포커스될 때 상태 초기화
   useFocusEffect(
     React.useCallback(() => {
-      setStep(1);
-      setEvent('');
-      setRelationship('');
-      setUserInfo(null);
-      setMessages([
-        {id: '0', text: '어떤 이벤트가 예정되어 있습니까?', type: 'bot'},
-      ]);
-      setInputText('');
+      resetChat();
     }, []),
   );
+
+  const resetChat = () => {
+    setStep(1);
+    setEvent('');
+    setRelationship('');
+    setIncome('');
+    setUserInfo(null);
+    setMessages([
+      {id: '0', text: '어떤 이벤트가 예정되어 있습니까?', type: 'bot'},
+    ]);
+    setInputText('');
+  };
 
   // 초기 질문 메시지
   useEffect(() => {
@@ -75,6 +81,10 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
       setStep(2);
     } else if (step === 2) {
       setRelationship(userResponse);
+      addBotMessage('연 소득은 어느 정도 되십니까?');
+      setStep(3);
+    } else if (step === 3) {
+      setIncome(userResponse); // 연 소득 설정
       try {
         // 회원 정보 조회
         const userInfoResponse = await axiosInstance.get('/user');
@@ -85,18 +95,15 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
             gender === 'M' ? '남' : '여'
           })님의 맞춤 정보를 분석합니다.`,
         );
-        setStep(3);
-      } catch (error) {
-        console.error('회원 정보를 가져오는 중 오류가 발생했습니다:', error);
-        addBotMessage('회원 정보를 가져오는 중 오류가 발생했습니다.');
-      }
-    } else if (step === 3) {
-      try {
+        setStep(4);
+
+        // 추천 금액 받기
         const recommendation = await fetchRecommendation();
         addBotMessage(`추천 금액: ${recommendation}원`);
         showOptions(); // 옵션 버튼 보여주기
       } catch (error) {
-        addBotMessage('추천 금액을 가져오는 중 오류가 발생했습니다.');
+        console.error('회원 정보를 가져오는 중 오류가 발생했습니다:', error);
+        addBotMessage('회원 정보를 가져오는 중 오류가 발생했습니다.');
       }
     }
   };
@@ -117,18 +124,18 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
       type: 'bot',
       options: (
         <View style={styles.optionsContainer}>
-          {/* pay송금 바로가기 */}
           <TouchableOpacity
             style={styles.optionBox}
             onPress={() => navigation.navigate(payNavigations.SENDING)}>
-            <Text style={styles.optionText}>pay송금 바로가기</Text>
+            <Text style={styles.optionText}>pay 송금 바로가기</Text>
           </TouchableOpacity>
-
-          {/* 홈 화면으로 이동 */}
           <TouchableOpacity
             style={styles.optionBox}
             onPress={() => navigation.navigate(homeNavigations.LANDING)}>
             <Text style={styles.optionText}>홈으로 돌아가기</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.optionBox} onPress={resetChat}>
+            <Text style={styles.optionText}>다시 질문하기</Text>
           </TouchableOpacity>
         </View>
       ),
@@ -139,15 +146,22 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
   // AI 금액 추천 API 호출
   const fetchRecommendation = async () => {
     try {
+      const gptQuotes = `${userInfo?.name}님, ${userInfo?.age}세 (${
+        userInfo?.gender === 'M' ? '남' : '여'
+      })님, ${event} 행사, 관계 점수 ${relationship}, 연 소득 ${income}으로 맞춤 추천합니다.`;
+
       const response = await axiosInstance.post('/events/ai/recommend/money', {
-        gptQuotes: `1~10점중에서 ${relationship}점인 사이예요. ${event} 행사이고, ${
-          userInfo?.age
-        }세, 성별 ${userInfo?.gender === 'M' ? '남' : '여'}입니다.`,
+        gptQuotes,
       });
-      return response.data;
+
+      if (response.data && typeof response.data === 'string') {
+        return response.data; // 정상적인 추천 금액 반환
+      } else {
+        throw new Error('추천 금액을 찾을 수 없습니다.');
+      }
     } catch (error) {
       console.error('추천 금액을 불러오는 중 오류가 발생했습니다:', error);
-      throw error;
+      return '추천 금액을 찾을 수 없습니다.';
     }
   };
 

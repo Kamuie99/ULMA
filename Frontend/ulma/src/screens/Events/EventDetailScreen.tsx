@@ -231,13 +231,13 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text>{event_id}</Text>
-        <Text style={styles.title}>이벤트 상세 내역</Text>
+        {/* <Text>{event_id}</Text>
+        <Text style={styles.title}>이벤트 상세 내역</Text> */}
 
         <View
           style={
             searchExpanded
-              ? styles.searchBoxExpanded
+              ? styles.searchBoxExpanded``
               : styles.searchBoxCollapsed
           }>
           {searchExpanded && (

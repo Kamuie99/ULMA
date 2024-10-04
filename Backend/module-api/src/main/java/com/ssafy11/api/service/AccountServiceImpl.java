@@ -3,6 +3,7 @@ package com.ssafy11.api.service;
 import com.ssafy11.api.dto.pay.PayHistoryDTO;
 import com.ssafy11.domain.Account.Account;
 import com.ssafy11.domain.Account.AccountDao;
+import com.ssafy11.domain.Account.PaginatedHistory;
 import com.ssafy11.domain.Pay.PayHistory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -76,12 +77,21 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<PayHistoryDTO> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType) {
-        List<PayHistory> payHistoryList = accountDao.findPayHistory(accountNumber, startDate, endDate, payType);
-        return payHistoryList.stream()
+    public PaginatedHistory<PayHistoryDTO> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType, int page, int size) {
+        // DAO에서 페이 히스토리를 조회 (PayHistory 타입의 PaginatedHistory 반환)
+        PaginatedHistory<PayHistory> paginatedHistory = accountDao.findPayHistory(accountNumber, startDate, endDate, payType, page, size);
+
+        // PayHistory 데이터를 PayHistoryDTO로 변환
+        List<PayHistoryDTO> payHistoryDTOList = paginatedHistory.data().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+
+        // PayHistoryDTO 타입의 PaginatedHistory 반환
+        return new PaginatedHistory<>(payHistoryDTOList, page, paginatedHistory.totalItemsCount(), paginatedHistory.totalPages());
     }
+
+
+
 
     // PayHistory 엔티티를 PayHistoryDTO로 변환하는 메서드
     private PayHistoryDTO convertToDTO(PayHistory payHistory) {

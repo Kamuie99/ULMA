@@ -8,6 +8,7 @@ import com.ssafy11.domain.Account.PaginatedHistory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.userdetails.User;
 
@@ -26,6 +27,8 @@ public class AccountController {
     public ResponseEntity<Account> createAccount(
             @AuthenticationPrincipal User user,
             @RequestBody BankCodeDTO bankCodeDTO) {
+        Assert.notNull(user, "User must not be null");
+        Assert.notNull(bankCodeDTO, "BankCode must not be null");
         int authenticatedUserId = Integer.parseInt(user.getUsername());
         Account createdAccount = accountService.createAccount(authenticatedUserId, bankCodeDTO.getBankCode());
         return ResponseEntity.ok(createdAccount);
@@ -36,6 +39,8 @@ public class AccountController {
     public ResponseEntity<Account> registerAccount(
             @AuthenticationPrincipal User user,
             @RequestBody AccountNumberRequest accountNumber) {
+        Assert.notNull(user, "User must not be null");
+        Assert.notNull(accountNumber, "AccountNumber must not be null");
         int authenticatedUserId = Integer.parseInt(user.getUsername());
         Account registeredAccount = accountService.connectAccount(authenticatedUserId, accountNumber.accountNumber());
         return ResponseEntity.ok(registeredAccount);
@@ -46,6 +51,7 @@ public class AccountController {
     public ResponseEntity<List<Account>> viewAccounts(
             @AuthenticationPrincipal User user,
             @RequestParam(value = "bankCode", required = false) String bankCode) {
+        Assert.notNull(user, "User must not be null");
         int authenticatedUserId = Integer.parseInt(user.getUsername());
         List<Account> accounts = accountService.findAllAccounts(authenticatedUserId, bankCode);
         return ResponseEntity.ok(accounts);
@@ -55,6 +61,7 @@ public class AccountController {
     @GetMapping("/users/account/info")
     public ResponseEntity<Account> viewConnectedAccountInfo(
             @AuthenticationPrincipal User user) {
+        Assert.notNull(user, "User must not be null");
         int authenticatedUserId = Integer.parseInt(user.getUsername());
         Account connectedAccount = accountService.connectedAccount(authenticatedUserId);
         return ResponseEntity.ok(connectedAccount);
@@ -65,6 +72,8 @@ public class AccountController {
     public ResponseEntity<PayHistoryDTO> chargeBalance(
             @PathVariable("account_number") String accountNumber,
             @RequestBody ChargePayAmountRequest request) {
+        Assert.hasText(accountNumber, "AccountNumber must not be null");
+        Assert.notNull(request, "ChargePayAmount must not be null");
         PayHistoryDTO payHistory = accountService.chargeBalance(accountNumber, request.amount());
         return ResponseEntity.ok(payHistory);
     }
@@ -74,6 +83,8 @@ public class AccountController {
     public ResponseEntity<PayHistoryDTO> sendMoney(
             @PathVariable("sender_account_number") String senderAccountNumber,
             @RequestBody SendPayMoneyRequest request) {
+        Assert.hasText(senderAccountNumber, "SenderAccountNumber must not be null");
+        Assert.notNull(request, "SendPayMoney must not be null");
         PayHistoryDTO payHistoryDTO = accountService.sendMoney(senderAccountNumber, request.info(), request.targetAccountNumber(), request.amount());
         return ResponseEntity.ok(payHistoryDTO);
     }
@@ -87,7 +98,7 @@ public class AccountController {
             @RequestParam(value = "pay_type", required = false) String payType,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {
-
+        Assert.hasText(accountNumber, "AccountNumber must not be null");
         PaginatedHistory paginatedHistory = accountService.findPayHistory(accountNumber, startDate, endDate, payType, page, size);
         return ResponseEntity.ok(paginatedHistory);
     }

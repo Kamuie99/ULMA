@@ -30,7 +30,7 @@ public class PayServiceImpl implements PayService {
         if (payAccountByUserId != null) {
             throw new ErrorException(ErrorCode.ALREADY_EXIST_PAY_ACCOUNT);
         }
-        
+
         Account createdAccount = payDao.createPayAccount(userId);
         return new AccountDTO(
                 createdAccount.accountNumber(),

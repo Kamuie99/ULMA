@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -29,6 +30,7 @@ public class PayController {
     @PostMapping
     public ResponseEntity<AccountDTO> createPayAccount(
             @AuthenticationPrincipal User user) {
+        Assert.notNull(user, "User must not be null");
         int authenticatedUserId = Integer.parseInt(user.getUsername());
         AccountDTO createdPayAccount = payService.createPayAccount(authenticatedUserId);
         return ResponseEntity.ok(createdPayAccount);
@@ -42,6 +44,7 @@ public class PayController {
             @RequestParam(value = "end_date", required = false) String endDate,    // 종료 날짜 (optional)
             @RequestParam(value = "pay_type", required = false) String payType     // SEND 또는 RECEIVE (optional)
     ) {
+        Assert.notNull(user, "User must not be null");
         // 문자열 날짜를 LocalDate로 변환
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate startLocalDate = null;
@@ -68,6 +71,7 @@ public class PayController {
     @GetMapping("/balance")
     public ResponseEntity<ChargePayAmountResponse> viewPayBalance(
             @AuthenticationPrincipal User user) {
+        Assert.notNull(user, "User must not be null");
         int authenticatedUserId = Integer.parseInt(user.getUsername());
         try {
             ChargePayAmountResponse balance = payService.viewPayBalance(authenticatedUserId);
@@ -82,6 +86,8 @@ public class PayController {
     public ResponseEntity<PayHistoryDTO> chargePayBalance(
             @AuthenticationPrincipal User user,
             @RequestBody ChargePayAmountRequest request) {
+        Assert.notNull(user, "User must not be null");
+        Assert.notNull(request, "ChargePayAmount must not be null");
         int authenticatedUserId = Integer.parseInt(user.getUsername());
         PayHistoryDTO receiveHistory = payService.chargePayBalance(authenticatedUserId, request.amount());
         return ResponseEntity.ok(receiveHistory);
@@ -92,6 +98,8 @@ public class PayController {
     public ResponseEntity<PayHistoryDTO> sendPayMoney(
             @AuthenticationPrincipal User user,
             @RequestBody SendPayMoneyRequest request) {
+        Assert.notNull(user, "User must not be null");
+        Assert.notNull(request, "SendPayMoney must not be null");
         int authenticatedUserId = Integer.parseInt(user.getUsername());
         PayHistoryDTO sendHistory = payService.sendPayMoney(authenticatedUserId, request.info(), request.targetAccountNumber(), request.amount());
         return ResponseEntity.ok(sendHistory);

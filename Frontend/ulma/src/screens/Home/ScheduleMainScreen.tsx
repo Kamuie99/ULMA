@@ -27,7 +27,6 @@ const ScheduleMainScreen = ({ navigation }) => {
     fetchEvents(currentMonth.year, currentMonth.month);
   }, [currentMonth]);
 
-  // 화면 포커스 시 데이터 다시 불러오기
   useFocusEffect(
     useCallback(() => {
       fetchEvents(currentMonth.year, currentMonth.month);
@@ -40,7 +39,9 @@ const ScheduleMainScreen = ({ navigation }) => {
     return acc;
   }, {});
 
-  const eventsForSelectedDate = upcomingEvents.filter(event => event.date.startsWith(selectedDate));
+  const eventsForSelectedDate = selectedDate
+    ? upcomingEvents.filter(event => event.date.startsWith(selectedDate))
+    : upcomingEvents;
 
   const deleteEvent = async (scheduleId) => {
     try {
@@ -82,6 +83,30 @@ const ScheduleMainScreen = ({ navigation }) => {
     );
   };
 
+  const getCategoryColor = (category) => {
+    switch (category) {
+      case '가족':
+        return colors.PINK;
+      case '친구':
+        return colors.GREEN_700;
+      case '직장':
+        return colors.PASTEL_BLUE;
+      default:
+        return '#e0e0e0';
+    }
+  };
+
+  const getCategoryTextColor = (category) => {
+    switch (category) {
+      case '가족':
+      case '친구':
+      case '직장':
+        return colors.WHITE;
+      default:
+        return '#333';
+    }
+  };
+
   const renderEventCard = ({ item }) => (
     <Swipeable
       renderRightActions={() => renderRightActions(item.scheduleId)}
@@ -89,7 +114,13 @@ const ScheduleMainScreen = ({ navigation }) => {
       <View style={styles.eventCard}>
         <View style={styles.eventCardInner}>
           <Text style={styles.eventName}>{item.name}</Text>
-          <Text>{item.category}</Text>
+          <TouchableOpacity
+            style={[styles.categoryButton, { backgroundColor: getCategoryColor(item.category) }]}
+          >
+            <Text style={[styles.categoryText, { color: getCategoryTextColor(item.category) }]}>
+              {item.category}
+            </Text>
+          </TouchableOpacity>
         </View>
         <Text style={styles.eventDate}>{item.date.split('T')[0]}</Text>
         <View style={styles.eventCardInner}>
@@ -100,10 +131,26 @@ const ScheduleMainScreen = ({ navigation }) => {
     </Swipeable>
   );
 
+  // 날짜 형식을 '10월 4일' 형식으로 변환
+  const formatDateToKorean = (dateString) => {
+    const date = new Date(dateString);
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${month}월 ${day}일`;
+  };
+
+  const handleDayPress = (day) => {
+    if (selectedDate === day.dateString) {
+      setSelectedDate(''); // 선택 해제
+    } else {
+      setSelectedDate(day.dateString); // 날짜 선택
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Calendar
-        onDayPress={day => setSelectedDate(day.dateString)}
+        onDayPress={handleDayPress}
         onMonthChange={month => setCurrentMonth({ year: month.year, month: month.month })}
         markedDates={{
           ...markedDates,
@@ -122,7 +169,11 @@ const ScheduleMainScreen = ({ navigation }) => {
       />
 
       <View style={styles.upcomingContainer}>
-        <Text style={styles.sectionTitle}>다가오는 경조사</Text>
+        <Text style={styles.sectionTitle}>
+          {selectedDate
+            ? `${formatDateToKorean(selectedDate)} 경조사`
+            : `${currentMonth.month}월 전체 경조사`}
+        </Text>
         <FlatList
           data={eventsForSelectedDate}
           keyExtractor={(item) => item.scheduleId.toString()}
@@ -191,6 +242,16 @@ const styles = StyleSheet.create({
   eventCardInner: {
     flexDirection: 'row',
     justifyContent: 'space-between'
+  },
+  categoryButton: {
+    borderRadius: 16,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    alignSelf: 'flex-start',
+    marginBottom: 8,
+  },
+  categoryText: {
+    fontSize: 14,
   },
 });
 

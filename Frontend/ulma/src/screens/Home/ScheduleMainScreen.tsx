@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, Alert, Modal } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, Alert } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axiosInstance from '@/api/axios';
 import { colors } from '@/constants';
 import { Swipeable } from 'react-native-gesture-handler';
+import { useFocusEffect } from '@react-navigation/native';
+import { friendsNavigations, homeNavigations } from '@/constants/navigations';
 
 const ScheduleMainScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState('');
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [currentMonth, setCurrentMonth] = useState({ year: 2024, month: 10 });
-  const [modalVisible, setModalVisible] = useState(false);
 
   const fetchEvents = async (year, month) => {
     try {
@@ -27,13 +28,21 @@ const ScheduleMainScreen = ({ navigation }) => {
     fetchEvents(currentMonth.year, currentMonth.month);
   }, [currentMonth]);
 
+  useFocusEffect(
+    useCallback(() => {
+      fetchEvents(currentMonth.year, currentMonth.month);
+    }, [currentMonth])
+  );
+
   const markedDates = upcomingEvents.reduce((acc, event) => {
     const date = event.date.split('T')[0];
     acc[date] = { marked: true, dotColor: colors.GREEN_700 };
     return acc;
   }, {});
 
-  const eventsForSelectedDate = upcomingEvents.filter(event => event.date.startsWith(selectedDate));
+  const eventsForSelectedDate = selectedDate
+    ? upcomingEvents.filter(event => event.date.startsWith(selectedDate))
+    : upcomingEvents;
 
   const deleteEvent = async (scheduleId) => {
     try {
@@ -75,45 +84,85 @@ const ScheduleMainScreen = ({ navigation }) => {
     );
   };
 
+  const getCategoryColor = (category) => {
+    switch (category) {
+      case '가족':
+        return colors.PINK;
+      case '친구':
+        return colors.GREEN_700;
+      case '직장':
+        return colors.PASTEL_BLUE;
+      default:
+        return '#e0e0e0';
+    }
+  };
+
+  const getCategoryTextColor = (category) => {
+    switch (category) {
+      case '가족':
+      case '친구':
+      case '직장':
+        return colors.WHITE;
+      default:
+        return '#333';
+    }
+  };
+
   const renderEventCard = ({ item }) => (
     <Swipeable
       renderRightActions={() => renderRightActions(item.scheduleId)}
     >
       <View style={styles.eventCard}>
-        <Text style={styles.eventName}>{item.name}</Text>
-        <Text style={styles.eventDate}>{item.date.split('T')[0]}</Text>
-        <Text style={styles.eventExpense}>예상 금액: ₩{-item.paidAmount}</Text>
-        <Text style={styles.eventStatus}>상태: {item.paidAmount < 0 ? '미지급' : '지급 완료'}</Text>
-      </View>
-    </Swipeable>
-  );
-
-  const AddEventModal = () => (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={modalVisible}
-      onRequestClose={() => setModalVisible(false)}
-    >
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <Text style={styles.modalText}>새 경조사 추가</Text>
-          {/* 여기에 새 경조사 추가를 위한 폼을 구현하세요 */}
+        <View style={styles.eventCardInner}>
+          <Text style={styles.eventName}>{item.name}</Text>
           <TouchableOpacity
-            style={styles.closeButton}
-            onPress={() => setModalVisible(false)}
+            style={[styles.categoryButton, { backgroundColor: getCategoryColor(item.category) }]}
           >
-            <Text style={styles.textStyle}>닫기</Text>
+            <Text style={[styles.categoryText, { color: getCategoryTextColor(item.category) }]}>
+              {item.category}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.eventDate}>{item.date.split('T')[0]}</Text>
+        <View style={styles.eventCardInner}>
+          <Text style={styles.eventExpense}>₩ {-item.paidAmount}</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate(friendsNavigations.FREINDS_DETAIL, {
+              guestId: item.guestId, // guestId 전달
+              name: item.guestName, // 이름 전달
+              category: item.category, // 카테고리 전달
+              phoneNumber: item.phoneNumber, // 전화번호 전달
+            })}
+          >
+            <Text>{`${item.guestName}님과의 거래내역 조회 ->`}</Text>
           </TouchableOpacity>
         </View>
       </View>
-    </Modal>
+    </Swipeable>
   );
+  
+  
+
+  // 날짜 형식을 '10월 4일' 형식으로 변환
+  const formatDateToKorean = (dateString) => {
+    const date = new Date(dateString);
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${month}월 ${day}일`;
+  };
+
+  const handleDayPress = (day) => {
+    if (selectedDate === day.dateString) {
+      setSelectedDate(''); // 선택 해제
+    } else {
+      setSelectedDate(day.dateString); // 날짜 선택
+    }
+  };
 
   return (
     <View style={styles.container}>
       <Calendar
-        onDayPress={day => setSelectedDate(day.dateString)}
+        onDayPress={handleDayPress}
         onMonthChange={month => setCurrentMonth({ year: month.year, month: month.month })}
         markedDates={{
           ...markedDates,
@@ -132,7 +181,11 @@ const ScheduleMainScreen = ({ navigation }) => {
       />
 
       <View style={styles.upcomingContainer}>
-        <Text style={styles.sectionTitle}>다가오는 경조사</Text>
+        <Text style={styles.sectionTitle}>
+          {selectedDate
+            ? `${formatDateToKorean(selectedDate)} 경조사`
+            : `${currentMonth.month}월 전체 경조사`}
+        </Text>
         <FlatList
           data={eventsForSelectedDate}
           keyExtractor={(item) => item.scheduleId.toString()}
@@ -142,12 +195,6 @@ const ScheduleMainScreen = ({ navigation }) => {
           contentContainerStyle={styles.eventListContent}
         />
       </View>
-
-      <TouchableOpacity style={styles.fab} onPress={() => setModalVisible(true)}>
-        <Icon name="add-outline" size={28} color={colors.WHITE} />
-      </TouchableOpacity>
-
-      <AddEventModal />
     </View>
   );
 };
@@ -184,20 +231,13 @@ const styles = StyleSheet.create({
   },
   eventExpense: {
     fontSize: 14,
-    color: colors.BLACK,
-  },
-  eventStatus: {
-    fontSize: 14,
     color: colors.PINK,
   },
-  fab: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: colors.GREEN_700,
-    padding: 15,
-    borderRadius: 30,
-    elevation: 3,
+  deleteButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    height: '100%',
   },
   noEventsText: {
     textAlign: 'center',
@@ -211,47 +251,19 @@ const styles = StyleSheet.create({
   eventListContent: {
     paddingBottom: 20,
   },
-  deleteButton: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 80,
-    height: '100%',
+  eventCardInner: {
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   },
-  centeredView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 22,
+  categoryButton: {
+    borderRadius: 16,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    alignSelf: 'flex-start',
+    marginBottom: 8,
   },
-  modalView: {
-    margin: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    padding: 35,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  closeButton: {
-    backgroundColor: colors.GREEN_700,
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-  },
-  textStyle: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
+  categoryText: {
+    fontSize: 14,
   },
 });
 

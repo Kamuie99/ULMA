@@ -9,8 +9,7 @@ import {
 } from 'react-native';
 import axiosInstance from '@/api/axios';
 import {NavigationProp, useFocusEffect} from '@react-navigation/native';
-import {payNavigations} from '@/constants/navigations';
-import {homeNavigations} from '@/constants/navigations';
+import {payNavigations, homeNavigations} from '@/constants/navigations';
 
 interface Message {
   id: string;
@@ -23,8 +22,11 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
   const [step, setStep] = useState(1); // 질문 단계
   const [event, setEvent] = useState(''); // 이벤트 종류
   const [relationship, setRelationship] = useState(''); // 관계
-  const [ageGroup, setAgeGroup] = useState(''); // 연령대
-  const [income, setIncome] = useState(''); // 연소득
+  const [userInfo, setUserInfo] = useState<{
+    name: string;
+    age: number;
+    gender: string;
+  } | null>(null); // 사용자 정보
   const [messages, setMessages] = useState<Message[]>([]); // 메시지 목록
   const [inputText, setInputText] = useState(''); // 사용자의 입력값
 
@@ -34,8 +36,7 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
       setStep(1);
       setEvent('');
       setRelationship('');
-      setAgeGroup('');
-      setIncome('');
+      setUserInfo(null);
       setMessages([
         {id: '0', text: '어떤 이벤트가 예정되어 있습니까?', type: 'bot'},
       ]);
@@ -43,7 +44,7 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
     }, []),
   );
 
-  // 초기 질문 추가
+  // 초기 질문 메시지
   useEffect(() => {
     const initialMessage: Message = {
       id: '0',
@@ -70,19 +71,26 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
   const nextStep = async (userResponse: string) => {
     if (step === 1) {
       setEvent(userResponse);
-      addBotMessage('그 사람과의 관계가 어떠십니까?');
-      addBotMessage('(1~10점 중)');
+      addBotMessage('그 사람과의 관계가 어떠십니까? (1~10점 중)');
       setStep(2);
     } else if (step === 2) {
       setRelationship(userResponse);
-      addBotMessage('연령대가 어떻게 되십니까?');
-      setStep(3);
+      try {
+        // 회원 정보 조회
+        const userInfoResponse = await axiosInstance.get('/user');
+        const {name, age, gender} = userInfoResponse.data;
+        setUserInfo({name, age, gender});
+        addBotMessage(
+          `${name}님, ${age}세 (${
+            gender === 'M' ? '남' : '여'
+          })님의 맞춤 정보를 분석합니다.`,
+        );
+        setStep(3);
+      } catch (error) {
+        console.error('회원 정보를 가져오는 중 오류가 발생했습니다:', error);
+        addBotMessage('회원 정보를 가져오는 중 오류가 발생했습니다.');
+      }
     } else if (step === 3) {
-      setAgeGroup(userResponse);
-      addBotMessage('연소득이 어떻게 되십니까?');
-      setStep(4);
-    } else if (step === 4) {
-      setIncome(userResponse);
       try {
         const recommendation = await fetchRecommendation();
         addBotMessage(`추천 금액: ${recommendation}원`);
@@ -122,13 +130,6 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
             onPress={() => navigation.navigate(homeNavigations.LANDING)}>
             <Text style={styles.optionText}>홈으로 돌아가기</Text>
           </TouchableOpacity>
-
-          {/* 현재 페이지 새로고침 */}
-          {/* <TouchableOpacity
-            style={styles.optionBox}
-            onPress={() => navigation.push(payNavigations.RECOMMEND_OPTION)}>
-            <Text style={styles.optionText}>다시 질문하기</Text>
-          </TouchableOpacity> */}
         </View>
       ),
     };
@@ -139,7 +140,9 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
   const fetchRecommendation = async () => {
     try {
       const response = await axiosInstance.post('/events/ai/recommend/money', {
-        gptQuotes: `1~10점중에서 ${relationship}점인 사이예요. ${event}행사이고 ${ageGroup}, 연소득 ${income}원이에요`,
+        gptQuotes: `1~10점중에서 ${relationship}점인 사이예요. ${event} 행사이고, ${
+          userInfo?.age
+        }세, 성별 ${userInfo?.gender === 'M' ? '남' : '여'}입니다.`,
       });
       return response.data;
     } catch (error) {

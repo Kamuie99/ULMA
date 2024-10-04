@@ -23,6 +23,21 @@ function HomeStackNavigator() {
   return (
     <Stack.Navigator
       screenOptions={{
+<<<<<<< HEAD
+        cardStyle: {
+          backgroundColor: colors.WHITE,
+        },
+        headerStyle: {
+          backgroundColor: colors.WHITE,
+        },
+        headerTitleAlign: 'left',
+        headerTitleStyle: {
+          fontSize: 18,
+          fontWeight: 'bold',
+        },
+        headerTintColor: colors.BLACK,
+      }}>
+=======
         cardStyle: { backgroundColor: colors.WHITE },
         headerStyle: { backgroundColor: colors.WHITE },
         headerTitleAlign: 'left',
@@ -30,6 +45,7 @@ function HomeStackNavigator() {
         headerTintColor: colors.BLACK,
       }}
     >
+>>>>>>> 0634bef121e43bef7cf4344f053a62853915a7ee
       <Stack.Screen
         name={homeNavigations.SCHEDULE_MAIN}
         component={ScheduleMainScreen}
@@ -64,6 +80,13 @@ function HomeStackNavigator() {
         component={FriendsDetailScreen}
         options={{
           headerTitle: '거래내역 조회',
+        }}
+      />
+      <Stack.Screen
+        name={homeNavigations.LANDING} // LandingPage 추가
+        component={LandingPage}
+        options={{
+          headerTitle: '홈',
         }}
       />
     </Stack.Navigator>

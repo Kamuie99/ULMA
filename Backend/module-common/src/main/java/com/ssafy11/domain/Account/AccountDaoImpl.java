@@ -223,7 +223,12 @@ public class AccountDaoImpl implements AccountDao {
     }
 
     @Override
-    public List<PayHistory> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType) {
+    public PaginatedHistory findPayHistory(String accountNumber,
+                                           LocalDate startDate,
+                                           LocalDate endDate,
+                                           String payType,
+                                           int page,
+                                           int size) {
         // 1. 계좌번호로 계좌 조회
         Account account = dsl.selectFrom(ACCOUNT)
                 .where(ACCOUNT.ACCOUNT_NUMBER.eq(accountNumber))
@@ -231,6 +236,15 @@ public class AccountDaoImpl implements AccountDao {
 
         // 2. 해당 계좌의 PayHistory 내역 조회
         if (account != null) {
+            Integer count = dsl.selectCount()
+                    .from(PAYHISTORY)
+                    .where(PAYHISTORY.ACCOUNT_ID.eq(account.id()))
+                    .fetchOne(0, int.class);
+
+
+            int totalItemsCount = (count != null) ? count : 0;
+            int totalPages = (int) Math.ceil((double) totalItemsCount/size);
+
             var query = dsl.selectFrom(PAYHISTORY)
                     .where(PAYHISTORY.ACCOUNT_ID.eq(account.id()));
 
@@ -247,12 +261,17 @@ public class AccountDaoImpl implements AccountDao {
                 query.and(PAYHISTORY.TRANSACTION_TYPE.eq(payType));
             }
 
-            // 5. 결과를 날짜순으로 정렬하여 반환
-            return query.orderBy(PAYHISTORY.TRANSACTION_DATE.desc())
+            // 페이지네이션 적용
+            List<PayHistory> payHistories = query.orderBy(PAYHISTORY.TRANSACTION_DATE.desc())
+                    .limit(size)
+                    .offset(page * size)
                     .fetchInto(PayHistory.class);
+
+            // 5. 결과를 날짜순으로 정렬하여 반환
+            return new PaginatedHistory(payHistories, page, totalItemsCount, totalPages);
         }
 
-        return List.of();
+        return new PaginatedHistory(List.of(), 0, 0, 0);
     }
 
 }

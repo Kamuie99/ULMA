@@ -95,7 +95,7 @@ function FriendsDetailScreen({ route }: FriendsDetailScreenProps) {
   return (
     <View style={styles.container}>
       {/* 개발 환경용  */}
-      <Text>{guestId}</Text> 
+      {/* <Text>{guestId}</Text>  */}
       {/* 친구 카드 + 금액 요약 카드 렌더링 */}
       {renderFriendSummaryCard()}
 

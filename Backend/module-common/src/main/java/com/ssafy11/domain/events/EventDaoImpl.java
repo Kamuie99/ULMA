@@ -4,6 +4,7 @@ import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.events.dto.Event;
 import com.ssafy11.domain.common.PageResponse;
 import com.ssafy11.domain.events.dto.EventCommand;
+import com.ssafy11.domain.events.dto.recommendAmount;
 import com.ssafy11.domain.participant.dto.EventParticipant;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
@@ -141,5 +142,22 @@ public class EventDaoImpl implements EventDao{
                 .set(EVENT.USERS_ID, (Integer)null)
                 .where(EVENT.ID.eq(eventId))
                 .execute();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public recommendAmount getRecommendAmount(String category, Integer userId) {
+        return dsl.select(PAYMENT_ANALYSIS.UNDER_50K_RATIO,
+                PAYMENT_ANALYSIS.BETWEEN_50K_100K_RATIO,
+                PAYMENT_ANALYSIS.BETWEEN_100K_150K_RATIO,
+                PAYMENT_ANALYSIS.ABOVE_150K_RATIO,
+                PAYMENT_ANALYSIS.MIN_AMOUNT,
+                PAYMENT_ANALYSIS.MAX_AMOUNT,
+                PAYMENT_ANALYSIS.TOP_AMOUNT)
+                .from(PAYMENT_ANALYSIS)
+                .where(PAYMENT_ANALYSIS.CATEGORY.eq(category))
+                .orderBy(PAYMENT_ANALYSIS.CREATE_AT.desc())
+                .limit(1)
+                .fetchOneInto(recommendAmount.class);
     }
 }

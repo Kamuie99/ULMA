@@ -3,16 +3,19 @@ import {View, Text, TouchableOpacity, StyleSheet, Alert} from 'react-native';
 import TitleTextField from '@/components/common/TitleTextField';
 import CustomButton from '@/components/common/CustomButton';
 import axiosInstance from '@/api/axios';
-import { NavigationProp } from '@react-navigation/native';
-import { eventNavigations } from '@/constants/navigations';
+import {NavigationProp} from '@react-navigation/native';
+import {eventNavigations} from '@/constants/navigations';
 import CalendarComponent from '@/components/calendar/CalendarButton';
-import { format } from 'date-fns';
-import { ko } from 'date-fns/locale';
+import {format} from 'date-fns';
+import {ko} from 'date-fns/locale';
 import InputField from '@/components/common/InputField';
+import {ScrollView} from 'react-native-gesture-handler';
 
 const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
   const [eventTitle, setEventTitle] = useState<string>(''); // 행사 제목
-  const [selectedEventType, setSelectedEventType] = useState<string | null>(null); // 행사 유형
+  const [selectedEventType, setSelectedEventType] = useState<string | null>(
+    null,
+  ); // 행사 유형
   const [eventDate, setEventDate] = useState<string>(''); // 행사 날짜 및 시간
   const [calendarVisible, setCalendarVisible] = useState(false); // 달력 모달 상태
   const [isConfirmVisible, setConfirmVisible] = useState(true); // 확인 버튼 상태
@@ -44,7 +47,7 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
 
   // 사용자에게 보여줄 때는 "년/월/일" 형식으로 변환
   const formattedDate = eventDate
-    ? format(new Date(eventDate), 'yyyy년 M월 d일 HH:mm', { locale: ko })
+    ? format(new Date(eventDate), 'yyyy년 M월 d일 HH:mm', {locale: ko})
     : '';
 
   return (
@@ -79,30 +82,31 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
           </TouchableOpacity>
         ))}
       </View>
-
-      {/* 달력 모달 열기 */}
-      <TouchableOpacity
-        onPress={() => {
-          setCalendarVisible(true);
-          setConfirmVisible(false); // 달력이 열리면 확인 버튼 숨기기
-        }}
-        style={styles.dateButton}>
-        <Text style={styles.dateButtonText}>
-          {formattedDate ? formattedDate : '날짜 선택'}
-        </Text>
-      </TouchableOpacity>
-
-      {/* CalendarComponent 모달 */}
-      {calendarVisible && (
-        <CalendarComponent
-          selectedDate={eventDate}
-          onDateSelected={date => {
-            setEventDate(date); // ISO 형식으로 전달받은 값을 저장
-            setCalendarVisible(false);
-            setConfirmVisible(true); // 날짜 선택 후 확인 버튼 다시 나타내기
+      <ScrollView>
+        {/* 달력 모달 열기 */}
+        <TouchableOpacity
+          onPress={() => {
+            setCalendarVisible(true);
+            setConfirmVisible(false); // 달력이 열리면 확인 버튼 숨기기
           }}
-        />
-      )}
+          style={styles.dateButton}>
+          <Text style={styles.dateButtonText}>
+            {formattedDate ? formattedDate : '날짜 선택'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* CalendarComponent 모달 */}
+        {calendarVisible && (
+          <CalendarComponent
+            selectedDate={eventDate}
+            onDateSelected={date => {
+              setEventDate(date); // ISO 형식으로 전달받은 값을 저장
+              setCalendarVisible(false);
+              setConfirmVisible(true); // 날짜 선택 후 확인 버튼 다시 나타내기
+            }}
+          />
+        )}
+      </ScrollView>
 
       {/* 확인 버튼 - 달력이 열려 있을 때 숨김 */}
       {isConfirmVisible && (

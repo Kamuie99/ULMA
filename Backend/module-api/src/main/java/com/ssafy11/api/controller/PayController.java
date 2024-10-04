@@ -1,8 +1,8 @@
 package com.ssafy11.api.controller;
 
 import com.ssafy11.api.dto.account.AccountDTO;
-import com.ssafy11.api.dto.account.ChargePayAmountRequest;
-import com.ssafy11.api.dto.account.ChargePayAmountResponse;
+import com.ssafy11.api.dto.account.ChargePayBalanceRequest;
+import com.ssafy11.api.dto.account.ChargePayBalanceResponse;
 import com.ssafy11.api.dto.account.SendPayMoneyRequest;
 import com.ssafy11.api.dto.pay.PayHistoryDTO;
 import com.ssafy11.api.exception.ErrorException;
@@ -69,12 +69,12 @@ public class PayController {
 
     // 3. Pay 잔액 보기
     @GetMapping("/balance")
-    public ResponseEntity<ChargePayAmountResponse> viewPayBalance(
+    public ResponseEntity<ChargePayBalanceResponse> viewPayBalance(
             @AuthenticationPrincipal User user) {
         Assert.notNull(user, "User must not be null");
         int authenticatedUserId = Integer.parseInt(user.getUsername());
         try {
-            ChargePayAmountResponse balance = payService.viewPayBalance(authenticatedUserId);
+            ChargePayBalanceResponse balance = payService.viewPayBalance(authenticatedUserId);
             return ResponseEntity.ok(balance);
         } catch (ErrorException e) {
             throw e;
@@ -85,11 +85,11 @@ public class PayController {
     @PostMapping("/balance")
     public ResponseEntity<PayHistoryDTO> chargePayBalance(
             @AuthenticationPrincipal User user,
-            @RequestBody ChargePayAmountRequest request) {
+            @RequestBody ChargePayBalanceRequest request) {
         Assert.notNull(user, "User must not be null");
         Assert.notNull(request, "ChargePayAmount must not be null");
         int authenticatedUserId = Integer.parseInt(user.getUsername());
-        PayHistoryDTO receiveHistory = payService.chargePayBalance(authenticatedUserId, request.amount());
+        PayHistoryDTO receiveHistory = payService.chargePayBalance(authenticatedUserId, request.balance());
         return ResponseEntity.ok(receiveHistory);
     }
 

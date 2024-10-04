@@ -3,6 +3,7 @@ const homeNavigations = {
   SCHEDULE_MAIN: 'ScheduleMain',
   SCHEDULE_ADD: 'ScheduleAdd',
   SELECT_FRIEND: 'SelectFriend',
+  FRIENDS_DETAIL: 'FriendsDetail',
 } as const;
 
 const authNavigations = {

@@ -1,5 +1,5 @@
-import {colors} from '@/constants';
-import React, {useState} from 'react';
+import { colors } from '@/constants';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
 import Icon from 'react-native-vector-icons/Entypo';
 import Modal from 'react-native-modal';
 import Toast from 'react-native-toast-message';
-import DocumentPicker from 'react-native-document-picker'; // 문서 선택을 위한 라이브러리
+import DocumentPicker from 'react-native-document-picker';
 import axiosInstance from '@/api/axios';
 import useAuthStore from '@/store/useAuthStore';
 
@@ -36,17 +36,16 @@ const options = [
   },
 ];
 
-function InputOptionModal({isVisible, onClose}) {
+function InputOptionModal({ isVisible, onClose, onDirectRegister }) {
   const [excelFile, setExcelFile] = useState(null);
-  const {accessToken} = useAuthStore();
+  const { accessToken } = useAuthStore();
 
-  // 파일 선택 로직 추가
   const pickExcelFile = async () => {
     try {
       const res = await DocumentPicker.pick({
-        type: [DocumentPicker.types.xlsx], // 엑셀 파일 선택
+        type: [DocumentPicker.types.xlsx],
       });
-      setExcelFile(res[0]); // 선택된 파일 저장
+      setExcelFile(res[0]);
       console.log('선택된 파일: ', res);
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
@@ -57,7 +56,6 @@ function InputOptionModal({isVisible, onClose}) {
     }
   };
 
-  // 엑셀 파일 서버로 전송
   const handleSubmit = async () => {
     if (!excelFile) {
       Toast.show({
@@ -88,7 +86,7 @@ function InputOptionModal({isVisible, onClose}) {
         type: 'success',
         text1: '파일 업로드 성공',
       });
-      onClose(); // 모달 닫기
+      onClose();
     } catch (e) {
       Toast.show({
         type: 'error',
@@ -100,14 +98,14 @@ function InputOptionModal({isVisible, onClose}) {
 
   const handlePress = (key: string) => {
     if (key === '2') {
-      // 엑셀 파일 선택을 위해 호출
       pickExcelFile();
+    } else if (key === '3') {
+      onDirectRegister(); // 직접 등록하기로 연결
     }
-    console.log(`${key} 선택됨`);
-    onClose(); // 옵션 선택 시 모달 닫기
+    onClose();
   };
 
-  const renderItem = ({item}: {item: (typeof options)[0]}) => (
+  const renderItem = ({ item }: { item: (typeof options)[0] }) => (
     <TouchableOpacity onPress={() => handlePress(item.key)}>
       <View style={styles.optionContainer}>
         <Image style={styles.icon} source={item.imageUrl} />

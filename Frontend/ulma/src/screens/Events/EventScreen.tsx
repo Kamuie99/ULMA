@@ -36,6 +36,30 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     }
   };
 
+  const deleteEvent = async (eventId: string) => {
+    try {
+      await axiosInstance.delete(`/events/${eventId}`);
+      Alert.alert('완료', '이벤트가 삭제되었습니다.');
+      fetchEvents(); // 삭제 후 목록 새로고침
+    } catch (error) {
+      console.error('이벤트 삭제 중 오류 발생:', error);
+      Alert.alert('에러', '이벤트 삭제 중 오류가 발생했습니다.');
+    }
+  };
+
+  const confirmDelete = (eventId: string) => {
+    Alert.alert('확인', '이벤트를 삭제하시겠습니까?', [
+      {
+        text: '취소',
+        style: 'cancel',
+      },
+      {
+        text: '확인',
+        onPress: () => deleteEvent(eventId),
+      },
+    ]);
+  };
+
   useFocusEffect(
     useCallback(() => {
       fetchEvents();
@@ -120,6 +144,13 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
           }}>
           <Icon name="pencil" size={20} color="#808080" />
         </TouchableOpacity>
+
+        {/* 쓰레기통 모양 버튼을 클릭했을 때 삭제 확인 */}
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => confirmDelete(item.id)}>
+          <Icon name="trash" size={20} color="#808080" />
+        </TouchableOpacity>
       </View>
     );
   };
@@ -134,11 +165,6 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
 
   return (
     <View style={styles.container}>
-      {/* 상단 헤더 부분 추가
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>내 이벤트 목록</Text>
-      </View> */}
-
       {events.length > 0 ? (
         <FlatList
           data={events}
@@ -241,6 +267,12 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   editButton: {
+    paddingHorizontal: 8,
+    position: 'absolute',
+    right: 40,
+    top: 10,
+  },
+  deleteButton: {
     paddingHorizontal: 8,
     position: 'absolute',
     right: 10,

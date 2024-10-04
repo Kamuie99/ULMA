@@ -11,6 +11,10 @@ import {useNavigation} from '@react-navigation/native';
 import CustomButton from '@/components/common/CustomButton';
 import {payNavigations} from '@/constants/navigations';
 import {colors} from '@/constants';
+import Toast from 'react-native-toast-message';
+import axiosInstance from '@/api/axios';
+import useAuthStore from '@/store/useAuthStore';
+import usePayStore from '@/store/usePayStore';
 
 function PayrechargingScreen({navigation}) {
   useEffect(() => {
@@ -18,13 +22,47 @@ function PayrechargingScreen({navigation}) {
     navigation.getParent()?.setOptions({
       tabBarStyle: {display: 'none'},
     });
-  }, [navigation]);
-  const [amount, setAmount] = useState<string>('300000'); // 초기값 300,000원 (사용자가 입력 가능)
 
-  const handleRecharge = () => {
-    // amount를 파라미터로 전달
-    navigation.navigate(payNavigations.CHARGER_RESULT, {amount});
+    // 컴포넌트가 unmount 될 때 탭바를 다시 보이도록 설정
+    return () => {
+      navigation.getParent()?.setOptions({
+        tabBarStyle: {display: ''},
+      });
+    };
+  }, [navigation]);
+
+  const [amount, setAmount] = useState<number>(0);
+  const {getPayInfo} = usePayStore();
+
+  const handleRecharge = async () => {
+    if (amount === 0) {
+      Toast.show({text1: '금액이 입력되지 않았어요.', type: 'error'});
+      return;
+    }
+    const accessToken = useAuthStore.getState().accessToken;
+
+    try {
+      const response = await axiosInstance.post(
+        '/users/pay/balance',
+        {
+          balance: amount,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+      console.log(response.data);
+      getPayInfo();
+      navigation.navigate(payNavigations.CHARGER_RESULT, {amount});
+    } catch (error) {
+      console.error('계정 정보를 불러오는 중 에러가 발생했습니다:', error);
+    }
   };
+
+  const {balance, accountNumber} = usePayStore();
+  const totalAmount = (Number(balance) || 0) + (Number(amount) || 0);
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
@@ -43,13 +81,11 @@ function PayrechargingScreen({navigation}) {
         </View>
         <View style={styles.infoContainer}>
           <Text style={styles.infoText}>충전 계좌</Text>
-          <Text style={styles.infoText}>000-1111-00-1111</Text>
+          <Text style={styles.infoText}>{accountNumber}</Text>
         </View>
         <View style={styles.infoContainer}>
           <Text style={styles.infoText}>충전 후 잔액</Text>
-          <Text style={styles.infoText}>
-            {Number(amount).toLocaleString()} 원
-          </Text>
+          <Text style={styles.infoText}>{totalAmount.toLocaleString()} 원</Text>
         </View>
       </View>
       <CustomButton label="충전하기" onPress={handleRecharge} />

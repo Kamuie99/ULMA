@@ -34,9 +34,11 @@ const payNavigations = {
   FRIENDHSHIP_SECLECT: 'Friendshipselect',
   RECOMMEND_OPTION: 'RecommendOption',
   SENDING: 'Sending',
+  SEND_ACCOUNT: 'SendAccount',
   SEND_RESULT: 'Sendresult',
   INPUT_AMOUNT: 'InputAmount',
   ACCOUNT_INFO: 'AccountInfo',
+  ADD_ACCOUNT: 'AddAccount',
 } as const;
 
 const mypageNavigations = {

@@ -20,27 +20,40 @@ import usePayStore from '@/store/usePayStore';
 
 function PayHomeScreen() {
   const {accessToken} = useAuthStore();
+  const {makeAccount, getPayInfo, getAccountInfo, balance} = usePayStore();
+  const [payHistory, setPayHistory] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const {accountNumber, balance, bankCode, getAccountInfo, makeAccount} =
-    usePayStore();
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          await getPayInfo(); // Pay 정보 가져오기
+          await getAccountInfo(); // Account 정보 가져오기
+        } catch (error) {
+          console.error('데이터를 불러오는 중 에러가 발생했습니다.', error);
+        }
+      };
+
+      fetchData(); // 화면이 포커스를 받을 때 fetchData 실행
+    }, [getPayInfo, getAccountInfo]),
+  );
 
   useEffect(() => {
-    getAccountInfo();
-  }, [getAccountInfo]);
+    const fetchData = async () => {
+      try {
+        const response = await axiosInstance.get('/users/pay', {
+          headers: {Authorization: `Bearer ${accessToken}`},
+        });
+        console.log(response.data);
+        setPayHistory(response.data);
+      } catch (error) {
+        console.error('잔액 정보를 불러오는 중 에러가 발생했습니다:', error);
+      }
+    };
 
-  useEffect(() => {
-    console.log('계좌번호가 업데이트되었습니다:', accountNumber);
-  }, [accountNumber]);
-
-  const handleCreateAccount = async () => {
-    try {
-      makeAccount();
-      getAccountInfo();
-      setModalVisible(false);
-    } catch (error) {
-      console.error('계좌 생성 중 에러:', error);
-    }
-  };
+    fetchData();
+  }, []);
 
   const bankImages = {
     하나은행: require('../../assets/Pay/banks/하나은행.png'),
@@ -54,9 +67,7 @@ function PayHomeScreen() {
         <Text style={styles.title}>페이머니</Text>
         {balance ? (
           <>
-            <Image source={bankImages[bankCode]} style={styles.bankImage} />
-            <Text style={styles.accountText}>{accountNumber}</Text>
-            <Text style={styles.balance}>{balance}원</Text>
+            <Text style={styles.balance}>{balance} 원</Text>
           </>
         ) : (
           <>
@@ -80,25 +91,11 @@ function PayHomeScreen() {
               source={require('@/assets/Pay/menu/accountInfo.png')}
               style={styles.buttonImage}
             />
-            <Text>계좌 정보</Text>
+            <Text>내 계좌 보기</Text>
           </TouchableOpacity>
-          <View style={styles.button}>
-            <Image
-              source={require('@/assets/Pay/menu/accountEdit.png')}
-              style={styles.buttonImage}
-            />
-            <Text>계좌 수정</Text>
-          </View>
-          <View style={styles.button}>
-            <Image
-              source={require('@/assets/Pay/menu/accountDel.png')}
-              style={styles.buttonImage}
-            />
-            <Text>계좌 삭제</Text>
-          </View>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate(payNavigations.SENDING)}>
+            onPress={() => navigation.navigate(payNavigations.SEND_ACCOUNT)}>
             <Image
               source={require('@/assets/Pay/menu/sendMoney.png')}
               style={styles.buttonImage}
@@ -119,11 +116,20 @@ function PayHomeScreen() {
       <View style={styles.boxContainer}>
         <Text style={styles.title}>Pay 이력 전체보기</Text>
         <View style={styles.historyContainer}>
-          <Text>내역 1</Text>
-          <Text>내역 1</Text>
-          <Text>내역 1</Text>
-          <Text>내역 1</Text>
-          <Text>내역 1</Text>
+          {payHistory.length > 0 ? (
+            payHistory.map((item, index) => (
+              <View
+                key={index}
+                style={{flexDirection: 'row', marginVertical: 10}}>
+                <Text>{item.amount}</Text>
+                <Text>{item.description}</Text>
+                <Text>{item.transactionDate}</Text>
+                <Text>{item.transactionType}</Text>
+              </View>
+            ))
+          ) : (
+            <Text>내역이 없습니다.</Text> // 데이터가 없을 때 표시
+          )}
         </View>
       </View>
 
@@ -142,7 +148,7 @@ function PayHomeScreen() {
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={async () => {
-                  await handleCreateAccount();
+                  await makeAccount();
                 }}>
                 <Text style={styles.closeButtonText}>시작하기</Text>
               </TouchableOpacity>

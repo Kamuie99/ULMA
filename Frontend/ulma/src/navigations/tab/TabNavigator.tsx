@@ -43,8 +43,8 @@ function TabNavigator() {
       })}>
       <Tab.Screen name="Home" component={HomeStackNavigator} />
       <Tab.Screen name="Event" component={EventStackNavigator} />
-      <Tab.Screen name="Pay" component={PayStackNavigator} />
       <Tab.Screen name="Friends" component={FriendsStackNavigator} />
+      <Tab.Screen name="Pay" component={PayStackNavigator} />
       <Tab.Screen name="MyPage" component={MyPageStackNavigator} />
     </Tab.Navigator>
   );

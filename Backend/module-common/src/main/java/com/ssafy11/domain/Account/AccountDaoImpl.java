@@ -49,6 +49,7 @@ public class AccountDaoImpl implements AccountDao {
         dsl.update(USERS)
                 .set(USERS.ACCOUNT_NUMBER, accountNumber)
                 .execute();
+
         return dsl.selectFrom(ACCOUNT)
                 .where(ACCOUNT.ACCOUNT_NUMBER.eq(accountNumber))
                 .fetchOneInto(Account.class);

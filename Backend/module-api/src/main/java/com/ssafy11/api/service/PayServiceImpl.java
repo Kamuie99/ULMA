@@ -42,6 +42,9 @@ public class PayServiceImpl implements PayService {
     @Override
     public PayHistoryDTO chargePayBalance(Integer userId, Long amount) {
         PayHistory receiveHistory = payDao.chargePayBalance(userId, amount);
+        if (receiveHistory == null) {
+            throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND);
+        }
         return new PayHistoryDTO(
                 receiveHistory.amount(),
                 receiveHistory.balanceAfterTransaction(),

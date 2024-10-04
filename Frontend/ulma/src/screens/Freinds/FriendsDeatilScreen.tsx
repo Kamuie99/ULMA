@@ -42,6 +42,7 @@ function FriendsDetailScreen({ route }: FriendsDetailScreenProps) {
   }, [guestId]);
 
   useEffect(() => {
+    console.log('Received guestId:', guestId); // guestId가 제대로 전달되는지 확인
     fetchFriendDetails();
   }, [fetchFriendDetails]);
 

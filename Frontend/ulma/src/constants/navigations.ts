@@ -1,6 +1,8 @@
 const homeNavigations = {
   LANDING: 'Landing',
   SCHEDULE_MAIN: 'ScheduleMain',
+  SCHEDULE_ADD: 'ScheduleAdd',
+  SELECT_FRIEND: 'SelectFriend',
 } as const;
 
 const authNavigations = {

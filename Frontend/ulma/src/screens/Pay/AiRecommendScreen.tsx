@@ -99,7 +99,7 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
 
         // 추천 금액 받기
         const recommendation = await fetchRecommendation();
-        addBotMessage(`추천 금액: ${recommendation}원`);
+        addBotMessage(`추천 금액: ${recommendation}`);
         showOptions(); // 옵션 버튼 보여주기
       } catch (error) {
         console.error('회원 정보를 가져오는 중 오류가 발생했습니다:', error);
@@ -154,8 +154,10 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
         gptQuotes,
       });
 
+      // 서버에서 받은 데이터가 예상대로 텍스트 형태의 금액일 때
       if (response.data && typeof response.data === 'string') {
-        return response.data; // 정상적인 추천 금액 반환
+        const amount = response.data.replace(/[^0-9]/g, ''); // 숫자만 추출
+        return `${amount}만원`; // '000만원' 형식으로 보여주기
       } else {
         throw new Error('추천 금액을 찾을 수 없습니다.');
       }
@@ -164,7 +166,6 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
       return '추천 금액을 찾을 수 없습니다.';
     }
   };
-
   const renderItem = ({item}: {item: Message}) => (
     <View
       style={[

@@ -1,5 +1,5 @@
-import { colors } from '@/constants';
-import React, { useState } from 'react';
+import {colors} from '@/constants';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,9 @@ import Toast from 'react-native-toast-message';
 import DocumentPicker from 'react-native-document-picker';
 import axiosInstance from '@/api/axios';
 import useAuthStore from '@/store/useAuthStore';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
+import {payNavigations} from '@/constants/navigations';
 
 const options = [
   {
@@ -36,10 +39,20 @@ const options = [
   },
 ];
 
-function InputOptionModal({ isVisible, onClose, onDirectRegister }) {
+function InputOptionModal({isVisible, onClose, onDirectRegister}) {
   const [excelFile, setExcelFile] = useState(null);
-  const { accessToken } = useAuthStore();
+  const {accessToken} = useAuthStore();
+  const navigation = useNavigation();
 
+  // 계좌 내역 불러오기
+  const handleAccountHistory = () => {
+    // 계좌 내역 불러오기 로직 구현
+    console.log('계좌 내역 불러오기 실행');
+    navigation.navigate(payNavigations.ACCOUNT_HISTORY);
+    onClose(); // 모달 닫기
+  };
+
+  // 엑셀 파일 선택
   const pickExcelFile = async () => {
     try {
       const res = await DocumentPicker.pick({
@@ -54,8 +67,10 @@ function InputOptionModal({ isVisible, onClose, onDirectRegister }) {
         console.error('파일 선택 오류:', err);
       }
     }
+    onClose(); // 모달 닫기
   };
 
+  // 엑셀 파일 업로드
   const handleSubmit = async () => {
     if (!excelFile) {
       Toast.show({
@@ -96,16 +111,23 @@ function InputOptionModal({ isVisible, onClose, onDirectRegister }) {
     }
   };
 
-  const handlePress = (key: string) => {
-    if (key === '2') {
-      pickExcelFile();
-    } else if (key === '3') {
-      onDirectRegister(); // 직접 등록하기로 연결
-    }
-    onClose();
+  // 직접 등록하기
+  const handleDirectRegister = () => {
+    onDirectRegister(); // 직접 등록하기 호출
+    onClose(); // 모달 닫기
   };
 
-  const renderItem = ({ item }: { item: (typeof options)[0] }) => (
+  const handlePress = (key: string) => {
+    if (key === '1') {
+      handleAccountHistory();
+    } else if (key === '2') {
+      pickExcelFile();
+    } else if (key === '3') {
+      handleDirectRegister();
+    }
+  };
+
+  const renderItem = ({item}: {item: (typeof options)[0]}) => (
     <TouchableOpacity onPress={() => handlePress(item.key)}>
       <View style={styles.optionContainer}>
         <Image style={styles.icon} source={item.imageUrl} />

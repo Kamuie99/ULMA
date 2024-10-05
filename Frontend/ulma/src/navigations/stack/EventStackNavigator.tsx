@@ -36,8 +36,7 @@ function EventStackNavigator() {
           fontWeight: 'bold',
         },
         headerTintColor: colors.BLACK,
-      }}
-    >
+      }}>
       <Stack.Screen
         name={eventNavigations.EVENT}
         component={EventScreen}

@@ -10,7 +10,7 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
-import {RouteProp} from '@react-navigation/native';
+import {RouteProp, NavigationProp} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axiosInstance from '@/api/axios';
 import {eventStackParamList} from '@/navigations/stack/EventStackNavigator';
@@ -23,7 +23,7 @@ type EventDetailScreenRouteProp = RouteProp<
 
 interface EventDetailScreenProps {
   route: EventDetailScreenRouteProp;
-  customProp?: string;
+  navigation: NavigationProp<any>; // 추가
 }
 
 interface Guest {
@@ -35,7 +35,7 @@ interface Guest {
 
 const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
   route,
-  customProp,
+  navigation, // 추가
 }) => {
   const {event_id} = route.params;
   const [guests, setGuests] = useState<Guest[]>([]);
@@ -88,6 +88,7 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
   useEffect(() => {
     fetchEventDetail();
   }, [event_id]);
+
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setFilteredGuests(guests); // 검색어가 없으면 전체 리스트 표시
@@ -159,7 +160,7 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
         {
           eventId: event_id,
           guestId: selectedGuest,
-          amount: Number(amount),
+          amount: Number(amount.replace(/,/g, '')), // 금액에서 콤마 제거 후 숫자로 변환
         },
       ]);
 
@@ -183,23 +184,28 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
         },
       ]);
     } catch (error: any) {
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
-        const errorMessage = error.response.data.message;
+      // 오류 내용 자세히 출력
+      console.error('오류 발생:', error);
 
-        if (
-          errorMessage.includes('duplicate') ||
-          errorMessage.includes('already exists')
-        ) {
-          Alert.alert('에러', '이미 등록된 정보입니다.');
-        } else {
-          Alert.alert('에러', '거래내역을 추가하는 중 오류가 발생했습니다.');
-        }
+      if (error.response) {
+        console.error('응답 데이터:', error.response.data);
+        console.error('응답 상태:', error.response.status);
+        console.error('응답 헤더:', error.response.headers);
+        Alert.alert(
+          '에러',
+          `오류: ${
+            error.response.data.message || '알 수 없는 오류가 발생했습니다.'
+          }`,
+        );
+      } else if (error.request) {
+        console.error(
+          '요청이 전송되었으나 응답을 받지 못했습니다:',
+          error.request,
+        );
+        Alert.alert('에러', '서버로부터 응답을 받지 못했습니다.');
       } else {
-        Alert.alert('에러', '알 수 없는 오류가 발생했습니다.');
+        console.error('요청 설정 중에 오류가 발생했습니다:', error.message);
+        Alert.alert('에러', '요청을 처리하는 중에 오류가 발생했습니다.');
       }
     }
   };
@@ -209,15 +215,17 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
     guestName: string,
     category: string,
   ) => {
-    setSelectedGuest(guestId);
-    setModalSearchQuery(`${guestName} (${category})`);
-    setExpandedGuests(null);
+    setSelectedGuest(guestId); // 선택된 지인 ID 저장
+    setModalSearchQuery(`${guestName} (${category})`); // 검색창에 선택된 지인의 정보 입력
+    setSearchResults([]); // 검색 결과 초기화
+    setExpandedGuests(null); // 검색 결과 목록 닫기
   };
 
   const handleOpenModal = () => {
     setModalVisible(true);
-    setModalSearchQuery('');
+    setModalSearchQuery(''); // 모달 열릴 때마다 검색어 초기화
     setAmount('');
+    setSearchResults([]); // 모달이 열릴 때 검색 결과 초기화
   };
 
   const toggleGuestList = (guestId: number) => {
@@ -281,6 +289,13 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
             <ActivityIndicator size="small" color="#00C77F" />
           ) : null
         }
+        ListEmptyComponent={
+          !loading ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>입금 내역이 없습니다.</Text>
+            </View>
+          ) : null
+        }
       />
 
       {/* 거래내역 직접 등록하기 버튼 */}
@@ -312,7 +327,7 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
               onChangeText={text => setModalSearchQuery(text)}
             />
 
-            {searchResults.length > 0 && (
+            {searchResults.length > 0 ? (
               <FlatList
                 data={searchResults}
                 keyExtractor={item => item.guestId.toString()}
@@ -330,13 +345,35 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
                   </TouchableOpacity>
                 )}
               />
-            )}
+            ) : modalSearchQuery.trim() !== '' && !selectedGuest ? (
+              // 검색 결과가 없고 지인이 선택되지 않았을 때만 지인 등록 버튼 표시
+              <View style={styles.noResultsContainer}>
+                <Text>검색 결과가 없습니다.</Text>
+                <TouchableOpacity
+                  style={styles.registerButton}
+                  onPress={() => {
+                    setModalVisible(false); // 모달 닫기
+                    navigation.navigate('FriendsStackNavigator', {
+                      screen: 'FriendsAddScreen', // 지인 등록 페이지로 이동
+                    });
+                  }}>
+                  <Text style={styles.registerButtonText}>지인 등록하기</Text>
+                </TouchableOpacity>
+              </View>
+            ) : null}
 
             <TextInput
               style={styles.input}
               placeholder="금액"
-              value={amount}
-              onChangeText={setAmount}
+              value={amount.replace(/\B(?=(\d{3})+(?!\d))/g, ',')} // 세 자리마다 콤마 추가
+              onChangeText={text => {
+                const rawValue = text.replace(/,/g, ''); // 입력 시 콤마를 제거한 순수 숫자 값
+                const formattedValue = rawValue.replace(
+                  /\B(?=(\d{3})+(?!\d))/g,
+                  ',',
+                ); // 세 자리마다 콤마 추가
+                setAmount(formattedValue);
+              }}
               keyboardType="numeric"
             />
 
@@ -365,11 +402,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -484,6 +516,30 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+  },
+  noResultsContainer: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  registerButton: {
+    backgroundColor: '#00C77F',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  registerButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#888',
   },
 });
 

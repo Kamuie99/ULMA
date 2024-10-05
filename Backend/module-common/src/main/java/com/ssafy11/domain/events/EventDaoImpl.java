@@ -30,14 +30,25 @@ public class EventDaoImpl implements EventDao{
 
     @Override
     public Integer addEvent(EventCommand event, Integer userId) {
-        Record1<Integer> saveEvent = dsl.insertInto(EVENT, EVENT.NAME, EVENT.CATEGORY, EVENT.DATE, EVENT.USERS_ID, EVENT.CREATE_AT)
-                .values(event.name(), event.category(), event.date(), userId, LocalDateTime.now())
+        Map<Field<?>, Object> insertMap = new HashMap<>();
+
+        insertMap.put(EVENT.NAME, event.name());
+        insertMap.put(EVENT.CATEGORY, event.category());
+        if (event.date() != null) {
+            insertMap.put(EVENT.DATE, event.date());
+        }
+        insertMap.put(EVENT.USERS_ID, userId);
+        insertMap.put(EVENT.CREATE_AT, LocalDateTime.now());
+
+        Record1<Integer> saveEvent = dsl.insertInto(EVENT)
+                .set(insertMap)
                 .returningResult(EVENT.ID)
                 .fetchOne();
 
         Assert.notNull(saveEvent.getValue(EVENT.ID), "EVENT_ID 에 null 값은 허용되지 않음");
         return saveEvent.getValue(EVENT.ID);
     }
+
 
     @Override
     public Integer updateEvent(EventCommand event, Integer eventId) {

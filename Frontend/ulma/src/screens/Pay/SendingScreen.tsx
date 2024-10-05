@@ -22,6 +22,7 @@ import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import Toast from 'react-native-toast-message';
 import axiosInstance from '@/api/axios';
 import useAuthStore from '@/store/useAuthStore';
+import usePayStore from '@/store/usePayStore';
 
 interface SendingScreenProps {
   route: RouteProp<payStackParamList, typeof payNavigations.SENDING>;
@@ -32,6 +33,8 @@ function SendingScreen({route}: SendingScreenProps) {
 
   // 전달받은 targetAccountNumber 값을 route에서 가져옴
   const {targetAccountNumber} = route.params;
+
+  const {getPayInfo} = usePayStore();
 
   useEffect(() => {
     // 페이지에 들어올 때 탭바 숨기기
@@ -68,8 +71,10 @@ function SendingScreen({route}: SendingScreenProps) {
       );
 
       console.log('송금 성공:', response.data);
+      const payAmount = response.data.amount;
       // 송금 성공 후 다음 화면으로 이동 또는 성공 메시지 표시
-      navigation.navigate(payNavigations.SEND_RESULT);
+      getPayInfo();
+      navigation.navigate(payNavigations.SEND_RESULT, {amount: payAmount});
     } catch (error) {
       console.error('송금 중 오류 발생:', error);
     }

@@ -1,21 +1,38 @@
 import React, {useState} from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, Alert} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Switch,
+} from 'react-native';
+import {Picker} from '@react-native-picker/picker'; // Picker 컴포넌트 import
 import TitleTextField from '@/components/common/TitleTextField';
 import CustomButton from '@/components/common/CustomButton';
 import axiosInstance from '@/api/axios';
-import { NavigationProp } from '@react-navigation/native';
-import { eventNavigations } from '@/constants/navigations';
-import CalendarComponent from '@/components/calendar/CalendarButton';
-import { format } from 'date-fns';
-import { ko } from 'date-fns/locale';
+import {NavigationProp} from '@react-navigation/native';
+import {eventNavigations} from '@/constants/navigations';
+import {format} from 'date-fns';
+import {ko} from 'date-fns/locale';
 import InputField from '@/components/common/InputField';
+import {Calendar} from 'react-native-calendars';
 
 const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
   const [eventTitle, setEventTitle] = useState<string>(''); // 행사 제목
-  const [selectedEventType, setSelectedEventType] = useState<string | null>(null); // 행사 유형
-  const [eventDate, setEventDate] = useState<string>(''); // 행사 날짜 및 시간
-  const [calendarVisible, setCalendarVisible] = useState(false); // 달력 모달 상태
+  const [selectedEventType, setSelectedEventType] = useState<string | null>(
+    null,
+  ); // 행사 유형
+  const [eventDate, setEventDate] = useState<string>(''); // 행사 날짜
+  const [eventTime, setEventTime] = useState<{hour: string; minute: string}>({
+    hour: '12',
+    minute: '00',
+  }); // 행사 시간
+  const [isAllDay, setIsAllDay] = useState(false); // 종일 여부
   const [isConfirmVisible, setConfirmVisible] = useState(true); // 확인 버튼 상태
+
+  // 종일 옵션 변경 함수
+  const toggleAllDay = () => setIsAllDay(previousState => !previousState);
 
   // 이벤트 저장 처리 함수
   const handleSaveEvent = async () => {
@@ -24,11 +41,15 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
       return;
     }
 
+    const fullEventDate = isAllDay
+      ? `${eventDate}T03:33:33` // 종일일 경우 03시 33분 33초로 설정
+      : `${eventDate}T${eventTime.hour}:${eventTime.minute}:00`; // 선택한 시간과 분, 초는 00으로 고정
+
     try {
       const response = await axiosInstance.post('/events', {
         category: selectedEventType,
         name: eventTitle,
-        date: eventDate, // 이미 ISO 형식으로 변환된 날짜 전송
+        date: fullEventDate,
       });
 
       console.log('성공:', response.data);
@@ -44,7 +65,7 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
 
   // 사용자에게 보여줄 때는 "년/월/일" 형식으로 변환
   const formattedDate = eventDate
-    ? format(new Date(eventDate), 'yyyy년 M월 d일 HH:mm', { locale: ko })
+    ? format(new Date(eventDate), 'yyyy년 M월 d일', {locale: ko})
     : '';
 
   return (
@@ -80,31 +101,71 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
         ))}
       </View>
 
-      {/* 달력 모달 열기 */}
-      <TouchableOpacity
-        onPress={() => {
-          setCalendarVisible(true);
-          setConfirmVisible(false); // 달력이 열리면 확인 버튼 숨기기
+      {/* Calendar 컴포넌트 추가 */}
+      <Calendar
+        onDayPress={day => {
+          setEventDate(day.dateString); // 날짜 선택 시 eventDate 업데이트
+          setConfirmVisible(true); // 날짜 선택 후 확인 버튼 다시 나타내기
         }}
-        style={styles.dateButton}>
-        <Text style={styles.dateButtonText}>
-          {formattedDate ? formattedDate : '날짜 선택'}
-        </Text>
-      </TouchableOpacity>
+        markedDates={{
+          [eventDate]: {
+            selected: true,
+            selectedColor: '#00C77F',
+          },
+        }}
+        monthFormat={'yyyy년 MM월'}
+        theme={{
+          selectedDayBackgroundColor: '#00C77F',
+          arrowColor: '#00C77F',
+        }}
+        locale={'ko'}
+      />
 
-      {/* CalendarComponent 모달 */}
-      {calendarVisible && (
-        <CalendarComponent
-          selectedDate={eventDate}
-          onDateSelected={date => {
-            setEventDate(date); // ISO 형식으로 전달받은 값을 저장
-            setCalendarVisible(false);
-            setConfirmVisible(true); // 날짜 선택 후 확인 버튼 다시 나타내기
-          }}
-        />
+      {/* 종일 옵션 */}
+      <View style={styles.allDayContainer}>
+        <Text>종일</Text>
+        <Switch onValueChange={toggleAllDay} value={isAllDay} />
+      </View>
+
+      {/* 시간 선택 - 종일이 아닐 때만 표시 */}
+      {!isAllDay && (
+        <View style={styles.timePickerContainer}>
+          <Text>시간 선택</Text>
+          <View style={styles.pickerRow}>
+            <Picker
+              selectedValue={eventTime.hour}
+              style={styles.picker}
+              onValueChange={itemValue =>
+                setEventTime(prevState => ({...prevState, hour: itemValue}))
+              }>
+              {Array.from({length: 24}, (_, i) => (
+                <Picker.Item
+                  key={i}
+                  label={i.toString()}
+                  value={i.toString().padStart(2, '0')}
+                />
+              ))}
+            </Picker>
+            <Text>:</Text>
+            <Picker
+              selectedValue={eventTime.minute}
+              style={styles.picker}
+              onValueChange={itemValue =>
+                setEventTime(prevState => ({...prevState, minute: itemValue}))
+              }>
+              {Array.from({length: 60}, (_, i) => (
+                <Picker.Item
+                  key={i}
+                  label={i.toString()}
+                  value={i.toString().padStart(2, '0')}
+                />
+              ))}
+            </Picker>
+          </View>
+        </View>
       )}
 
-      {/* 확인 버튼 - 달력이 열려 있을 때 숨김 */}
+      {/* 확인 버튼 */}
       {isConfirmVisible && (
         <CustomButton
           label="저장"
@@ -142,17 +203,23 @@ const styles = StyleSheet.create({
   selectedButtonText: {
     color: '#fff',
   },
-  dateButton: {
-    padding: 16,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: '#00C77F',
-    marginBottom: 10,
-    justifyContent: 'center',
+  allDayContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  timePickerContainer: {
+    marginVertical: 10,
+  },
+  pickerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
     alignItems: 'center',
   },
-  dateButtonText: {
-    color: '#00C77F',
+  picker: {
+    height: 50,
+    width: 100,
   },
 });
 

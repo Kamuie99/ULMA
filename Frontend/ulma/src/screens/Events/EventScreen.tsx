@@ -96,6 +96,16 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     return `${date.getHours()}시 ${date.getMinutes()}분`;
   };
 
+  // 시간이 03:33:33인 경우 "종일"로 표시 (원본 eventTime에서 바로 확인)
+  // 시간이 03:33:33인 경우 "종일"로 표시 (원본 이벤트 시간이 null일 때 대비)
+  const isAllDayEvent = (eventTime: string | null) => {
+    if (!eventTime) {
+      return false; // eventTime이 null 또는 undefined일 경우 처리
+    }
+
+    return eventTime.includes('03:33:33'); // eventTime에 '03:33:33'이 포함된 경우 '종일'로 판단
+  };
+
   const renderItem = ({item}: {item: Event}) => {
     return (
       <View style={styles.eventContainer}>
@@ -124,9 +134,12 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
             <Text style={styles.eventCategory}>{item.category}</Text>
           </View>
 
+          {/* 시간이 03시 33분 33초일 경우 종일로 표시 */}
           <Text style={styles.eventDate}>
             {formatKoreanDate(item.eventTime)} {'\n'}
-            {formatKoreanTime(item.eventTime)}
+            {isAllDayEvent(item.eventTime)
+              ? '종일'
+              : formatKoreanTime(item.eventTime)}
           </Text>
         </TouchableOpacity>
 

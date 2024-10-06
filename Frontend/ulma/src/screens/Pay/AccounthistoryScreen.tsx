@@ -1,10 +1,14 @@
 //입출금 내역 선택 페이지
+import axiosInstance from '@/api/axios';
 import CustomButton from '@/components/common/CustomButton';
 import {colors} from '@/constants';
 import {payNavigations} from '@/constants/navigations';
 import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
+import useAuthStore from '@/store/useAuthStore';
+import usePayStore from '@/store/usePayStore';
+import {useFocusEffect} from '@react-navigation/native';
 import {StackScreenProps} from '@react-navigation/stack';
-import React, {useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -27,13 +31,49 @@ type AccounthistoryScreenProps = StackScreenProps<
 >;
 
 function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
-  const [data, setData] = useState<Transaction[]>([
-    {id: '1', name: '싸피은행환급', amount: '17 원', selected: false},
-    {id: '2', name: '싸피이유찬', amount: '100,000 원', selected: false},
-    {id: '3', name: '계좌확인', amount: '1 원', selected: false},
-    {id: '4', name: '윤예리', amount: '100,000 원', selected: false},
-    {id: '5', name: '윤동환', amount: '100,000 원', selected: false},
-  ]);
+  const [accountHistory, setAccountHistory] = useState([]);
+  const {accessToken} = useAuthStore();
+  const {accountNumber, bankCode} = usePayStore();
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchAccountHistory = async () => {
+        setLoading(true);
+        try {
+          const response = await axiosInstance.get(
+            `/account/${accountNumber}/history`,
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            },
+          );
+          setAccountHistory(response.data);
+          console.log(accountHistory);
+        } catch (err) {
+          setError(err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchAccountHistory();
+    }, []),
+  );
+
+  const [data, setData] = useState<Transaction[]>();
+  useEffect(() => {
+    if (accountHistory && accountHistory.length > 0) {
+      const formattedData = accountHistory.map((item, index) => ({
+        id: item.id || String(index),
+        name: item.name,
+        amount: `${item.amount} 원`,
+        selected: false,
+      }));
+      setData(formattedData);
+    }
+  }, [accountHistory]); // accountHistory가 변경될 때마다 실행
 
   const toggleSelect = (id: string) => {
     setData(prevData =>
@@ -65,8 +105,8 @@ function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
     <View style={styles.container}>
       <View style={styles.cardContiner}>
         <View style={styles.accountInfoContainer}>
-          <Text style={styles.accountInfo}>싸피은행</Text>
-          <Text style={styles.accountInfo}>000-1111-000-1111</Text>
+          <Text style={styles.accountInfo}>{bankCode}</Text>
+          <Text style={styles.accountInfo}>{accountNumber}</Text>
         </View>
         <FlatList
           data={data}

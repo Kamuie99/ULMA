@@ -15,7 +15,9 @@ public interface PayService {
 
     PayHistoryDTO sendPayMoney(Integer userId, String info, String targetAccountNumber, Long amount);
 
-    List<PayHistoryDTO> viewPayHistory(Integer userId, LocalDate startDate, LocalDate endDate, String payType);  // Pay 내역 조회
+    List<PayHistoryDTO> viewPayHistory(Integer userId, LocalDate startDate, LocalDate endDate, String payType);
 
-    ChargePayBalanceResponse viewPayBalance(Integer userId);  // Pay 잔액 조회
+    ChargePayBalanceResponse viewPayBalance(Integer userId);
+
+
 }

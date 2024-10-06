@@ -1,6 +1,9 @@
 package com.ssafy11.api.service;
 
+import com.ssafy11.api.dto.account.VerifyNumber;
 import com.ssafy11.api.dto.pay.PayHistoryDTO;
+import com.ssafy11.api.exception.ErrorCode;
+import com.ssafy11.api.exception.ErrorException;
 import com.ssafy11.domain.Account.Account;
 import com.ssafy11.domain.Account.AccountDao;
 import com.ssafy11.domain.Account.PaginatedHistory;
@@ -104,5 +107,19 @@ public class AccountServiceImpl implements AccountService {
                 payHistory.description(),
                 payHistory.transactionDate()
         );
+    }
+
+    @Override
+    @Transactional
+    public VerifyNumber verifyMyAccount(Integer userId, String accountNumber) {
+        String result = accountDao.verifyMyAccount(userId, accountNumber);
+
+        if (result == null) {
+            throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND);
+        } else if (result.equals("유저 불일치")) {
+            throw new ErrorException(ErrorCode.USER_MISSMATCH);
+        }
+
+        return new VerifyNumber(result);
     }
 }

@@ -103,5 +103,15 @@ public class AccountController {
         return ResponseEntity.ok(paginatedHistory);
     }
 
-
+    // 8. 1원 인증
+    @PostMapping("/users/account/verify")
+    public ResponseEntity<VerifyNumber> VerifyAccount(
+            @AuthenticationPrincipal User user,
+            @RequestBody VerifyAccount verifyAccount
+    ) {
+        Assert.notNull(user, "User must not be null");
+        int authenticatedUserId = Integer.parseInt(user.getUsername());
+        VerifyNumber verifyNumber = accountService.verifyMyAccount(authenticatedUserId, verifyAccount.accountNumber());
+        return ResponseEntity.ok(verifyNumber);
+    }
 }

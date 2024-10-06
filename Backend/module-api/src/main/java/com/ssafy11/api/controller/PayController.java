@@ -40,9 +40,9 @@ public class PayController {
     @GetMapping
     public ResponseEntity<List<PayHistoryDTO>> viewPayHistory(
             @AuthenticationPrincipal User user,
-            @RequestParam(value = "start_date", required = false) String startDate,  // 시작 날짜 (optional)
-            @RequestParam(value = "end_date", required = false) String endDate,    // 종료 날짜 (optional)
-            @RequestParam(value = "pay_type", required = false) String payType     // SEND 또는 RECEIVE (optional)
+            @RequestParam(value = "start_date", required = false) String startDate,
+            @RequestParam(value = "end_date", required = false) String endDate,
+            @RequestParam(value = "pay_type", required = false) String payType
     ) {
         Assert.notNull(user, "User must not be null");
         // 문자열 날짜를 LocalDate로 변환

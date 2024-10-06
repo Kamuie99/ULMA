@@ -77,11 +77,11 @@ public class GptService implements ChatService{
                 }
                 return content;
             } else {
-                throw new ErrorException(ErrorCode.GptApiRequestFailed);
+                throw new ErrorException(ErrorCode.GPT_API_REQUEST_FAILED);
             }
         }catch (Exception e) {
             log.error("API 호출 중 예기치 않은 오류 발생: {}", e.getMessage());
-            throw new ErrorException(ErrorCode.GptApiRequestFailed);
+            throw new ErrorException(ErrorCode.GPT_API_REQUEST_FAILED);
         }
 
 
@@ -89,7 +89,7 @@ public class GptService implements ChatService{
     }
 
     private String extractAmount(String content) { //00만원 형식으로 파싱
-        Pattern pattern = Pattern.compile("(\\d+)(만원)");
+        Pattern pattern = Pattern.compile("(\\d+)\\s*만원", Pattern.CANON_EQ);
         Matcher matcher = pattern.matcher(content);
 
         if (matcher.find()) {

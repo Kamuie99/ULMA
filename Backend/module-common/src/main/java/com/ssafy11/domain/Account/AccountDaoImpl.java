@@ -49,26 +49,34 @@ public class AccountDaoImpl implements AccountDao {
 
 
     @Override
-    public Account connectAccount(Integer userid, String accountNumber) {
+    public Account connectAccount(Integer userId, String bankCode, String accountNumber) {
+        Account account = dsl.selectFrom(ACCOUNT)
+                .where(ACCOUNT.ACCOUNT_NUMBER.eq(accountNumber))
+                .and(ACCOUNT.BANK_CODE.eq(bankCode))
+                .fetchOneInto(Account.class);
+
+        if (account == null) {
+            return null;
+        }
+
         dsl.update(USERS)
                 .set(USERS.ACCOUNT_NUMBER, accountNumber)
                 .execute();
 
-        return dsl.selectFrom(ACCOUNT)
-                .where(ACCOUNT.ACCOUNT_NUMBER.eq(accountNumber))
-                .fetchOneInto(Account.class);
+        return account;
     }
 
     @Override
-    public List<Account> findAllAccounts(Integer userId, String bankCode) {  // BankCode -> String
+    public List<Account> findAllAccounts(Integer userId, String bankCode) {
         if (bankCode != null) {
             return dsl.selectFrom(ACCOUNT)
                     .where(ACCOUNT.USER_ID.eq(userId))
-                    .and(ACCOUNT.BANK_CODE.eq(bankCode))  // String 처리
+                    .and(ACCOUNT.BANK_CODE.eq(bankCode))
                     .fetchInto(Account.class);
         } else {
             return dsl.selectFrom(ACCOUNT)
                     .where(ACCOUNT.USER_ID.eq(userId))
+                    .and(ACCOUNT.BANK_CODE.notEqual(bankCode))
                     .fetchInto(Account.class);
         }
     }
@@ -280,9 +288,10 @@ public class AccountDaoImpl implements AccountDao {
     }
 
     @Override
-    public String verifyMyAccount(Integer userId, String accountNumber) {
+    public String verifyMyAccount(Integer userId, String bankCode, String accountNumber) {
         Account account = dsl.selectFrom(ACCOUNT)
                 .where(ACCOUNT.ACCOUNT_NUMBER.eq(accountNumber))
+                .and(ACCOUNT.BANK_CODE.eq(bankCode))
                 .fetchOneInto(Account.class);
 
         if (account == null) {

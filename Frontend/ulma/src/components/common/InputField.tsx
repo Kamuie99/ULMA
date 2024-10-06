@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     borderBottomWidth: 1,
     borderBottomColor: colors.GREEN_700,
-    width: '90%',
+    width: '100%',
   },
   disabled: {
     backgroundColor: colors.GRAY_300,

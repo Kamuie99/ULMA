@@ -44,35 +44,38 @@ function PayHomeScreen() {
         }
       };
 
-      fetchData(); // 화면이 포커스를 받을 때 fetchData 실행
+      fetchData();
     }, [getPayInfo, getAccountInfo]),
   );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axiosInstance.get('/users/pay', {
-          headers: {Authorization: `Bearer ${accessToken}`},
-        });
-        console.log(response.data);
+  useFocusEffect(
+    useCallback(() => {
+      const fetchData = async () => {
+        try {
+          const response = await axiosInstance.get('/users/pay', {
+            headers: {Authorization: `Bearer ${accessToken}`},
+          });
+          console.log(response.data);
 
-        // 서버에서 받아온 데이터를 Transaction 형식으로 변환
-        const formattedData: Transaction[] = response.data.map((item: any) => ({
-          amount: item.amount,
-          date: item.transactionDate.slice(0, 10),
-          guest: item.counterpartyName,
-          description: item.description,
-          type: item.transactionType === 'SEND' ? 'send' : 'receive', // type 필드가 'send' 또는 'receive' 인지 확인
-        }));
+          const formattedData: Transaction[] = response.data.map(
+            (item: any) => ({
+              amount: item.amount,
+              date: item.transactionDate.slice(0, 10),
+              guest: item.counterpartyName,
+              description: item.description,
+              type: item.transactionType === 'SEND' ? 'send' : 'receive',
+            }),
+          );
 
-        setPayHistory(formattedData);
-      } catch (error) {
-        console.error('계좌 이력을 불러오는 중 에러가 발생했습니다:', error);
-      }
-    };
+          setPayHistory(formattedData);
+        } catch (error) {
+          console.error('계좌 이력을 불러오는 중 에러가 발생했습니다:', error);
+        }
+      };
 
-    fetchData();
-  }, []);
+      fetchData();
+    }, [accessToken]), // 의존성 배열에 accessToken 추가
+  );
 
   // 거래 내역
   const renderTransaction = ({item}: {item: Transaction}) => (
@@ -133,6 +136,15 @@ function PayHomeScreen() {
               style={styles.buttonImage}
             />
             <Text>내 계좌 보기</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate(payNavigations.ADD_ACCOUNT)}>
+            <Image
+              source={require('@/assets/Pay/menu/accountEdit.png')}
+              style={styles.buttonImage}
+            />
+            <Text>새 계좌 등록</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}

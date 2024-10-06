@@ -1,5 +1,9 @@
 const homeNavigations = {
   LANDING: 'Landing',
+  SCHEDULE_MAIN: 'ScheduleMain',
+  SCHEDULE_ADD: 'ScheduleAdd',
+  SELECT_FRIEND: 'SelectFriend',
+  FRIENDS_DETAIL: 'FriendsDetail',
 } as const;
 
 const authNavigations = {
@@ -17,9 +21,12 @@ const eventNavigations = {
   EVENT_COMMENT: 'EventComment',
   EVENT_COMMENT_RESULT: 'EventCommentResult',
   EVENT_DETAIL: 'EVENT_DETAIL',
+  AI_RECOMMEND_MESSAGE: 'AIRecommendMessage',
+  EVENT_FIX: 'EVENT_FIX',
 } as const;
 
 const payNavigations = {
+  HOME: 'PayHome',
   ACCOUNT_HISTORY: 'Accounthistory',
   ACCOUNT_INPUT: 'Accountinput',
   ADD_HISTORY: 'Addhistory',
@@ -30,8 +37,11 @@ const payNavigations = {
   FRIENDHSHIP_SECLECT: 'Friendshipselect',
   RECOMMEND_OPTION: 'RecommendOption',
   SENDING: 'Sending',
+  SEND_ACCOUNT: 'SendAccount',
   SEND_RESULT: 'Sendresult',
   INPUT_AMOUNT: 'InputAmount',
+  ACCOUNT_INFO: 'AccountInfo',
+  ADD_ACCOUNT: 'AddAccount',
 } as const;
 
 const mypageNavigations = {

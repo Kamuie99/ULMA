@@ -7,7 +7,7 @@ import {
   ScrollView,
   Alert, // 로그아웃 확인창을 띄우기 위한 Alert import
 } from 'react-native';
-import {mypageNavigations} from '@/constants/navigations';
+import {eventNavigations, mypageNavigations} from '@/constants/navigations';
 import {payNavigations} from '@/constants/navigations';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -169,16 +169,19 @@ function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
           <Icon name="chevron-forward" size={15} color="#666" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.InfoBoxInner}>
+        <TouchableOpacity
+          style={styles.InfoBoxInner}
+          onPress={() =>
+            navigation.navigate(eventNavigations.AI_RECOMMEND_MESSAGE)
+          } // 정확한 경로 사용
+        >
           <View style={styles.MenuBar}>
             <Icon2 name="message-text-outline" size={24} color="#000" />
             <Text style={styles.InfoMenu}>메세지 추천</Text>
           </View>
           <Icon name="chevron-forward" size={15} color="#666" />
         </TouchableOpacity>
-
       </View>
-
 
       {/* <Text style={styles.sectionTitle}>계좌 관리</Text>
 

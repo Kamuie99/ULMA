@@ -1,7 +1,7 @@
 import {payNavigations} from '@/constants/navigations';
 import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
+import {StyleSheet, View, Text} from 'react-native';
 
 import {colors} from '@/constants';
 import Icon from 'react-native-vector-icons/Entypo';
@@ -19,8 +19,14 @@ import AccounthistoryScreen from '@/screens/Pay/AccounthistoryScreen';
 import FriendsearchScreen from '@/screens/Pay/FriendsearchScreen';
 import InputAmountScreen from '@/screens/Pay/InputAmountScreen';
 import AiRecommendScreen from '@/screens/Pay/AiRecommendScreen'; // '.1'을 제거한 경로
+import PayHomeScreen from '@/screens/Pay/PayHomeScreen';
+import MakePayAccountScreen from '@/screens/Pay/MakePayAccountScreen';
+import AccountInfoScreen from '@/screens/Pay/AccountInfoScreen';
+import AddAccountScreen from '@/screens/Pay/AddAccountScreen';
+import SendAccountScreen from '@/screens/Pay/SendAccountScreen';
 
 export type payStackParamList = {
+  [payNavigations.HOME]: undefined;
   [payNavigations.ACCOUNT_HISTORY]: undefined;
   [payNavigations.ACCOUNT_INPUT]: undefined;
   [payNavigations.ADD_HISTORY]: undefined;
@@ -30,10 +36,12 @@ export type payStackParamList = {
   [payNavigations.PAY_LIST]: undefined;
   [payNavigations.PAY_RECHARGE]: undefined;
   [payNavigations.RECOMMEND_OPTION]: undefined;
-  [payNavigations.SENDING]: undefined;
+  [payNavigations.SENDING]: {targetAccountNumber: string};
   [payNavigations.SEND_RESULT]: undefined;
-  LandingScreen: undefined;
   [payNavigations.INPUT_AMOUNT]: {guestId: number};
+  [payNavigations.ACCOUNT_INFO]: undefined;
+  [payNavigations.ADD_ACCOUNT]: undefined;
+  [payNavigations.SEND_ACCOUNT]: undefined;
 };
 
 const Stack = createStackNavigator<payStackParamList>();
@@ -48,15 +56,25 @@ function PayStackNavigator() {
         headerStyle: {
           backgroundColor: colors.WHITE,
         },
-        headerTitleAlign: 'center',
+        headerTitleAlign: 'left',
         headerTitleStyle: {
-          fontSize: 15,
+          fontSize: 18,
+          fontWeight: 'bold',
         },
         headerTintColor: colors.BLACK,
-        headerBackImage: () => {
-          return <Icon name="chevron-left" size={24} color={colors.BLACK} />;
-        },
       }}>
+      <Stack.Screen
+        name={payNavigations.HOME}
+        component={PayHomeScreen}
+        options={{
+          headerTitle: () => (
+            <Text style={{fontSize: 18, fontWeight: 'bold'}}>
+              <Text style={{color: colors.GREEN_700}}>ULMA</Text>
+              <Text style={{color: colors.BLACK}}> PAY</Text>
+            </Text>
+          ),
+        }}
+      />
       <Stack.Screen
         name={payNavigations.ADD_HISTORY}
         component={AddhistoryScreen}
@@ -83,7 +101,7 @@ function PayStackNavigator() {
           headerTitle: '',
         }}
       />
-      {/* <Stack.Screen
+      <Stack.Screen
         name={payNavigations.ACCOUNT_INPUT}
         component={AccountinputScreen}
         options={{
@@ -92,8 +110,8 @@ function PayStackNavigator() {
             return <Icon name="cross" size={24} color={colors.BLACK} />;
           },
         }}
-      /> */}
-      {/* <Stack.Screen
+      />
+      <Stack.Screen
         name={payNavigations.SEND_RESULT}
         component={SendresultScreen}
         options={{
@@ -102,15 +120,15 @@ function PayStackNavigator() {
             return <Icon name="cross" size={24} color={colors.BLACK} />;
           },
         }}
-      /> */}
-      {/* <Stack.Screen
+      />
+      <Stack.Screen
         name={payNavigations.CHARGER_RESULT}
         component={ChangeresultScreen}
         initialParams={{amount: '0'}}
         options={{
           headerTitle: 'Pay 충전 결과',
         }}
-      /> */}
+      />
       <Stack.Screen
         name={payNavigations.FRIEND_SEARCH}
         component={FriendsearchScreen}
@@ -119,21 +137,21 @@ function PayStackNavigator() {
           headerStyle: {backgroundColor: colors.LIGHTGRAY},
         }}
       />
-      {/* <Stack.Screen
+      <Stack.Screen
         name={payNavigations.FRIENDHSHIP_SECLECT}
         component={FriendshipselectScreen}
         options={{
           headerTitle: 'AI 금액 추천',
         }}
-      /> */}
-      {/* <Stack.Screen
+      />
+      <Stack.Screen
         name={payNavigations.PAY_LIST}
         component={PaylistScreen}
         options={{
           headerTitle: 'Pay 이력보기',
         }}
-      /> */}
-      {/* <Stack.Screen
+      />
+      <Stack.Screen
         name={payNavigations.PAY_RECHARGE}
         component={PayrechargingScreen}
         options={{
@@ -142,7 +160,7 @@ function PayStackNavigator() {
             return <Icon name="cross" size={24} color={colors.BLACK} />;
           },
         }}
-      /> */}
+      />
       {/* <Stack.Screen
         name={payNavigations.RECOMMEND_OPTION}
         component={RecommendOptionScreen}
@@ -166,6 +184,27 @@ function PayStackNavigator() {
         component={AiRecommendScreen}
         options={{
           headerTitle: 'AI 금액 추천',
+        }}
+      />
+      <Stack.Screen
+        name={payNavigations.ACCOUNT_INFO}
+        component={AccountInfoScreen}
+        options={{
+          headerTitle: '계좌 정보 보기',
+        }}
+      />
+      <Stack.Screen
+        name={payNavigations.ADD_ACCOUNT}
+        component={AddAccountScreen}
+        options={{
+          headerTitle: '연결 계좌 추가하기',
+        }}
+      />
+      <Stack.Screen
+        name={payNavigations.SEND_ACCOUNT}
+        component={SendAccountScreen}
+        options={{
+          headerTitle: '송금하기',
         }}
       />
     </Stack.Navigator>

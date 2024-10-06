@@ -27,7 +27,7 @@ function FriendsStackNavigator() {
           backgroundColor: colors.WHITE,
         },
         headerStyle: {
-          backgroundColor: colors.GRAY_100,
+          backgroundColor: colors.WHITE,
         },
         headerTitleAlign: 'left',
         headerTitleStyle: {
@@ -70,7 +70,7 @@ function FriendsStackNavigator() {
         name={friendsNavigations.FREINDS_DETAIL}
         component={FriendsDetailScreen}
         options={{
-          headerTitle: '지인 상세 정보',
+          headerTitle: '거래내역 조회',
         }}
       />
     </Stack.Navigator>

@@ -28,10 +28,12 @@ public enum ErrorCode {
 
 	// Excel
 	EXCEL_PARSING_FAILED(HttpStatus.BAD_REQUEST,"엑셀 파싱에 실패했습니다."),
-	NOT_EXCEL(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "파일 형식을 확인해주세요"),
-	NO_CONTENT(HttpStatus.NO_CONTENT, "파일 내용을 확인해주세요"),
+	NOT_EXCEL(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "파일 형식을 확인해주세요."),
+	NO_CONTENT(HttpStatus.NO_CONTENT, "파일 내용을 확인해주세요."),
 	ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "계좌가 존재하지 않습니다."),
-	ALREADY_EXIST_PAY_ACCOUNT(HttpStatus.CONFLICT, "페이 계좌가 이미 존재합니다");
+	ALREADY_EXIST_PAY_ACCOUNT(HttpStatus.CONFLICT, "페이 계좌가 이미 존재합니다."),
+	LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "1회 송금 한도는 200만원까지입니다."),
+	USER_MISSMATCH(HttpStatus.BAD_REQUEST, "요청하신 계좌가 사용자 정보와 일치하지 않습니다.");
 
 	private final HttpStatus status;
 	private final String message;

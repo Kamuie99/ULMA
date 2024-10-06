@@ -8,6 +8,7 @@ import com.ssafy11.api.exception.ErrorException;
 import com.ssafy11.domain.Account.Account;
 import com.ssafy11.domain.Pay.PayDao;
 import com.ssafy11.domain.Pay.PayHistory;
+import com.ssafy11.domain.Pay.PayType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,7 @@ public class PayServiceImpl implements PayService {
 
     @Override
     public PayHistoryDTO chargePayBalance(Integer userId, Long amount) {
+
         PayHistory receiveHistory = payDao.chargePayBalance(userId, amount);
         if (receiveHistory == null) {
             throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND);
@@ -76,7 +78,28 @@ public class PayServiceImpl implements PayService {
     @Override
     @Transactional(readOnly = true)
     public List<PayHistoryDTO> viewPayHistory(Integer userId, LocalDate startDate, LocalDate endDate, String payType) {
+
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            throw new ErrorException(ErrorCode.INVALID_DATE_RANGE);
+        }
+
+        if (payType != null) {
+            try {
+                PayType valid = PayType.valueOf(payType.toUpperCase());
+                if (valid.equals(PayType.CHARGE)) {
+                    throw new ErrorException(ErrorCode.BadRequest, "유효하지 않은 결제 유형입니다.");
+                }
+            } catch (IllegalArgumentException e) {
+                throw new ErrorException(ErrorCode.BadRequest, "유효하지 않은 결제 유형입니다.");
+            }
+        }
+
         List<PayHistory> history = payDao.findPayHistory(userId, startDate, endDate, payType);
+
+        if (history == null) {
+            throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND);
+        }
+
         return history.stream()
                 .map(h -> new PayHistoryDTO(
                         h.amount(),

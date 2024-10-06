@@ -6,6 +6,7 @@ import com.ssafy11.api.service.AccountService;
 import com.ssafy11.domain.Account.Account;
 import com.ssafy11.domain.Account.PaginatedHistory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.Assert;
@@ -30,8 +31,8 @@ public class AccountController {
         Assert.notNull(user, "User must not be null");
         Assert.notNull(bankCodeDTO, "BankCode must not be null");
         int authenticatedUserId = Integer.parseInt(user.getUsername());
-        Account createdAccount = accountService.createAccount(authenticatedUserId, bankCodeDTO.getBankCode());
-        return ResponseEntity.ok(createdAccount);
+        Account createdAccount = accountService.createAccount(authenticatedUserId, bankCodeDTO.bankCode());
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdAccount);
     }
 
     // 2. 내 계좌 등록하기
@@ -40,7 +41,6 @@ public class AccountController {
             @AuthenticationPrincipal User user,
             @RequestBody AccountConnectRequest request) {
         Assert.notNull(user, "User must not be null");
-        Assert.notNull(request, "계좌 정보를 입력해주세요.");
         int authenticatedUserId = Integer.parseInt(user.getUsername());
         Account registeredAccount = accountService.connectAccount(authenticatedUserId, request.bankCode(), request.accountNumber());
         return ResponseEntity.ok(registeredAccount);
@@ -73,7 +73,6 @@ public class AccountController {
             @PathVariable("account_number") String accountNumber,
             @RequestBody ChargePayBalanceRequest request) {
         Assert.hasText(accountNumber, "AccountNumber must not be null");
-        Assert.notNull(request, "ChargePayBalanceRequest must not be null");
         PayHistoryDTO payHistory = accountService.chargeBalance(accountNumber, request.balance());
         return ResponseEntity.ok(payHistory);
     }

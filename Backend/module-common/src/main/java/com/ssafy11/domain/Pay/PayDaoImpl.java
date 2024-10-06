@@ -99,9 +99,11 @@ public class PayDaoImpl implements PayDao {
                 .from(USERS)
                 .where(USERS.ID.eq(userId))
                 .fetchOneInto(String.class);
+
         if (userAccountNumber == null) {
             return null;
         }
+
         // account 테이블에서 사용자의 account_number를 가진 원래 계좌를 찾음
         Account connectedAccount = accountDao.findByAccountNumber(userAccountNumber);
 

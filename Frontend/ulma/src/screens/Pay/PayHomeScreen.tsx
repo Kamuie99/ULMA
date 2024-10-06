@@ -13,15 +13,24 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import {ScrollView} from 'react-native-gesture-handler';
+import {FlatList, ScrollView} from 'react-native-gesture-handler';
 import {payNavigations} from '@/constants/navigations';
 import Toast from 'react-native-toast-message';
 import usePayStore from '@/store/usePayStore';
+import CustomButton from '@/components/common/CustomButton';
+
+interface Transaction {
+  date: string;
+  guest: string;
+  amount: string;
+  description: string;
+  type: 'send' | 'receive';
+}
 
 function PayHomeScreen() {
   const {accessToken} = useAuthStore();
   const {makeAccount, getPayInfo, getAccountInfo, balance} = usePayStore();
-  const [payHistory, setPayHistory] = useState([]);
+  const [payHistory, setPayHistory] = useState<Transaction[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
 
   useFocusEffect(
@@ -46,14 +55,46 @@ function PayHomeScreen() {
           headers: {Authorization: `Bearer ${accessToken}`},
         });
         console.log(response.data);
-        setPayHistory(response.data);
+
+        // 서버에서 받아온 데이터를 Transaction 형식으로 변환
+        const formattedData: Transaction[] = response.data.map((item: any) => ({
+          amount: item.amount,
+          date: item.transactionDate.slice(0, 10),
+          guest: item.counterpartyName,
+          description: item.description,
+          type: item.transactionType === 'SEND' ? 'send' : 'receive', // type 필드가 'send' 또는 'receive' 인지 확인
+        }));
+
+        setPayHistory(formattedData);
       } catch (error) {
-        console.error('잔액 정보를 불러오는 중 에러가 발생했습니다:', error);
+        console.error('계좌 이력을 불러오는 중 에러가 발생했습니다:', error);
       }
     };
 
     fetchData();
   }, []);
+
+  // 거래 내역
+  const renderTransaction = ({item}: {item: Transaction}) => (
+    <View style={styles.transactionItem}>
+      <View style={styles.iconContainer}>
+        <Text style={styles.iconText}>PAY</Text>
+      </View>
+      <View style={styles.transactionDetails}>
+        <Text style={styles.transactionText}>{item.guest}</Text>
+        <Text style={styles.dateText}>
+          {item.description} | {item.date}
+        </Text>
+      </View>
+      <Text
+        style={[
+          styles.amountText,
+          item.type === 'send' ? styles.negative : styles.positive,
+        ]}>
+        {item.type === 'send' ? `-${item.amount}` : item.amount}
+      </Text>
+    </View>
+  );
 
   const bankImages = {
     하나은행: require('../../assets/Pay/banks/하나은행.png'),
@@ -114,19 +155,26 @@ function PayHomeScreen() {
         </View>
       </View>
       <View style={styles.boxContainer}>
-        <Text style={styles.title}>Pay 이력 전체보기</Text>
-        <View style={styles.historyContainer}>
+        <Text style={styles.title}>Pay 이력</Text>
+        <View>
           {payHistory.length > 0 ? (
-            payHistory.map((item, index) => (
-              <View
-                key={index}
-                style={{flexDirection: 'row', marginVertical: 10}}>
-                <Text>{item.amount}</Text>
-                <Text>{item.description}</Text>
-                <Text>{item.transactionDate}</Text>
-                <Text>{item.transactionType}</Text>
+            <>
+              <View>
+                {/* 송금 내역 리스트 */}
+                <FlatList
+                  data={payHistory.slice(0, 5)} // 10개의 항목만 전달
+                  renderItem={renderTransaction}
+                  keyExtractor={item => item.id}
+                />
               </View>
-            ))
+
+              {payHistory.length > 5 && (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate(payNavigations.PAY_LIST)}>
+                  <Text style={styles.moreBtn}>더보기</Text>
+                </TouchableOpacity>
+              )}
+            </>
           ) : (
             <Text>내역이 없습니다.</Text> // 데이터가 없을 때 표시
           )}
@@ -229,7 +277,11 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     marginBottom: 10,
   },
-  historyContainer: {},
+  moreBtn: {
+    marginTop: 20,
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
 
   // modal
   modalContainer: {
@@ -257,6 +309,53 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 10,
+  },
+  transactionItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.GRAY_300,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.GREEN_700,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  iconText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: colors.WHITE,
+  },
+  transactionDetails: {
+    flex: 1,
+    paddingHorizontal: 10,
+  },
+  transactionText: {
+    fontSize: 16,
+  },
+  dateText: {
+    fontSize: 12,
+    color: colors.GRAY_700,
+  },
+  amountText: {
+    fontSize: 16,
+  },
+  positive: {
+    color: colors.PINK,
+    fontWeight: 'bold',
+  },
+  negative: {
+    color: colors.BLACK,
+  },
+  listContainer: {
+    backgroundColor: colors.LIGHTGRAY,
+    borderRadius: 8,
+    flex: 1,
+    overflow: 'scroll',
   },
 });
 

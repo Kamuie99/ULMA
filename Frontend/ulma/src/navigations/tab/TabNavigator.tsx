@@ -21,15 +21,15 @@ function TabNavigator() {
 
           // 탭 이름에 따라 아이콘 이름 설정
           if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home-outline';
+            iconName = focused ? 'calendar' : 'calendar-outline';
           } else if (route.name === 'Pay') {
             iconName = focused ? 'wallet' : 'wallet-outline';
           } else if (route.name === 'Friends') {
             iconName = focused ? 'people' : 'people-outline';
           } else if (route.name === 'Event') {
-            iconName = focused ? 'calendar' : 'calendar-outline';
-          } else if (route.name === 'MyPage') {
             iconName = focused ? 'person' : 'person-outline';
+          } else if (route.name === 'MyPage') {
+            iconName = focused ? 'apps' : 'apps-outline';
           }
 
           // Icon 컴포넌트 반환
@@ -42,9 +42,9 @@ function TabNavigator() {
         tabBarLabel: '' // 탭 레이블을 빈 문자열로 설정하여 이름을 숨깁니다.
       })}>
       <Tab.Screen name="Home" component={HomeStackNavigator} />
-      <Tab.Screen name="Pay" component={PayStackNavigator} />
-      <Tab.Screen name="Friends" component={FriendsStackNavigator} />
       <Tab.Screen name="Event" component={EventStackNavigator} />
+      <Tab.Screen name="Friends" component={FriendsStackNavigator} />
+      <Tab.Screen name="Pay" component={PayStackNavigator} />
       <Tab.Screen name="MyPage" component={MyPageStackNavigator} />
     </Tab.Navigator>
   );

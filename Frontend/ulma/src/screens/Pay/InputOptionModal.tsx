@@ -11,9 +11,12 @@ import {
 import Icon from 'react-native-vector-icons/Entypo';
 import Modal from 'react-native-modal';
 import Toast from 'react-native-toast-message';
-import DocumentPicker from 'react-native-document-picker'; // 문서 선택을 위한 라이브러리
+import DocumentPicker from 'react-native-document-picker';
 import axiosInstance from '@/api/axios';
 import useAuthStore from '@/store/useAuthStore';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
+import {payNavigations} from '@/constants/navigations';
 
 const options = [
   {
@@ -36,17 +39,26 @@ const options = [
   },
 ];
 
-function InputOptionModal({isVisible, onClose}) {
+function InputOptionModal({isVisible, onClose, onDirectRegister}) {
   const [excelFile, setExcelFile] = useState(null);
   const {accessToken} = useAuthStore();
+  const navigation = useNavigation();
 
-  // 파일 선택 로직 추가
+  // 계좌 내역 불러오기
+  const handleAccountHistory = () => {
+    // 계좌 내역 불러오기 로직 구현
+    console.log('계좌 내역 불러오기 실행');
+    navigation.navigate(payNavigations.ACCOUNT_HISTORY);
+    onClose(); // 모달 닫기
+  };
+
+  // 엑셀 파일 선택
   const pickExcelFile = async () => {
     try {
       const res = await DocumentPicker.pick({
-        type: [DocumentPicker.types.xlsx], // 엑셀 파일 선택
+        type: [DocumentPicker.types.xlsx],
       });
-      setExcelFile(res[0]); // 선택된 파일 저장
+      setExcelFile(res[0]);
       console.log('선택된 파일: ', res);
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
@@ -55,9 +67,10 @@ function InputOptionModal({isVisible, onClose}) {
         console.error('파일 선택 오류:', err);
       }
     }
+    onClose(); // 모달 닫기
   };
 
-  // 엑셀 파일 서버로 전송
+  // 엑셀 파일 업로드
   const handleSubmit = async () => {
     if (!excelFile) {
       Toast.show({
@@ -88,7 +101,7 @@ function InputOptionModal({isVisible, onClose}) {
         type: 'success',
         text1: '파일 업로드 성공',
       });
-      onClose(); // 모달 닫기
+      onClose();
     } catch (e) {
       Toast.show({
         type: 'error',
@@ -98,13 +111,20 @@ function InputOptionModal({isVisible, onClose}) {
     }
   };
 
+  // 직접 등록하기
+  const handleDirectRegister = () => {
+    onDirectRegister(); // 직접 등록하기 호출
+    onClose(); // 모달 닫기
+  };
+
   const handlePress = (key: string) => {
-    if (key === '2') {
-      // 엑셀 파일 선택을 위해 호출
+    if (key === '1') {
+      handleAccountHistory();
+    } else if (key === '2') {
       pickExcelFile();
+    } else if (key === '3') {
+      handleDirectRegister();
     }
-    console.log(`${key} 선택됨`);
-    onClose(); // 옵션 선택 시 모달 닫기
   };
 
   const renderItem = ({item}: {item: (typeof options)[0]}) => (

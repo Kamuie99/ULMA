@@ -1,4 +1,3 @@
-//시간 넣는 창 수정
 import React, {useState} from 'react';
 import {
   View,
@@ -7,12 +6,13 @@ import {
   Modal,
   FlatList,
   Button,
+  TextInput,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import {Calendar} from 'react-native-calendars';
 import {format} from 'date-fns';
 import {ko} from 'date-fns/locale';
-import DateTimePickerModal from 'react-native-modal-datetime-picker'; // 시간 선택을 위한 모달 라이브러리
 
 interface DayPressEvent {
   dateString: string;
@@ -34,32 +34,51 @@ const CalendarComponent: React.FC<CalendarComponentProps> = ({
   const [isYearSelection, setIsYearSelection] = useState(true);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  const [isTimePickerVisible, setTimePickerVisible] = useState(false); // 시간 선택 모달 상태
-  const [selectedTime, setSelectedTime] = useState<Date | null>(null); // 선택된 시간
   const [localSelectedDate, setLocalSelectedDate] = useState<string | null>(
     selectedDate,
-  ); // 내부에서 날짜를 관리하기 위한 상태
+  );
+  const [timeInput, setTimeInput] = useState(''); // 시간 입력 필드 상태
 
   // 사용자에게 보여줄 형식
   const formattedDate = localSelectedDate
-    ? format(new Date(localSelectedDate), 'yyyy년 M월 d일 a h시 mm분', {
+    ? format(new Date(localSelectedDate), 'yyyy년 M월 d일', {
         locale: ko,
       })
     : '';
 
-  // 시간 선택 모달에서 시간을 선택했을 때
-  const handleTimeConfirm = (time: Date) => {
-    setSelectedTime(time);
-    setTimePickerVisible(false);
+  // 시간 입력 시 "시", "분" 자동 추가
+  const handleTimeChange = (text: string) => {
+    const cleaned = text.replace(/\D/g, ''); // 숫자만 남김
+    let formatted = cleaned;
 
-    // 날짜와 시간을 조합하여 최종 선택된 날짜/시간을 부모 컴포넌트로 전달
-    if (localSelectedDate) {
-      const selectedDateTime = new Date(localSelectedDate);
-      selectedDateTime.setHours(time.getHours());
-      selectedDateTime.setMinutes(time.getMinutes());
-
-      onDateSelected(selectedDateTime.toISOString());
+    if (cleaned.length >= 3) {
+      formatted = cleaned.slice(0, 2) + '시 ' + cleaned.slice(2, 4) + '분';
+    } else if (cleaned.length > 0) {
+      formatted = cleaned.slice(0, 2) + '시';
     }
+
+    setTimeInput(formatted);
+  };
+
+  // 저장 시 ISO 형식으로 변환
+  const handleSave = () => {
+    if (!localSelectedDate || timeInput.length < 7) {
+      Alert.alert('경고', '날짜와 정확한 시간을 입력하세요.');
+      return;
+    }
+
+    // 날짜와 시간을 합쳐서 ISO 형식으로 변환
+    const selectedDateTime = new Date(localSelectedDate);
+    const hours = parseInt(timeInput.slice(0, 2), 10); // 시 정보 추출
+    const minutes = parseInt(timeInput.slice(4, 6), 10); // 분 정보 추출
+
+    // 시간과 분을 설정
+    selectedDateTime.setHours(hours);
+    selectedDateTime.setMinutes(minutes);
+    selectedDateTime.setSeconds(0); // 초는 항상 00초로 설정
+
+    // 최종 ISO 형식으로 변환하여 상위 컴포넌트에 전달
+    onDateSelected(selectedDateTime.toISOString());
   };
 
   const openModal = (yearSelection: boolean) => {
@@ -95,7 +114,6 @@ const CalendarComponent: React.FC<CalendarComponentProps> = ({
       <Calendar
         onDayPress={(day: DayPressEvent) => {
           setLocalSelectedDate(day.dateString); // 선택한 날짜 설정
-          setTimePickerVisible(true); // 날짜 선택 후 시간 선택 모달 열기
         }}
         markedDates={{
           [localSelectedDate || '']: {
@@ -118,15 +136,17 @@ const CalendarComponent: React.FC<CalendarComponentProps> = ({
       />
       <Text>선택된 날짜: {formattedDate}</Text>
 
-      {/* 시간 선택 모달 */}
-      <DateTimePickerModal
-        isVisible={isTimePickerVisible}
-        mode="time" // 시간 선택 모드
-        is24Hour={true} // 키보드 모드로 기본 설정
-        locale="ko-KR" // 한글 표시
-        onConfirm={handleTimeConfirm}
-        onCancel={() => setTimePickerVisible(false)}
+      {/* 시간 입력 필드 */}
+      <TextInput
+        style={styles.timeInput}
+        placeholder="예) 14시 30분"
+        value={timeInput}
+        onChangeText={handleTimeChange}
+        keyboardType="numeric"
       />
+
+      {/* 저장 버튼 */}
+      <Button title="저장" onPress={handleSave} />
 
       {/* 연도/월 선택 모달 */}
       <Modal visible={modalVisible} transparent={true}>
@@ -190,6 +210,13 @@ const styles = StyleSheet.create({
   },
   listText: {
     fontSize: 18,
+  },
+  timeInput: {
+    borderColor: '#ccc',
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
   },
 });
 

@@ -8,8 +8,9 @@ import {
   Alert,
 } from 'react-native';
 import {NavigationProp, useFocusEffect} from '@react-navigation/native';
-import axiosInstance from '@/api/axios'; // axiosInstance 불러오기
+import axiosInstance from '@/api/axios';
 import {eventNavigations} from '@/constants/navigations';
+import Icon from 'react-native-vector-icons/Ionicons';
 
 interface Event {
   id: string;
@@ -22,12 +23,11 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // 이벤트 목록 가져오기
   const fetchEvents = async () => {
     try {
       const response = await axiosInstance.get('/events');
-      console.log('응답 데이터:', response.data); // API 응답 디버깅
-      setEvents(response.data.data); // API에서 받은 데이터로 상태 업데이트
+      console.log('응답 데이터:', response.data);
+      setEvents(response.data.data);
       setLoading(false);
     } catch (error) {
       console.error('이벤트 목록을 불러오는 중 오류 발생:', error);
@@ -36,48 +36,137 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     }
   };
 
-  // 페이지가 포커스를 받을 때마다 이벤트 목록을 새로고침
+  const deleteEvent = async (eventId: string) => {
+    try {
+      await axiosInstance.delete(`/events/${eventId}`);
+      Alert.alert('완료', '이벤트가 삭제되었습니다.');
+      fetchEvents(); // 삭제 후 목록 새로고침
+    } catch (error) {
+      console.error('이벤트 삭제 중 오류 발생:', error);
+      Alert.alert('에러', '이벤트 삭제 중 오류가 발생했습니다.');
+    }
+  };
+
+  const confirmDelete = (eventId: string) => {
+    Alert.alert('확인', '이벤트를 삭제하시겠습니까?', [
+      {
+        text: '취소',
+        style: 'cancel',
+      },
+      {
+        text: '확인',
+        onPress: () => deleteEvent(eventId),
+      },
+    ]);
+  };
+
   useFocusEffect(
     useCallback(() => {
       fetchEvents();
     }, []),
   );
 
-  // 이벤트 카테고리에 따른 색상을 설정하는 함수
-  const getEventTypeStyle = (name: string) => {
-    // 디버깅용으로 name 값을 출력
-    console.log(`name: '${name}'`);
-    // name에 따라 배경색을 결정
-    switch (name.trim().toLowerCase()) {
+  // eventTitle 값에 따라 배경색을 변경
+  const getEventTitleStyle = (eventTitle: string) => {
+    switch (eventTitle.trim().toLowerCase()) {
       case '결혼':
-        return {backgroundColor: '#ffc0cb'}; // 분홍색
-      case '돌잔치':
-        return {backgroundColor: '#87CEFA'}; // 하늘색
-      case '장례식':
-        return {backgroundColor: '#A9A9A9'}; // 옅은 검은색
+        return {backgroundColor: '#ffc0cb', color: '#fff'};
       case '생일':
-        return {backgroundColor: '#97deb3'}; // 옅은 연두색
+        return {backgroundColor: '#97deb3', color: '#fff'};
+      case '돌잔치':
+        return {backgroundColor: '#87CEFA', color: '#fff'};
+      case '장례식':
+        return {backgroundColor: '#A9A9A9', color: '#fff'};
       default:
-        return {backgroundColor: '#9aa160'}; // 기본값 노란색
+        return {backgroundColor: '#9aa160', color: '#fff'};
     }
   };
-  const renderItem = ({item}: {item: Event}) => (
-    <TouchableOpacity
-      style={styles.eventBox}
-      onPress={() =>
-        navigation.navigate(eventNavigations.EVENT_DETAIL, {event_id: item.id})
-      }>
-      <Text style={[styles.eventType, getEventTypeStyle(item.name)]}>
-        {item.category}
-      </Text>
-      <View style={styles.eventDetails}>
-        <Text style={styles.eventTitle}>{item.name}</Text>
-        <Text style={styles.eventDate}>
-          {new Date(item.eventTime).toLocaleString()}
-        </Text>
+
+  // 날짜를 '2024년 8월 11일' 형식으로 변환
+  const formatKoreanDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return `${date.getFullYear()}년 ${
+      date.getMonth() + 1
+    }월 ${date.getDate()}일`;
+  };
+
+  // 시간을 '14시 30분' 형식으로 변환
+  const formatKoreanTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return `${date.getHours()}시 ${date.getMinutes()}분`;
+  };
+
+  // 시간이 03:33:33인 경우 "종일"로 표시 (원본 eventTime에서 바로 확인)
+  // 시간이 03:33:33인 경우 "종일"로 표시 (원본 이벤트 시간이 null일 때 대비)
+  const isAllDayEvent = (eventTime: string | null) => {
+    if (!eventTime) {
+      return false; // eventTime이 null 또는 undefined일 경우 처리
+    }
+
+    return eventTime.includes('03:33:33'); // eventTime에 '03:33:33'이 포함된 경우 '종일'로 판단
+  };
+
+  const renderItem = ({item}: {item: Event}) => {
+    return (
+      <View style={styles.eventContainer}>
+        {/* 박스를 클릭했을 때 EventDetailScreen으로 이동 */}
+        <TouchableOpacity
+          style={styles.eventBox}
+          onPress={() =>
+            navigation.navigate(eventNavigations.EVENT_DETAIL, {
+              event_id: item.id,
+              category: item.category,
+              name: item.name,
+              eventTime: item.eventTime,
+            })
+          }>
+          <View style={styles.eventHeader}>
+            <View
+              style={[
+                styles.eventTitleContainer,
+                getEventTitleStyle(item.name), // name에 따라 배경색 변경
+              ]}>
+              <Text style={styles.eventTitle}>{item.name}</Text>
+            </View>
+          </View>
+
+          <View style={styles.eventCategoryContainer}>
+            <Text style={styles.eventCategory}>{item.category}</Text>
+          </View>
+
+          {/* 시간이 03시 33분 33초일 경우 종일로 표시 */}
+          <Text style={styles.eventDate}>
+            {formatKoreanDate(item.eventTime)} {'\n'}
+            {isAllDayEvent(item.eventTime)
+              ? '종일'
+              : formatKoreanTime(item.eventTime)}
+          </Text>
+        </TouchableOpacity>
+
+        {/* 연필 모양 버튼을 클릭했을 때 EventFixScreen으로 이동 */}
+        <TouchableOpacity
+          style={styles.editButton}
+          onPress={() => {
+            console.log('Navigating to EVENT_FIX with event_id:', item.id);
+            navigation.navigate(eventNavigations.EVENT_FIX, {
+              event_id: item.id,
+              category: item.category,
+              name: item.name,
+              eventTime: item.eventTime,
+            });
+          }}>
+          <Icon name="pencil" size={20} color="#808080" />
+        </TouchableOpacity>
+
+        {/* 쓰레기통 모양 버튼을 클릭했을 때 삭제 확인 */}
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => confirmDelete(item.id)}>
+          <Icon name="trash" size={20} color="#808080" />
+        </TouchableOpacity>
       </View>
-    </TouchableOpacity>
-  );
+    );
+  };
 
   if (loading) {
     return (
@@ -89,16 +178,13 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
 
   return (
     <View style={styles.container}>
-      {/* 상단 헤더 부분 추가 */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>내 이벤트 목록</Text>
-      </View>
-
       {events.length > 0 ? (
         <FlatList
           data={events}
           keyExtractor={item => item.id}
           renderItem={renderItem}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
         />
       ) : (
         <View style={styles.emptyContainer}>
@@ -116,12 +202,12 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // 화면을 채우기 위해 flex: 1 추가
+    flex: 1,
     padding: 16,
     backgroundColor: '#fff',
   },
   header: {
-    paddingTop: 10, // 상태바 아래로부터 패딩
+    paddingTop: 10,
     paddingBottom: 20,
     backgroundColor: '#fff',
     alignItems: 'center',
@@ -134,8 +220,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#00C77F',
     padding: 16,
     borderRadius: 8,
-    marginTop: 'auto', // 버튼을 하단으로 밀어내기
-    marginBottom: 16, // 하단에서 약간의 여백 추가
+    marginTop: 'auto',
+    marginBottom: 16,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -144,39 +230,66 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
+  eventContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
   eventBox: {
     backgroundColor: '#f9f9f9',
     padding: 16,
     borderRadius: 16,
     marginBottom: 16,
+    flex: 1,
+    marginHorizontal: 8,
   },
-  eventType: {
-    paddingVertical: 5, // 상하 패딩
-    paddingHorizontal: 15, // 좌우 패딩을 따로 설정하여 조절 가능
+  row: {
+    justifyContent: 'space-between',
+  },
+  eventHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  eventCategoryContainer: {
     borderRadius: 4,
-    color: '#fff',
-    fontWeight: 'bold',
-    marginBottom: 12,
-    alignSelf: 'flex-start', // 내용에 맞게 좌우 길이를 줄임
+    padding: 4,
+    marginBottom: 8,
   },
-  eventDetails: {
-    flexDirection: 'row', // 같은 줄에 텍스트 배치
-    justifyContent: 'space-between', // 텍스트 사이에 공간 배치
-    alignItems: 'center', // 텍스트 높이 맞춤
-    marginBottom: 4, // 필요하면 하단 여백 추가
-  },
-  eventTitle: {
+  eventCategory: {
     fontSize: 18,
     fontWeight: 'bold',
-    flex: 1, // flex를 통해 공간을 차지하도록 설정
-    paddingLeft: 10,
+    color: '#000',
+  },
+  eventTitleContainer: {
+    borderRadius: 4,
+    paddingVertical: 5,
+    paddingHorizontal: 16,
+    marginBottom: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  eventTitle: {
+    fontSize: 15,
+    fontWeight: 'bold',
   },
   eventDate: {
     fontSize: 15,
     color: '#888',
     fontWeight: 'bold',
-    textAlign: 'right', // 날짜를 오른쪽 정렬
-    flex: 1, // flex를 통해 남은 공간을 차지
+    marginTop: 4,
+  },
+  editButton: {
+    paddingHorizontal: 8,
+    position: 'absolute',
+    right: 40,
+    top: 10,
+  },
+  deleteButton: {
+    paddingHorizontal: 8,
+    position: 'absolute',
+    right: 10,
+    top: 10,
   },
   loadingContainer: {
     flex: 1,

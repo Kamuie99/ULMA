@@ -12,13 +12,29 @@ import {
 import TitleTextField from '@/components/common/TitleTextField';
 import {colors} from '@/constants';
 import CustomButton from '@/components/common/CustomButton';
-import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {
+  NavigationProp,
+  RouteProp,
+  useNavigation,
+} from '@react-navigation/native';
 import {payNavigations} from '@/constants/navigations';
 import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
+import Toast from 'react-native-toast-message';
+import axiosInstance from '@/api/axios';
+import useAuthStore from '@/store/useAuthStore';
+import usePayStore from '@/store/usePayStore';
 
-function SendingScreen() {
-  // useNavigation에 제네릭 타입을 추가해 navigation 타입을 명시적으로 지정
+interface SendingScreenProps {
+  route: RouteProp<payStackParamList, typeof payNavigations.SENDING>;
+}
+
+function SendingScreen({route}: SendingScreenProps) {
   const navigation = useNavigation<NavigationProp<payStackParamList>>();
+
+  // 전달받은 targetAccountNumber 값을 route에서 가져옴
+  const {targetAccountNumber} = route.params;
+
+  const {getPayInfo} = usePayStore();
 
   useEffect(() => {
     // 페이지에 들어올 때 탭바 숨기기
@@ -27,6 +43,42 @@ function SendingScreen() {
     });
   }, [navigation]);
   const [amount, setAmount] = useState<string>('');
+
+  const handleSendMoney = async () => {
+    const {accessToken} = useAuthStore.getState(); // accessToken 가져오기
+    console.log(targetAccountNumber);
+    if (!amount || !targetAccountNumber) {
+      Toast.show({
+        text1: '모든 정보를 입력하세요.',
+        type: 'error',
+      });
+      return;
+    }
+
+    try {
+      const response = await axiosInstance.post(
+        '/users/pay/send',
+        {
+          info: '결혼식',
+          targetAccountNumber: targetAccountNumber, // 수신 계좌 번호
+          amount: parseInt(amount, 10), // 송금 금액 (정수로 변환)
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`, // Authorization 헤더에 토큰 추가
+          },
+        },
+      );
+
+      console.log('송금 성공:', response.data);
+      const payAmount = response.data.amount;
+      // 송금 성공 후 다음 화면으로 이동 또는 성공 메시지 표시
+      getPayInfo();
+      navigation.navigate(payNavigations.SEND_RESULT, {amount: payAmount});
+    } catch (error) {
+      console.error('송금 중 오류 발생:', error);
+    }
+  };
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
@@ -52,7 +104,8 @@ function SendingScreen() {
           onPress={() => navigation.navigate(payNavigations.RECOMMEND_OPTION)}>
           <Image source={require('@/assets/Pay/RecommBtn.png')} />
         </TouchableOpacity>
-        <CustomButton label="확인" variant="outlined" />
+
+        <CustomButton label="송금하기" onPress={handleSendMoney} />
       </View>
     </KeyboardAvoidingView>
   );

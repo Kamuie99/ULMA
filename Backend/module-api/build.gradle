@@ -31,6 +31,13 @@ dependencies {
     implementation group: 'org.apache.poi', name: 'poi-scratchpad', version: '5.3.0'
     implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.3.0'
 
+    // testContainers
+    implementation 'org.testcontainers:testcontainers'
+    implementation 'org.testcontainers:mysql'
+
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:junit-jupiter'
+
 }
 
 sonar {

@@ -1,5 +1,5 @@
 package com.ssafy11.domain.Pay;
 
 public enum PayType {
-    SEND, RECEIVE;
+    SEND, RECEIVE, CHARGE;
 }

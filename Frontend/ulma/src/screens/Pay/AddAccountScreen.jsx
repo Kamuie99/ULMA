@@ -9,11 +9,16 @@ import {
 } from 'react-native';
 import CustomButton from '@/components/common/CustomButton';
 import InputField from '@/components/common/InputField';
+import axiosInstance from '@/api/axios';
+import useAuthStore from '@/store/useAuthStore';
+import {payNavigations} from '@/constants/navigations';
+import {useNavigation} from '@react-navigation/native';
 
 function AddAccountScreen() {
   const [account, setAccount] = useState('');
   const [selectedBank, setSelectedBank] = useState(''); // 선택된 은행
   const [isModalVisible, setModalVisible] = useState(false); // 모달 가시성
+  const navigation = useNavigation();
 
   // 은행 목록
   const banks = [
@@ -30,6 +35,29 @@ function AddAccountScreen() {
     setModalVisible(false);
   };
 
+  const handleVerify = async () => {
+    const {accessToken} = useAuthStore();
+    try {
+      const response = await axiosInstance.post(
+        'users/account/verify',
+        {
+          accountNumber: account, // 입력된 계좌 번호 전송
+          bankCode: selectedBank, // 선택된 은행 전송
+        },
+        {
+          headers: {Authorization: `Bearer ${accessToken}`}, // 인증 헤더 설정
+        },
+      );
+
+      // 인증 성공 시 다음 페이지로 이동, 결과값 넘기기
+      navigation.navigate(payNavigations.ACCOUNT_VERIFY, {
+        verifyNumber: response.data.verifyNumber,
+      });
+    } catch (error) {
+      console.error('인증 중 에러 발생:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -44,7 +72,7 @@ function AddAccountScreen() {
         onChangeText={setAccount}
         keyboardType="numeric"
       />
-      <CustomButton label="추가하기" size="maxSize" />
+      <CustomButton label="인증하기" size="maxSize" />
 
       {/* 은행 선택 모달 */}
       <Modal

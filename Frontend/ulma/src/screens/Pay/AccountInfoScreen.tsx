@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import axiosInstance from '@/api/axios';
 import CustomButton from '@/components/common/CustomButton';
 import {colors} from '@/constants';
@@ -8,6 +8,7 @@ import {useNavigation} from '@react-navigation/native';
 import {ScrollView} from 'react-native-gesture-handler';
 import usePayStore from '@/store/usePayStore';
 import Toast from 'react-native-toast-message';
+import {payNavigations} from '@/constants/navigations'; // payNavigations import 추가
 
 function AccountInfoScreen() {
   const navigation = useNavigation();
@@ -53,6 +54,10 @@ function AccountInfoScreen() {
 
   const handleSelectAccount = account => {
     setSelectedAccount(account);
+    navigation.navigate(payNavigations.ACCOUNT_HISTORY, {
+      accountNumber: account.accountNumber, // 선택된 계좌 번호를 전달
+      bankCode: account.bankCode, // 선택된 은행 코드를 전달
+    });
   };
 
   const handleAccountAction = async () => {
@@ -87,18 +92,18 @@ function AccountInfoScreen() {
         <>
           <ScrollView>
             {accountInfo.map(account => (
-              <View
+              <TouchableOpacity
                 key={account.id}
                 style={
                   account.accountNumber === selectedAccount?.accountNumber
                     ? styles.selectedAccountBox
                     : styles.accountBox
                 }
-                onTouchEnd={() => handleSelectAccount(account)}>
+                onPress={() => handleSelectAccount(account)}>
                 <Text>{account.bankCode}</Text>
                 <Text>{account.accountNumber}</Text>
                 <Text>{account.balance} 원</Text>
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
           {selectedAccount && (

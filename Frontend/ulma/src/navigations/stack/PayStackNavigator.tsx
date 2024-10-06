@@ -24,6 +24,8 @@ import MakePayAccountScreen from '@/screens/Pay/MakePayAccountScreen';
 import AccountInfoScreen from '@/screens/Pay/AccountInfoScreen';
 import AddAccountScreen from '@/screens/Pay/AddAccountScreen';
 import SendAccountScreen from '@/screens/Pay/SendAccountScreen';
+import AccountVerifyScreen from '@/screens/Pay/AccountVerifyScreen';
+import AccountDetailScreen from '@/screens/Pay/AccountDetailScreen';
 
 export type payStackParamList = {
   [payNavigations.HOME]: undefined;
@@ -42,6 +44,8 @@ export type payStackParamList = {
   [payNavigations.ACCOUNT_INFO]: undefined;
   [payNavigations.ADD_ACCOUNT]: undefined;
   [payNavigations.SEND_ACCOUNT]: undefined;
+  [payNavigations.ACCOUNT_VERIFY]: {verifyNumber: number};
+  [payNavigations.ACCOUNT_DETAIL]: {accountNumber: string; bankCode: string};
 };
 
 const Stack = createStackNavigator<payStackParamList>();
@@ -197,6 +201,20 @@ function PayStackNavigator() {
         component={SendAccountScreen}
         options={{
           headerTitle: '송금하기',
+        }}
+      />
+      <Stack.Screen
+        name={payNavigations.ACCOUNT_VERIFY}
+        component={AccountVerifyScreen}
+        options={{
+          headerTitle: '송금하기',
+        }}
+      />
+      <Stack.Screen
+        name={payNavigations.ACCOUNT_DETAIL}
+        component={AccountDetailScreen}
+        options={{
+          headerTitle: '계좌 상세 보기',
         }}
       />
     </Stack.Navigator>

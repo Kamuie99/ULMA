@@ -135,20 +135,19 @@ public class PayDaoImpl implements PayDao {
             );
 
             // 4. 얼마페이 계좌에서 수신 내역(PayHistory) 생성
-
             String senderUserName = dsl.select(USERS.NAME)
                     .from(USERS)
                     .where(USERS.ID.eq(connectedAccount.userId()))
                     .fetchOneInto(String.class);
 
-            PayHistory receiveHistory = createReceiveHistory(
+            PayHistory chargeHistory = createChargeHistory(
                     payAccount.accountNumber(),
                     amount,
                     senderUserName,
                     connectedAccount.accountNumber()
             );
 
-            return receiveHistory;
+            return chargeHistory;
         }
 
         return null;
@@ -262,6 +261,30 @@ public class PayDaoImpl implements PayDao {
         return null;
     }
 
+
+    public PayHistory createChargeHistory(String accountNumber, Long amount, String sender, String senderAccountNumber) {
+        Account receiveAccount = accountDao.findByAccountNumber(accountNumber);
+
+        if (receiveAccount != null) {
+            int receiveId = dsl.insertInto(PAYHISTORY)
+                    .set(PAYHISTORY.ACCOUNT_ID, receiveAccount.id())
+                    .set(PAYHISTORY.AMOUNT, amount)
+                    .set(PAYHISTORY.BALANCE_AFTER_TRANSACTION, receiveAccount.balance())
+                    .set(PAYHISTORY.TRANSACTION_TYPE, PayType.CHARGE.name())
+                    .set(PAYHISTORY.COUNTERPARTY_NAME, sender)
+                    .set(PAYHISTORY.COUNTERPARTY_ACCOUNT_NUMBER, senderAccountNumber)
+                    .set(PAYHISTORY.DESCRIPTION, sender)
+                    .returning(PAYHISTORY.ID)
+                    .fetchOne()
+                    .getValue(PAYHISTORY.ID);
+
+            return dsl.selectFrom(PAYHISTORY)
+                    .where(PAYHISTORY.ID.eq(receiveId))
+                    .fetchOneInto(PayHistory.class);
+        }
+        return null;
+    }
+
     @Override
     public List<PayHistory> findPayHistory(Integer userId, LocalDate startDate, LocalDate endDate, String payType) {
         // 1. 해당 userId의 얼마페이 계좌 조회
@@ -284,7 +307,7 @@ public class PayDaoImpl implements PayDao {
             }
 
             // 4. payType이 지정된 경우 필터링 추가 ("SEND" 또는 "RECEIVE")
-            if (payType != null && (payType.equals("SEND") || payType.equals("RECEIVE"))) {
+            if (payType != null && (payType.equals("SEND") || payType.equals("RECEIVE") || payType.equals("CHARGE"))) {
                 query.and(PAYHISTORY.TRANSACTION_TYPE.eq(payType));
             }
 

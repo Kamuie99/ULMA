@@ -76,7 +76,7 @@ public class AccountDaoImpl implements AccountDao {
         } else {
             return dsl.selectFrom(ACCOUNT)
                     .where(ACCOUNT.USER_ID.eq(userId))
-                    .and(ACCOUNT.BANK_CODE.notEqual(bankCode))
+                    .and(ACCOUNT.BANK_CODE.notEqual("얼마페이"))
                     .fetchInto(Account.class);
         }
     }

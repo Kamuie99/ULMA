@@ -87,6 +87,10 @@ public class AccountDaoImpl implements AccountDao {
                 .where(USERS.ID.eq(userId))
                 .fetchOneInto(Users.class);
 
+        if (user.getAccountNumber() == null) {
+            return null;
+        }
+
         return dsl.selectFrom(ACCOUNT)
                 .where(ACCOUNT.ACCOUNT_NUMBER.eq(user.getAccountNumber()))
                 .fetchOneInto(Account.class);
@@ -284,7 +288,7 @@ public class AccountDaoImpl implements AccountDao {
             return new PaginatedHistory(payHistories, page, totalItemsCount, totalPages);
         }
 
-        return new PaginatedHistory(List.of(), 0, 0, 0);
+        return null;
     }
 
     @Override

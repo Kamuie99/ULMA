@@ -8,6 +8,7 @@ import com.ssafy11.domain.Account.Account;
 import com.ssafy11.domain.Account.AccountDao;
 import com.ssafy11.domain.Account.PaginatedHistory;
 import com.ssafy11.domain.Pay.PayHistory;
+import com.ssafy11.domain.Pay.PayType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,12 +43,20 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public List<Account> findAllAccounts(Integer userId, String bankCode) {
+        List<Account> allAccounts = accountDao.findAllAccounts(userId, bankCode);
+        if (allAccounts == null || allAccounts.isEmpty()) {
+            throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND);
+        }
         return accountDao.findAllAccounts(userId, bankCode);
     }
 
     @Override
     public Account connectedAccount(Integer userId) {
-        return accountDao.connectedAccount(userId);
+        Account account = accountDao.connectedAccount(userId);
+        if (account == null) {
+            throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND, "등록된 계좌가 없습니다.");
+        }
+        return account;
     }
 
     @Override
@@ -63,7 +72,15 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public PayHistoryDTO chargeBalance(String accountNumber, Long amount) {
+        if (amount < 0) {
+            throw new ErrorException(ErrorCode.NEGATIVE_VALUE_NOT_ALLOWED);
+        }
+
         PayHistory payHistory = accountDao.chargeBalance(accountNumber, amount);
+
+        if (payHistory == null) {
+            throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND);
+        }
 
         // PayHistory 엔티티를 PayHistoryDTO로 변환
         return new PayHistoryDTO(
@@ -81,14 +98,41 @@ public class AccountServiceImpl implements AccountService {
     @Override
     @Transactional
     public PayHistoryDTO sendMoney(String senderAccountNumber, String info, String targetAccountNumber, Long amount) {
+
+        if (amount <= 0) {
+            throw new ErrorException(ErrorCode.NEGATIVE_VALUE_NOT_ALLOWED);
+        }
         PayHistory payHistory = accountDao.sendMoney(senderAccountNumber, info, targetAccountNumber, amount);
+
+        if (payHistory == null) {
+            throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND);
+        }
+
         return convertToDTO(payHistory);
     }
 
     @Override
     public PaginatedHistory<PayHistoryDTO> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType, int page, int size) {
-        // DAO에서 페이 히스토리를 조회 (PayHistory 타입의 PaginatedHistory 반환)
+
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            throw new ErrorException(ErrorCode.INVALID_DATE_RANGE);
+        }
+
+
+        try {
+            PayType valid = PayType.valueOf(payType.toUpperCase());
+            if (valid.equals(PayType.CHARGE)) {
+                throw new ErrorException(ErrorCode.BadRequest, "유효하지 않은 결제 유형입니다.");
+            }
+        } catch (IllegalArgumentException e) {
+            throw new ErrorException(ErrorCode.BadRequest, "유효하지 않은 결제 유형입니다.");
+        }
+
         PaginatedHistory<PayHistory> paginatedHistory = accountDao.findPayHistory(accountNumber, startDate, endDate, payType, page, size);
+
+        if (paginatedHistory == null) {
+            throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND);
+        }
 
         // PayHistory 데이터를 PayHistoryDTO로 변환
         List<PayHistoryDTO> payHistoryDTOList = paginatedHistory.data().stream()

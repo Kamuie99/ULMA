@@ -58,6 +58,9 @@ public class PayServiceImpl implements PayService {
 
     @Override
     public PayHistoryDTO sendPayMoney(Integer userId, String info, String targetAccountNumber, Long amount) {
+        if (amount > 2000000) {
+            throw new ErrorException(ErrorCode.LIMIT_EXCEEDED);
+        }
         PayHistory sendHistory = payDao.sendPayMoney(userId, info, targetAccountNumber, amount);
         return new PayHistoryDTO(
                 sendHistory.amount(),

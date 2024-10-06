@@ -119,14 +119,17 @@ public class AccountServiceImpl implements AccountService {
         }
 
 
-        try {
-            PayType valid = PayType.valueOf(payType.toUpperCase());
-            if (valid.equals(PayType.CHARGE)) {
+        if (payType != null) {
+            try {
+                PayType valid = PayType.valueOf(payType.toUpperCase());
+                if (valid.equals(PayType.CHARGE)) {
+                    throw new ErrorException(ErrorCode.BadRequest, "유효하지 않은 결제 유형입니다.");
+                }
+            } catch (IllegalArgumentException e) {
                 throw new ErrorException(ErrorCode.BadRequest, "유효하지 않은 결제 유형입니다.");
             }
-        } catch (IllegalArgumentException e) {
-            throw new ErrorException(ErrorCode.BadRequest, "유효하지 않은 결제 유형입니다.");
         }
+
 
         PaginatedHistory<PayHistory> paginatedHistory = accountDao.findPayHistory(accountNumber, startDate, endDate, payType, page, size);
 

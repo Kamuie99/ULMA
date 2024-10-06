@@ -50,16 +50,11 @@ public class PayController {
         LocalDate startLocalDate = null;
         LocalDate endLocalDate = null;
 
-        try {
-            if (startDate != null) {
-                startLocalDate = LocalDate.parse(startDate, formatter);
-            }
-            if (endDate != null) {
-                endLocalDate = LocalDate.parse(endDate, formatter);
-            }
-        } catch (DateTimeParseException e) {
-            // 예외 처리: 날짜 형식이 잘못된 경우 에러 응답
-            return ResponseEntity.badRequest().body(null);
+        if (startDate != null) {
+            startLocalDate = LocalDate.parse(startDate, formatter);
+        }
+        if (endDate != null) {
+            endLocalDate = LocalDate.parse(endDate, formatter);
         }
 
         int authenticatedUserId = Integer.parseInt(user.getUsername());
@@ -73,12 +68,8 @@ public class PayController {
             @AuthenticationPrincipal User user) {
         Assert.notNull(user, "User must not be null");
         int authenticatedUserId = Integer.parseInt(user.getUsername());
-        try {
-            ChargePayBalanceResponse balance = payService.viewPayBalance(authenticatedUserId);
-            return ResponseEntity.ok(balance);
-        } catch (ErrorException e) {
-            throw e;
-        }
+        ChargePayBalanceResponse balance = payService.viewPayBalance(authenticatedUserId);
+        return ResponseEntity.ok(balance);
     }
 
     // 4. Pay 충전하기

@@ -21,4 +21,6 @@ public interface AccountDao {
     PayHistory sendMoney(String senderAccountNumber, String info, String targetAccountNumber, Long amount);
     PayHistory chargeBalance(String accountNumber, Long amount);
     PaginatedHistory findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType, int page, int size);
+
+    String verifyMyAccount(Integer userId, String accountNumber);
 }

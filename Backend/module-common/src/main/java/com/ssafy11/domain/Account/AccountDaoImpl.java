@@ -3,12 +3,15 @@ package com.ssafy11.domain.Account;
 import com.ssafy11.domain.Pay.PayHistory;
 import com.ssafy11.domain.Pay.PayType;
 import com.ssafy11.domain.users.Users;
+import com.ssafy11.ulma.generated.tables.records.AccountRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
+import org.jooq.SelectConditionStep;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import static com.ssafy11.ulma.generated.Tables.PAYHISTORY;
@@ -274,6 +277,30 @@ public class AccountDaoImpl implements AccountDao {
         }
 
         return new PaginatedHistory(List.of(), 0, 0, 0);
+    }
+
+    @Override
+    public String verifyMyAccount(Integer userId, String accountNumber) {
+        Account account = dsl.selectFrom(ACCOUNT)
+                .where(ACCOUNT.ACCOUNT_NUMBER.eq(accountNumber))
+                .fetchOneInto(Account.class);
+
+        if (account == null) {
+            return null;
+        }
+
+        if (account.userId() != userId) {
+            return "유저 불일치";
+        }
+
+        Random random = new Random();
+        int number = random.nextInt(1000);
+        String num = String.format("%03d", number);
+
+        PayHistory receiveHistory = this.createReceiveHistory(accountNumber, 1L, num, "얼마페이 인증");
+
+
+        return num;
     }
 
 }

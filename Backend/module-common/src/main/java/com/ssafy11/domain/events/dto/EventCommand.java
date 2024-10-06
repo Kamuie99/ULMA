@@ -8,8 +8,6 @@ import java.time.LocalDateTime;
 public record EventCommand(
         String category,
         String name,
-        LocalDateTime date,
-        Integer userId
-) {
+        LocalDateTime date) {
 }
 

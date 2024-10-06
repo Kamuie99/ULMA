@@ -1,8 +1,10 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import { StyleSheet, View, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, Text, FlatList, ActivityIndicator, TouchableOpacity, TextInput, Alert, StyleSheet } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { Swipeable } from 'react-native-gesture-handler';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import axiosInstance from '@/api/axios';
+import Icon from 'react-native-vector-icons/Ionicons';
 import { colors } from '@/constants';
 import { homeNavigations, friendsNavigations } from '@/constants/navigations';
 
@@ -24,7 +26,7 @@ function FriendsListScreen() {
   const route = useRoute();
   const isSelectionMode = route.name === homeNavigations.SELECT_FRIEND;
 
-  // 전체 목록 및 검색 결과 불러오기 함수
+  // 친구 목록 및 검색 결과 불러오기 함수
   const searchFriends = useCallback(async () => {
     setLoading(true);
     try {
@@ -36,9 +38,8 @@ function FriendsListScreen() {
         params.category = selectedCategory;
       }
 
-      const response = await axiosInstance.get(`/participant/same`, { params });
+      const response = await axiosInstance.get('/participant/same', { params });
       const fetchedFriends = response.data.data || [];
-
       setFilteredFriends(fetchedFriends);
     } catch (error) {
       console.error('친구 목록을 불러오는 데 실패했습니다:', error);
@@ -48,15 +49,13 @@ function FriendsListScreen() {
     }
   }, [searchQuery, selectedCategory]);
 
-  const handleSearch = () => {
-    searchFriends();
-  };
+  useFocusEffect(
+    useCallback(() => {
+      searchFriends(); // 포커스가 돌아오면 친구 목록 갱신
+    }, [searchFriends])
+  );
 
-  // 페이지가 처음 로드될 때 전체 목록 불러오기
-  useEffect(() => {
-    searchFriends(); // 처음 들어왔을 때 전체 목록을 불러오기
-  }, [searchFriends]);
-
+  // 전화번호 포맷팅 함수
   const formatPhoneNumber = (phoneNumber: string | null) => {
     if (!phoneNumber) return '등록된 번호가 없습니다.';
     return `${phoneNumber.slice(0, 3)}-${phoneNumber.slice(3, 7)}-${phoneNumber.slice(7)}`;
@@ -86,6 +85,43 @@ function FriendsListScreen() {
     }
   };
 
+  // 친구 삭제 요청 함수
+  const deleteFriend = async (guestId: number) => {
+    try {
+      await axiosInstance.delete(`/relation/${guestId}`);
+      setFilteredFriends(prevFriends => prevFriends.filter(friend => friend.guestId !== guestId));
+      Alert.alert('삭제 완료', '해당 친구가 삭제되었습니다.');
+    } catch (error) {
+      console.error('친구 삭제에 실패했습니다:', error);
+      Alert.alert('삭제 실패', '친구 삭제에 실패했습니다.');
+    }
+  };
+
+  // 삭제 확인 팝업 함수
+  const confirmDelete = (guestId: number) => {
+    Alert.alert(
+      "삭제 확인",
+      "이 친구를 삭제하시겠습니까?",
+      [
+        { text: "아니오", style: "cancel" },
+        { text: "예", onPress: () => deleteFriend(guestId) },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  // 삭제 버튼 렌더링 함수
+  const renderRightActions = (guestId: number) => {
+    return (
+      <TouchableOpacity
+        style={styles.deleteButton}
+        onPress={() => confirmDelete(guestId)}
+      >
+        <Icon name="trash-outline" size={28} color={colors.RED} />
+      </TouchableOpacity>
+    );
+  };
+
   const handleFriendSelect = (friend: Friend) => {
     if (isSelectionMode) {
       navigation.navigate(homeNavigations.SCHEDULE_ADD, {
@@ -101,25 +137,28 @@ function FriendsListScreen() {
     }
   };
 
+  // 친구 카드 렌더링 함수
   const renderFriendCard = ({ item }: { item: Friend }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => handleFriendSelect(item)}
-    >
-      <View style={styles.cardHeader}>
-        <Text style={styles.name}>{item.name}</Text>
-        <TouchableOpacity
-          style={[styles.categoryButton, { backgroundColor: getCategoryColor(item.category) }]}
-        >
-          <Text style={[styles.categoryText, { color: getCategoryTextColor(item.category) }]}>
-            {item.category}
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.phoneNumber}>
-        Phone <Text style={styles.colorGreen}>|</Text> {formatPhoneNumber(item.phoneNumber)}
-      </Text>
-    </TouchableOpacity>
+    <Swipeable renderRightActions={() => renderRightActions(item.guestId)}>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => handleFriendSelect(item)}
+      >
+        <View style={styles.cardHeader}>
+          <Text style={styles.name}>{item.name}</Text>
+          <TouchableOpacity
+            style={[styles.categoryButton, { backgroundColor: getCategoryColor(item.category) }]}
+          >
+            <Text style={[styles.categoryText, { color: getCategoryTextColor(item.category) }]}>
+              {item.category}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.phoneNumber}>
+          Phone <Text style={styles.colorGreen}>|</Text> {formatPhoneNumber(item.phoneNumber)}
+        </Text>
+      </TouchableOpacity>
+    </Swipeable>
   );
 
   const renderFooter = () => {
@@ -149,9 +188,6 @@ function FriendsListScreen() {
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
-        {/* <TouchableOpacity style={styles.searchButton} onPress={handleSearch}>
-          <Text style={styles.searchButtonText}>검색</Text>
-        </TouchableOpacity> */}
       </View>
       <FlatList
         data={filteredFriends}
@@ -184,16 +220,6 @@ const styles = StyleSheet.create({
   categoryPicker: {
     height: 40,
     width: 150,
-  },
-  searchButton: {
-    backgroundColor: colors.GREEN_700,
-    padding: 10,
-    borderRadius: 5,
-    marginLeft: 10,
-  },
-  searchButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
   },
   card: {
     backgroundColor: '#f5f5f5',
@@ -232,6 +258,12 @@ const styles = StyleSheet.create({
   },
   colorGreen: {
     color: colors.GREEN_700,
+  },
+  deleteButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    height: '100%',
   },
 });
 

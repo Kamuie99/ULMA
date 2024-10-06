@@ -38,11 +38,11 @@ public class AccountController {
     @PostMapping("/users/account")
     public ResponseEntity<Account> registerAccount(
             @AuthenticationPrincipal User user,
-            @RequestBody AccountNumberRequest accountNumber) {
+            @RequestBody AccountConnectRequest request) {
         Assert.notNull(user, "User must not be null");
-        Assert.notNull(accountNumber, "AccountNumber must not be null");
+        Assert.notNull(request, "계좌 정보를 입력해주세요.");
         int authenticatedUserId = Integer.parseInt(user.getUsername());
-        Account registeredAccount = accountService.connectAccount(authenticatedUserId, accountNumber.accountNumber());
+        Account registeredAccount = accountService.connectAccount(authenticatedUserId, request.bankCode(), request.accountNumber());
         return ResponseEntity.ok(registeredAccount);
     }
 
@@ -107,11 +107,12 @@ public class AccountController {
     @PostMapping("/users/account/verify")
     public ResponseEntity<VerifyNumber> VerifyAccount(
             @AuthenticationPrincipal User user,
-            @RequestBody VerifyAccount verifyAccount
+            @RequestBody AccountConnectRequest request
     ) {
         Assert.notNull(user, "User must not be null");
+        Assert.notNull(request, "계좌 정보를 입력해주세요.");
         int authenticatedUserId = Integer.parseInt(user.getUsername());
-        VerifyNumber verifyNumber = accountService.verifyMyAccount(authenticatedUserId, verifyAccount.accountNumber());
+        VerifyNumber verifyNumber = accountService.verifyMyAccount(authenticatedUserId, request.bankCode(), request.accountNumber());
         return ResponseEntity.ok(verifyNumber);
     }
 }

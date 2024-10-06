@@ -8,7 +8,7 @@ import java.util.List;
 public interface AccountDao {
     Account createAccount(Integer userId, String bankCode);  // BankCode -> String
 
-    Account connectAccount(Integer userid, String accountNumber);
+    Account connectAccount(Integer userId, String bankCode, String accountNumber);
 
     List<Account> findAllAccounts(Integer userId, String bankCode);  // BankCode -> String
 
@@ -22,5 +22,5 @@ public interface AccountDao {
     PayHistory chargeBalance(String accountNumber, Long amount);
     PaginatedHistory findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType, int page, int size);
 
-    String verifyMyAccount(Integer userId, String accountNumber);
+    String verifyMyAccount(Integer userId, String bankCode, String accountNumber);
 }

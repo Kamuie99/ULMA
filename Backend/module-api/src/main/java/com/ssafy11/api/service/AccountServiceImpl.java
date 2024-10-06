@@ -30,8 +30,14 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public Account connectAccount(Integer userId, String accountNumber) {
-        return accountDao.connectAccount(userId, accountNumber);
+    public Account connectAccount(Integer userId, String bankCode, String accountNumber) {
+        Account account = accountDao.connectAccount(userId, bankCode, accountNumber);
+
+        if (account == null) {
+            throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND);
+        }
+
+        return account;
     }
 
     @Override
@@ -111,8 +117,8 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public VerifyNumber verifyMyAccount(Integer userId, String accountNumber) {
-        String result = accountDao.verifyMyAccount(userId, accountNumber);
+    public VerifyNumber verifyMyAccount(Integer userId, String bankCode, String accountNumber) {
+        String result = accountDao.verifyMyAccount(userId, bankCode, accountNumber);
 
         if (result == null) {
             throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND);

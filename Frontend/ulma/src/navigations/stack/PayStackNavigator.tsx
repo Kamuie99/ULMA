@@ -161,14 +161,6 @@ function PayStackNavigator() {
           },
         }}
       />
-      {/* <Stack.Screen
-        name={payNavigations.RECOMMEND_OPTION}
-        component={RecommendOptionScreen}
-        options={{
-          headerTitle: ' ',
-          headerShown: false,
-        }}
-      /> */}
       <Stack.Screen
         name={payNavigations.SENDING}
         component={SendingScreen}

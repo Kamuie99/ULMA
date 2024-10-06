@@ -42,6 +42,8 @@ const payNavigations = {
   INPUT_AMOUNT: 'InputAmount',
   ACCOUNT_INFO: 'AccountInfo',
   ADD_ACCOUNT: 'AddAccount',
+  ACCOUNT_VERIFY: 'AccountVerify',
+  ACCOUNT_DETAIL: 'AccountDetail',
 } as const;
 
 const mypageNavigations = {

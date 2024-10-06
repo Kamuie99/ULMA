@@ -13,7 +13,7 @@ import {StyleSheet, Text, View} from 'react-native';
 
 type InputAmountScreenRouteProp = RouteProp<
   payStackParamList,
-  typeof payNavigations.INPUT_AMOUNT // 'INPUT_AMOUNT' 대신 정확한 경로 이름 사용
+  typeof payNavigations.INPUT_AMOUNT
 >;
 
 type InputAmountScreenProps = {
@@ -21,7 +21,7 @@ type InputAmountScreenProps = {
 };
 
 function InputAmountScreen({route}: InputAmountScreenProps) {
-  const {guestId} = route.params; // route.params에서 guestId를 받아옴
+  const {guestId} = route.params;
   const {accessToken} = useAuthStore();
   const [amount, setAmount] = useState(0);
 

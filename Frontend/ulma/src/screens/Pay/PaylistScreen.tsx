@@ -1,115 +1,92 @@
-//페이 이력보기 페이지
-
-import {colors} from '@/constants';
-import Icon from 'react-native-vector-icons/Entypo';
-
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
-  Text,
   TextInput,
-  TouchableOpacity,
   FlatList,
   StyleSheet,
+  TouchableOpacity,
+  Text,
 } from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
+import Icon from 'react-native-vector-icons/Entypo';
+import {colors} from '@/constants';
+import axiosInstance from '@/api/axios';
+import useAuthStore from '@/store/useAuthStore';
 
 interface Transaction {
-  id: string;
   date: string;
-  from: string;
-  to: string;
+  guest: string;
   amount: string;
+  description: string;
   type: 'send' | 'receive';
 }
 
 const PaylistScreen = () => {
   const [searchMode, setSearchMode] = useState(false);
   const [searchText, setSearchText] = useState('');
-  const [transactions] = useState<Transaction[]>([
-    {
-      id: '1',
-      date: '08.27',
-      from: 'ULMA페이머니',
-      to: '홍길동',
-      amount: '- 200,000',
-      type: 'send',
-    },
-    {
-      id: '2',
-      date: '08.20',
-      from: '김사비',
-      to: 'ULMA페이머니',
-      amount: '400,000',
-      type: 'receive',
-    },
-    {
-      id: '3',
-      date: '08.20',
-      from: '홍길동',
-      to: 'ULMA페이머니',
-      amount: '500,000',
-      type: 'receive',
-    },
-    {
-      id: '4',
-      date: '08.20',
-      from: '가나다',
-      to: 'ULMA페이머니',
-      amount: '600,000',
-      type: 'receive',
-    },
-    {
-      id: '5',
-      date: '08.15',
-      from: 'ULMA페이머니',
-      to: '윤예리',
-      amount: '- 100,000',
-      type: 'send',
-    },
+  const [payHistory, setPayHistory] = useState<Transaction[]>([]);
+  const {accessToken} = useAuthStore();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axiosInstance.get('/users/pay', {
+          headers: {Authorization: `Bearer ${accessToken}`},
+        });
+        console.log(response.data);
+
+        // 서버에서 받아온 데이터를 Transaction 형식으로 변환
+        const formattedData: Transaction[] = response.data.map((item: any) => ({
+          amount: item.amount,
+          date: item.transactionDate.slice(0, 10),
+          guest: item.counterpartyName,
+          description: item.description,
+          type: item.transactionType === 'SEND' ? 'send' : 'receive', // type 필드가 'send' 또는 'receive' 인지 확인
+        }));
+
+        setPayHistory(formattedData);
+      } catch (error) {
+        console.error('계좌 이력을 불러오는 중 에러가 발생했습니다:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // 드롭다운
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState('전체 보기');
+  const [items, setItems] = useState([
+    {label: '전체 보기', value: '전체 보기'},
+    {label: '출금', value: '###'},
+    {label: '입금', value: '###'},
+    {label: '충전', value: '###'},
   ]);
 
+  // 거래 내역
   const renderTransaction = ({item}: {item: Transaction}) => (
     <View style={styles.transactionItem}>
       <View style={styles.iconContainer}>
         <Text style={styles.iconText}>PAY</Text>
       </View>
       <View style={styles.transactionDetails}>
-        <Text style={styles.transactionText}>
-          {item.from} → {item.to}
+        <Text style={styles.transactionText}>{item.guest}</Text>
+        <Text style={styles.dateText}>
+          {item.description} | {item.date}
         </Text>
-        <Text style={styles.dateText}>{item.date}</Text>
       </View>
       <Text
         style={[
           styles.amountText,
           item.type === 'send' ? styles.negative : styles.positive,
         ]}>
-        {item.amount}
+        {item.type === 'send' ? `-${item.amount}` : item.amount}
       </Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
-      {/* 상단 Pay 머니 영역 */}
-      <View style={styles.moneyContainer}>
-        <TouchableOpacity style={styles.moneyWrap}>
-          <View>
-            <Text style={styles.moneyText}>페이머니</Text>
-            <Text style={styles.amountTextLarge}>54,000원</Text>
-          </View>
-          <Icon name="chevron-right" size={24} color={colors.BLACK} />
-        </TouchableOpacity>
-        <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.buttonText}>송금</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.buttonText}>충전</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
       <View style={styles.listContainer}>
         {/* 검색창 */}
         <View style={styles.searchContainer}>
@@ -123,7 +100,16 @@ const PaylistScreen = () => {
             />
           ) : (
             <View style={styles.searchBefore}>
-              <Text>머니 송금 내역</Text>
+              {/* 드롭다운 메뉴 */}
+              <DropDownPicker
+                open={open}
+                value={value}
+                items={items}
+                setOpen={setOpen}
+                setValue={setValue}
+                setItems={setItems}
+                containerStyle={{width: '70%'}}
+              />
               <TouchableOpacity onPress={() => setSearchMode(true)}>
                 <Icon
                   name="magnifying-glass"
@@ -136,9 +122,8 @@ const PaylistScreen = () => {
         </View>
         {/* 송금 내역 리스트 */}
         <FlatList
-          data={transactions}
+          data={payHistory}
           renderItem={renderTransaction}
-          keyExtractor={item => item.id}
           style={styles.transactionList}
         />
       </View>
@@ -150,49 +135,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-  },
-  moneyContainer: {
-    padding: 20,
-    borderColor: colors.GRAY_300,
-    borderWidth: 1,
-    borderRadius: 10,
-    backgroundColor: colors.WHITE,
-    // 그림자
-    shadowColor: colors.BLACK,
-    shadowOpacity: 0.15, // 그림자의 투명도
-    shadowRadius: 20, // 그림자의 흐림 정도
-    elevation: 4,
-  },
-  moneyWrap: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  moneyText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.BLACK,
-  },
-  amountTextLarge: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: colors.BLACK,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  actionButton: {
-    backgroundColor: colors.LIGHTGRAY,
-    paddingVertical: 9,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-    width: '45%',
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: colors.BLACK,
   },
   searchContainer: {
     marginVertical: 6,
@@ -214,9 +156,6 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.GREEN_700,
     borderBottomWidth: 0.5,
     width: '100%',
-  },
-  searchIcon: {
-    fontSize: 24,
   },
   transactionList: {
     paddingHorizontal: 16,
@@ -266,7 +205,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.LIGHTGRAY,
     borderRadius: 8,
     flex: 1,
-    marginTop: 20,
     overflow: 'scroll',
   },
 });

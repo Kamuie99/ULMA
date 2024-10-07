@@ -175,7 +175,7 @@ const ScheduleMainScreen = ({ navigation }) => {
           arrowColor: colors.GREEN_700,
           textDayFontSize: 16,
           textMonthFontSize: 16,
-          textDayHeaderFontSize: 16,
+          textDayHeaderFontSize: 14,
           textSaturday: { color: 'blue' },
           textSunday: { color: 'red' },
           'stylesheet.calendar.header': {

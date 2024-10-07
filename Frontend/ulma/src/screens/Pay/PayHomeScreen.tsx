@@ -157,21 +157,30 @@ function PayHomeScreen() {
           {payHistory.length > 0 ? (
             <>
               <View>
-                {/* 송금 내역 리스트 */}
-                <FlatList
-                  data={payHistory.slice(0, 5)} // 10개의 항목만 전달
-                  renderItem={renderTransaction}
-                  keyExtractor={item => item.id}
-                  style={{maxHeight: 200}} // 높이 조정을 통해 스크롤 영역 제한
-                />
+                <View>
+                  {/* 송금 내역 리스트 */}
+                  <FlatList
+                    data={[
+                      ...payHistory.slice(0, 5),
+                      {id: 'loadMore', type: 'loadMore'},
+                    ]} // 데이터에 더보기 항목 추가
+                    renderItem={({item}) =>
+                      item.type === 'loadMore' ? (
+                        <TouchableOpacity
+                          onPress={() =>
+                            navigation.navigate(payNavigations.PAY_LIST)
+                          }>
+                          <Text style={styles.moreBtn}>더보기</Text>
+                        </TouchableOpacity>
+                      ) : (
+                        renderTransaction({item})
+                      )
+                    }
+                    keyExtractor={item => item.id}
+                    style={{maxHeight: '90%'}}
+                  />
+                </View>
               </View>
-
-              {payHistory.length > 5 && (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate(payNavigations.PAY_LIST)}>
-                  <Text style={styles.moreBtn}>더보기</Text>
-                </TouchableOpacity>
-              )}
             </>
           ) : (
             <Text>내역이 없습니다.</Text> // 데이터가 없을 때 표시
@@ -218,12 +227,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.LIGHTGRAY,
     padding: 15,
+    gap: 15,
   },
   boxContainer: {
     backgroundColor: colors.WHITE,
     borderRadius: 15,
     padding: 20,
-    marginVertical: 10,
   },
   title: {
     fontWeight: 'bold',
@@ -259,8 +268,8 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingVertical: 20,
     justifyContent: 'space-between',
+    paddingHorizontal: 5,
   },
   button: {
     justifyContent: 'center',

@@ -96,6 +96,9 @@ const AccountDetailScreen: React.FC = () => {
           renderItem={renderItem}
           keyExtractor={item => item.id}
           style={styles.list}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>거래 내역이 없습니다 😥</Text>
+          }
         />
       </View>
     </View>
@@ -153,6 +156,11 @@ const styles = StyleSheet.create({
   },
   amount: {
     fontSize: 16,
+  },
+  emptyText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 15,
   },
 });
 

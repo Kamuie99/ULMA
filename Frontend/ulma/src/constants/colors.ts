@@ -12,7 +12,9 @@ const colors = {
   LIGHTPINK: '#F9CFD7',
   YELLOW: '#FFF4C1',
   BLUE: '#CEE9EB',
-  PASTEL_BLUE: '#80CEE1'
+  PASTEL_BLUE: '#80CEE1',
+  ORANGE: '#FF8461',
+  PURPLE: '#CF8DBF',
 };
 
 export {colors};

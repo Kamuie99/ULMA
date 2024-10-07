@@ -10,9 +10,15 @@ import {
 import Icon from 'react-native-vector-icons/Entypo';
 import Modal from 'react-native-modal';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
+<<<<<<< HEAD:Frontend/ulma/src/screens/Events/InputOptionModal.tsx
+import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
+import {eventNavigations, payNavigations} from '@/constants/navigations';
+import usePayStore from '@/store/usePayStore';
+=======
 import {payNavigations} from '@/constants/navigations';
 import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import {colors} from '@/constants';
+>>>>>>> b527ec73bdb4dbf0ee1b73a19b0d5d6d6136e2b5:Frontend/ulma/src/screens/Pay/InputOptionModal.tsx
 
 interface InputOptionModalProps {
   isVisible: boolean;
@@ -52,7 +58,12 @@ function InputOptionModal({
   // 계좌 내역 불러오기
   const handleAccountHistory = () => {
     console.log('계좌 내역 불러오기 실행');
+<<<<<<< HEAD:Frontend/ulma/src/screens/Events/InputOptionModal.tsx
+    getAccountInfo();
+    navigation.navigate(eventNavigations.ACCOUNT_HISTORY);
+=======
     navigation.navigate('Accounthistory');
+>>>>>>> b527ec73bdb4dbf0ee1b73a19b0d5d6d6136e2b5:Frontend/ulma/src/screens/Pay/InputOptionModal.tsx
     onClose(); // 모달 닫기
   };
 

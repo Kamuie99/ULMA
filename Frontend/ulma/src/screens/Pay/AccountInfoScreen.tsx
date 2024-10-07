@@ -3,6 +3,7 @@ import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import axiosInstance from '@/api/axios';
 import CustomButton from '@/components/common/CustomButton';
 import {colors} from '@/constants';
+import Icon from 'react-native-vector-icons/Entypo';
 import useAuthStore from '@/store/useAuthStore';
 import {useNavigation} from '@react-navigation/native';
 import {ScrollView} from 'react-native-gesture-handler';
@@ -48,7 +49,13 @@ function AccountInfoScreen() {
   }, [accessToken, accountNumber]); // accountNumber가 바뀌면 다시 실행
 
   const handleSelectAccount = account => {
-    // setSelectedAccount(account);
+    setSelectedAccount({
+      accountNumber: account.accountNumber,
+      bankCode: account.bankCode,
+    });
+  };
+
+  const handleViewAccountDetail = account => {
     navigation.navigate<payStackParamList>(payNavigations.ACCOUNT_DETAIL, {
       accountNumber: account.accountNumber,
       bankCode: account.bankCode,
@@ -57,20 +64,11 @@ function AccountInfoScreen() {
 
   const handleAccountAction = async () => {
     if (!selectedAccount) return;
-    const accessToken = useAuthStore.getState().accessToken;
-
     try {
-      const response = await axiosInstance.post(
-        '/users/account',
-        {
-          accountNumber: selectedAccount.accountNumber,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        },
-      );
+      const response = await axiosInstance.post('/users/account', {
+        bankCode: selectedAccount.bankCode,
+        accountNumber: selectedAccount.accountNumber,
+      });
       console.log('post요청:', response.data);
       Toast.show({
         text1: '연결 계좌가 변경되었습니다.',
@@ -87,18 +85,31 @@ function AccountInfoScreen() {
         <>
           <ScrollView>
             {accountInfo.map(account => (
-              <TouchableOpacity
+              <View
                 key={account.id}
-                style={
-                  account.accountNumber === selectedAccount?.accountNumber
+                style={[
+                  styles.accountItemContainer,
+                  selectedAccount?.accountNumber === account.accountNumber
                     ? styles.selectedAccountBox
-                    : styles.accountBox
-                }
-                onPress={() => handleSelectAccount(account)}>
-                <Text>{account.bankCode}</Text>
-                <Text>{account.accountNumber}</Text>
-                <Text>{account.balance} 원</Text>
-              </TouchableOpacity>
+                    : {},
+                ]}>
+                <TouchableOpacity
+                  style={styles.accountDetails}
+                  onPress={() => handleSelectAccount(account)}>
+                  <Text>{account.bankCode}</Text>
+                  <Text>{account.accountNumber}</Text>
+                  <Text>{account.balance} 원</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.viewButton}
+                  onPress={() => handleViewAccountDetail(account)}>
+                  <Icon
+                    name="chevron-right"
+                    size={24}
+                    color={colors.GRAY_700}
+                  />
+                </TouchableOpacity>
+              </View>
             ))}
           </ScrollView>
           {selectedAccount && (
@@ -123,7 +134,10 @@ const styles = StyleSheet.create({
     padding: 15,
     gap: 10,
   },
-  accountBox: {
+  accountItemContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     backgroundColor: colors.WHITE,
     borderRadius: 10,
     borderWidth: 1,
@@ -133,11 +147,17 @@ const styles = StyleSheet.create({
   },
   selectedAccountBox: {
     backgroundColor: colors.LIGHTPINK,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.GRAY_300,
+  },
+  accountDetails: {
+    flex: 1,
+  },
+  viewButton: {
+    borderRadius: 5,
     padding: 10,
-    marginBottom: 10,
+  },
+  viewButtonText: {
+    color: colors.WHITE,
+    fontWeight: 'bold',
   },
   noAccountsText: {
     textAlign: 'center',

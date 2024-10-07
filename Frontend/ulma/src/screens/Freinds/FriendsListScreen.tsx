@@ -162,7 +162,7 @@ function FriendsListScreen() {
         </Picker>
         <TextInput
           style={styles.searchInput}
-          placeholder="지인 이름 또는 전화번호로 검색"
+          placeholder="지인 이름으로 검색"
           value={searchQuery}
           onChangeText={setSearchQuery}
         />

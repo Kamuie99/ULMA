@@ -33,16 +33,18 @@ const PaylistScreen = () => {
         const response = await axiosInstance.get('/users/pay', {
           headers: {Authorization: `Bearer ${accessToken}`},
         });
-        console.log(response.data);
+        console.log(response.data.data);
 
         // 서버에서 받아온 데이터를 Transaction 형식으로 변환
-        const formattedData: Transaction[] = response.data.map((item: any) => ({
-          amount: item.amount,
-          date: item.transactionDate.slice(0, 10),
-          guest: item.counterpartyName,
-          description: item.description,
-          type: item.transactionType === 'SEND' ? 'send' : 'receive', // type 필드가 'send' 또는 'receive' 인지 확인
-        }));
+        const formattedData: Transaction[] = response.data.data.map(
+          (item: any) => ({
+            amount: item.amount,
+            date: item.transactionDate.slice(0, 10),
+            guest: item.counterpartyName,
+            description: item.description,
+            type: item.transactionType === 'SEND' ? 'send' : 'receive', // type 필드가 'send' 또는 'receive' 인지 확인
+          }),
+        );
 
         setPayHistory(formattedData);
       } catch (error) {

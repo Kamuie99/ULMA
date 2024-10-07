@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
 import CustomButton from '@/components/common/CustomButton';
 import {payNavigations} from '@/constants/navigations';
 import {colors} from '@/constants';
@@ -16,21 +15,7 @@ import axiosInstance from '@/api/axios';
 import useAuthStore from '@/store/useAuthStore';
 import usePayStore from '@/store/usePayStore';
 
-function PayrechargingScreen({navigation}) {
-  useEffect(() => {
-    // 페이지에 들어올 때 탭바 숨기기
-    navigation.getParent()?.setOptions({
-      tabBarStyle: {display: 'none'},
-    });
-
-    // 컴포넌트가 unmount 될 때 탭바를 다시 보이도록 설정
-    return () => {
-      navigation.getParent()?.setOptions({
-        tabBarStyle: {display: ''},
-      });
-    };
-  }, [navigation]);
-
+function PayrechargingScreen() {
   const [amount, setAmount] = useState<number>(0);
   const {getPayInfo} = usePayStore();
 

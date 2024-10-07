@@ -98,6 +98,7 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
 
   // 시간이 03:33:33인 경우 "종일"로 표시 (원본 eventTime에서 바로 확인)
   // 시간이 03:33:33인 경우 "종일"로 표시 (원본 이벤트 시간이 null일 때 대비)
+  // 이거 null값으로 보내면 백엔드 로직이랑 db구조랑 프론트 로직 다 바꿔야해서 쩔수임
   const isAllDayEvent = (eventTime: string | null) => {
     if (!eventTime) {
       return false; // eventTime이 null 또는 undefined일 경우 처리

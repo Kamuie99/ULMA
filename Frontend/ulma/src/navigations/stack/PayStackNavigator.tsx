@@ -1,7 +1,7 @@
 import {payNavigations} from '@/constants/navigations';
 import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
-import {StyleSheet, View, Text} from 'react-native';
+import {StyleSheet, Text} from 'react-native';
 
 import {colors} from '@/constants';
 import Icon from 'react-native-vector-icons/Entypo';
@@ -20,12 +20,18 @@ import FriendsearchScreen from '@/screens/Events/FriendsearchScreen';
 import InputAmountScreen from '@/screens/Pay/InputAmountScreen';
 import AiRecommendScreen from '@/screens/Pay/AiRecommendScreen'; // '.1'을 제거한 경로
 import PayHomeScreen from '@/screens/Pay/PayHomeScreen';
-import MakePayAccountScreen from '@/screens/Pay/MakePayAccountScreen';
 import AccountInfoScreen from '@/screens/Pay/AccountInfoScreen';
 import AddAccountScreen from '@/screens/Pay/AddAccountScreen';
 import SendAccountScreen from '@/screens/Pay/SendAccountScreen';
 import AccountVerifyScreen from '@/screens/Pay/AccountVerifyScreen';
 import AccountDetailScreen from '@/screens/Pay/AccountDetailScreen';
+import ExcelScreen from '@/screens/Events/ExcelScreen';
+import {DocumentPickerResponse} from 'react-native-document-picker';
+import AccounthistoryScreen from '@/screens/Pay/AccounthistoryScreen';
+import InputAmountScreen from '@/screens/Pay/InputAmountScreen';
+import FriendsearchScreen from '@/screens/Pay/FriendsearchScreen';
+import SendingScreen from '@/screens/Pay/SendingScreen';
+import {StackScreenProps} from '@react-navigation/stack';
 
 export type payStackParamList = {
   [payNavigations.HOME]: undefined;
@@ -46,6 +52,7 @@ export type payStackParamList = {
   [payNavigations.SEND_ACCOUNT]: undefined;
   [payNavigations.ACCOUNT_VERIFY]: {verifyNumber: number};
   [payNavigations.ACCOUNT_DETAIL]: {accountNumber: string; bankCode: string};
+  [payNavigations.EXCEL_SCREEN]: {file?: DocumentPickerResponse};
 };
 
 const Stack = createStackNavigator<payStackParamList>();
@@ -117,7 +124,6 @@ function PayStackNavigator() {
       <Stack.Screen
         name={payNavigations.CHARGER_RESULT}
         component={ChangeresultScreen}
-        initialParams={{amount: '0'}}
         options={{
           headerTitle: 'Pay 충전 결과',
         }}
@@ -186,16 +192,24 @@ function PayStackNavigator() {
       />
       <Stack.Screen
         name={payNavigations.ACCOUNT_VERIFY}
-        component={AccountVerifyScreen}
+        component={props => <AccountVerifyScreen {...props} />}
         options={{
           headerTitle: '송금하기',
         }}
       />
       <Stack.Screen
         name={payNavigations.ACCOUNT_DETAIL}
-        component={AccountDetailScreen}
+        component={props => <AccountDetailScreen {...props} />}
         options={{
           headerTitle: '계좌 상세 보기',
+        }}
+      />
+      <Stack.Screen
+        name={payNavigations.EXCEL_SCREEN}
+        component={props => <ExcelScreen {...props} />}
+        options={{
+          headerTitle: '엑셀 파일 등록',
+          headerStyle: {backgroundColor: colors.LIGHTGRAY},
         }}
       />
     </Stack.Navigator>

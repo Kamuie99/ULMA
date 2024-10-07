@@ -4,7 +4,7 @@ import {colors} from '@/constants';
 import React, {useState} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity, Alert} from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
-import InputOptionModal from './InputOptionModal';
+import InputOptionModal from '../Events/InputOptionModal';
 
 export default function AddhistoryScreen() {
   const category = '돌잔치';

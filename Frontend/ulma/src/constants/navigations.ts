@@ -23,17 +23,19 @@ const eventNavigations = {
   EVENT_DETAIL: 'EVENT_DETAIL',
   AI_RECOMMEND_MESSAGE: 'AIRecommendMessage',
   EVENT_FIX: 'EVENT_FIX',
+  ACCOUNT_HISTORY: 'AccountHistory',
+  FRIEND_SEARCH: 'Friendsearch',
 } as const;
 
 const payNavigations = {
   HOME: 'PayHome',
-  ACCOUNT_HISTORY: 'Accounthistory',
+  // ACCOUNT_HISTORY: 'Accounthistory',
   ACCOUNT_INPUT: 'Accountinput',
   ADD_HISTORY: 'Addhistory',
   CHARGER_RESULT: 'Chargerresult',
   PAY_LIST: 'Paylist',
   PAY_RECHARGE: 'Payrecharge',
-  FRIEND_SEARCH: 'Friendsearch',
+  // FRIEND_SEARCH: 'Friendsearch',
   FRIENDHSHIP_SECLECT: 'Friendshipselect',
   RECOMMEND_OPTION: 'RecommendOption',
   SENDING: 'Sending',

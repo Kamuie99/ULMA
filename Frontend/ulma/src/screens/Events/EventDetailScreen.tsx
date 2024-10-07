@@ -14,7 +14,7 @@ import {RouteProp, NavigationProp} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axiosInstance from '@/api/axios';
 import {eventStackParamList} from '@/navigations/stack/EventStackNavigator';
-import InputOptionModal from '@/screens/Pay/InputOptionModal'; // 모달 컴포넌트 import
+import InputOptionModal from '@/screens/Events/InputOptionModal'; // 모달 컴포넌트 import
 
 type EventDetailScreenRouteProp = RouteProp<
   eventStackParamList,

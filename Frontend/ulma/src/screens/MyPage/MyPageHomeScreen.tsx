@@ -7,7 +7,7 @@ import {
   ScrollView,
   Alert, // 로그아웃 확인창을 띄우기 위한 Alert import
 } from 'react-native';
-import {eventNavigations, mypageNavigations} from '@/constants/navigations';
+import {eventNavigations, friendsNavigations, mypageNavigations} from '@/constants/navigations';
 import {payNavigations} from '@/constants/navigations';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -103,7 +103,7 @@ function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
       <View style={styles.InfoBox}>
         <Text>지인 관리</Text>
         
-        <TouchableOpacity style={styles.InfoBoxInner}>
+        <TouchableOpacity style={styles.InfoBoxInner} onPress={() => navigation.navigate(friendsNavigations.FRIENDS_LIST)}>
           <View style={styles.MenuBar}>
             <Icon2 name="account-search" size={24} color="#000" />
             <Text style={styles.InfoMenu}>지인 목록 조회</Text>
@@ -111,7 +111,7 @@ function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
           <Icon name="chevron-forward" size={15} color="#666" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.InfoBoxInner}>
+        <TouchableOpacity style={styles.InfoBoxInner} onPress={() => navigation.navigate(friendsNavigations.FRIENDS_ADD)}>
           <View style={styles.MenuBar}>
             <Icon2 name="account-plus" size={24} color="#000" />
             <Text style={styles.InfoMenu}>지인 신규 등록</Text>

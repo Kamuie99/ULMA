@@ -95,8 +95,8 @@ public class AccountController {
             @RequestParam(value = "start_date", required = false) LocalDate startDate,
             @RequestParam(value = "end_date", required = false) LocalDate endDate,
             @RequestParam(value = "pay_type", required = false) String payType,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size) {
         Assert.hasText(accountNumber, "AccountNumber must not be null");
         PaginatedHistory paginatedHistory = accountService.findPayHistory(accountNumber, startDate, endDate, payType, page, size);
         return ResponseEntity.ok(paginatedHistory);

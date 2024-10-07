@@ -144,6 +144,7 @@ public class AccountDaoImpl implements AccountDao {
         // 2. 받는 사람의 계좌를 조회
         Account targetAccount = this.findByAccountNumber(targetAccountNumber);
 
+        if (senderAccount != null && targetAccount != null && senderAccount.balance() >= amount) {
         // 3. 송금 대상 사용자의 이름을 조회
         String targetUserName = dsl.select(USERS.NAME)
                 .from(USERS)
@@ -157,7 +158,6 @@ public class AccountDaoImpl implements AccountDao {
                 .fetchOneInto(String.class);
 
         // 5. 송금 처리
-        if (senderAccount != null && targetAccount != null && senderAccount.balance() >= amount) {
             // 6. 보내는 사람의 계좌에서 잔액 차감
             dsl.update(ACCOUNT)
                     .set(ACCOUNT.BALANCE, ACCOUNT.BALANCE.subtract(amount))

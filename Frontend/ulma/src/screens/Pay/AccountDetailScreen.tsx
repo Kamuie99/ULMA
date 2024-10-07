@@ -1,13 +1,11 @@
+import React, {useCallback, useEffect, useState} from 'react';
+import {StyleSheet, View, Text, FlatList} from 'react-native';
 import axiosInstance from '@/api/axios';
 import CustomButton from '@/components/common/CustomButton';
 import {colors} from '@/constants';
-import {payNavigations} from '@/constants/navigations';
-import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import useAuthStore from '@/store/useAuthStore';
-import {useFocusEffect} from '@react-navigation/native';
-import {StackScreenProps} from '@react-navigation/stack';
-import React, {useCallback, useEffect, useState} from 'react';
-import {View, Text, FlatList, StyleSheet} from 'react-native';
+import {useFocusEffect, useRoute} from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 
 interface Transaction {
   id: string;
@@ -15,22 +13,12 @@ interface Transaction {
   amount: string;
 }
 
-type AccountDetailScreenProps = StackScreenProps<
-  payStackParamList,
-  typeof payNavigations.ACCOUNT_DETAIL
-> & {
-  accountNumber: string;
-  bankCode: string;
-};
+const AccountDetailScreen: React.FC = () => {
+  const route = useRoute();
+  const params = route.params as {accountNumber: string; bankCode: string};
 
-function AccountDetailScreen({
-  navigation,
-  accountNumber,
-  bankCode,
-}: AccountDetailScreenProps) {
   const [accountHistory, setAccountHistory] = useState([]);
   const {accessToken} = useAuthStore();
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -40,23 +28,35 @@ function AccountDetailScreen({
         setLoading(true);
         try {
           const response = await axiosInstance.get(
-            `/account/${accountNumber}/history`,
+            `/account/${params.accountNumber}/history`,
             {
               headers: {
                 Authorization: `Bearer ${accessToken}`,
               },
             },
           );
-          setAccountHistory(response.data);
-          console.log(accountHistory);
+          setAccountHistory(response.data.data);
+          console.log(response.data.data);
         } catch (err) {
+          console.log(err);
+          if (err.code === 401) {
+            Toast.show({
+              type: 'error',
+              text1: '로그인이 만료되었습니다.',
+            });
+            navigation.navigate('Auth', {screen: 'LoginScreen'});
+          }
+          Toast.show({
+            type: 'error',
+            text1: '거래 내역을 가져오는 중 에러가 발생했습니다.',
+          });
           setError(err);
         } finally {
           setLoading(false);
         }
       };
       fetchAccountHistory();
-    }, [accountNumber, accessToken]),
+    }, [accessToken, params.accountNumber]),
   );
 
   const [data, setData] = useState<Transaction[]>();
@@ -64,8 +64,12 @@ function AccountDetailScreen({
     if (accountHistory && accountHistory.length > 0) {
       const formattedData = accountHistory.map((item, index) => ({
         id: item.id || String(index),
-        name: item.name,
-        amount: `${item.amount} 원`,
+        description: item.description,
+        name: item.counterpartyName,
+        amount:
+          item.transactionType === 'SEND'
+            ? `- ${item.amount} 원`
+            : `${item.amount} 원`,
       }));
       setData(formattedData);
     }
@@ -84,24 +88,22 @@ function AccountDetailScreen({
     <View style={styles.container}>
       <View style={styles.cardContiner}>
         <View style={styles.accountInfoContainer}>
-          <Text style={styles.accountInfo}>{bankCode}</Text>
-          <Text style={styles.accountInfo}>{accountNumber}</Text>
+          <Text style={styles.accountInfo}>{params.bankCode}</Text>
+          <Text style={styles.accountInfo}>{params.accountNumber}</Text>
         </View>
         <FlatList
           data={data}
           renderItem={renderItem}
           keyExtractor={item => item.id}
           style={styles.list}
-        />
-        <CustomButton
-          label="확인"
-          variant="outlined"
-          onPress={() => navigation.navigate(payNavigations.FRIEND_SEARCH)}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>거래 내역이 없습니다 😥</Text>
+          }
         />
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -154,6 +156,11 @@ const styles = StyleSheet.create({
   },
   amount: {
     fontSize: 16,
+  },
+  emptyText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 15,
   },
 });
 

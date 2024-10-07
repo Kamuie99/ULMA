@@ -42,16 +42,31 @@ function FriendsDetailScreen({ route }: FriendsDetailScreenProps) {
   }, [guestId]);
 
   useEffect(() => {
-    console.log('Received guestId:', guestId); // guestId가 제대로 전달되는지 확인
     fetchFriendDetails();
   }, [fetchFriendDetails]);
 
-  // 친구 정보 카드 + 금액 요약 카드 컴포넌트
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case '가족':
+        return colors.PINK;
+      case '친구':
+        return colors.GREEN_700;
+      case '직장':
+        return colors.PASTEL_BLUE;
+      case '지인':
+        return colors.PASTEL_BLUE;
+      case '기타':
+        return colors.GRAY_300;
+      default:
+        return '#e0e0e0';
+    }
+  };
+
   const renderFriendSummaryCard = () => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
         <Text style={styles.name}>{name}</Text>
-        <TouchableOpacity style={styles.categoryButton}>
+        <TouchableOpacity style={[styles.categoryButton, { backgroundColor: getCategoryColor(category) }]}>
           <Text style={styles.categoryText}>{category}</Text>
         </TouchableOpacity>
       </View>
@@ -59,14 +74,13 @@ function FriendsDetailScreen({ route }: FriendsDetailScreenProps) {
         Phone <Text style={styles.colorGreen}>|</Text> {formatPhoneNumber(phoneNumber)}
       </Text>
 
-      {/* 구분선 */}
       <View style={styles.separator} />
 
       {summary && (
         <View style={styles.summaryContent}>
           <View>
             <Text style={[styles.amountText, styles.receivedText]}>{`+${summary.totalReceived.toLocaleString()}원`}</Text>
-            <Text style={[styles.amountText, styles.givenText]}>{`-${summary.totalGiven.toLocaleString()}원`}</Text>
+            <Text style={[styles.amountText, styles.givenText]}>{`${summary.totalGiven.toLocaleString()}원`}</Text>
           </View>
           <View style={styles.totalContainer}>
             <Text style={summary.totalBalance > 0 ? styles.balancePositive : styles.balanceNegative}>
@@ -94,8 +108,6 @@ function FriendsDetailScreen({ route }: FriendsDetailScreenProps) {
 
   return (
     <View style={styles.container}>
-      {/* 개발 환경용  */}
-      <Text>{guestId}</Text> 
       {/* 친구 카드 + 금액 요약 카드 렌더링 */}
       {renderFriendSummaryCard()}
 
@@ -103,7 +115,7 @@ function FriendsDetailScreen({ route }: FriendsDetailScreenProps) {
         <FlatList
           data={transactions}
           renderItem={renderTransactionCard}
-          keyExtractor={(item) => item.guestId.toString()} // guestId가 고유한지 확인
+          keyExtractor={(item) => item.guestId.toString()}
         />
       ) : (
         <Text style={styles.noTransactions}>거래 내역이 없습니다</Text>
@@ -144,7 +156,6 @@ const styles = StyleSheet.create({
     color: colors.BLACK,
   },
   categoryButton: {
-    backgroundColor: '#e0e0e0',
     borderRadius: 16,
     paddingVertical: 4,
     paddingHorizontal: 12,
@@ -152,7 +163,7 @@ const styles = StyleSheet.create({
   },
   categoryText: {
     fontSize: 14,
-    color: '#333',
+    color: colors.WHITE,
   },
   phoneNumber: {
     fontSize: 14,
@@ -170,10 +181,6 @@ const styles = StyleSheet.create({
   summaryContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-  },
-  amountLabel: {
-    fontSize: 14,
-    color: colors.GRAY_700,
   },
   amountText: {
     fontSize: 16,

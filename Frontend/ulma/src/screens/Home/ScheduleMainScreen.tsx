@@ -128,10 +128,10 @@ const ScheduleMainScreen = ({ navigation }) => {
           <Text style={styles.eventExpense}>₩ {-item.paidAmount}</Text>
           <TouchableOpacity
             onPress={() => navigation.navigate(friendsNavigations.FREINDS_DETAIL, {
-              guestId: item.guestId, // guestId 전달
-              name: item.guestName, // 이름 전달
-              category: item.category, // 카테고리 전달
-              phoneNumber: item.phoneNumber, // 전화번호 전달
+              guestId: item.guestId,
+              name: item.guestName,
+              category: item.category,
+              phoneNumber: item.phoneNumber,
             })}
           >
             <Text>{`${item.guestName}님과의 거래내역 조회 ->`}</Text>
@@ -140,10 +140,7 @@ const ScheduleMainScreen = ({ navigation }) => {
       </View>
     </Swipeable>
   );
-  
-  
 
-  // 날짜 형식을 '10월 4일' 형식으로 변환
   const formatDateToKorean = (dateString) => {
     const date = new Date(dateString);
     const month = date.getMonth() + 1;
@@ -153,9 +150,9 @@ const ScheduleMainScreen = ({ navigation }) => {
 
   const handleDayPress = (day) => {
     if (selectedDate === day.dateString) {
-      setSelectedDate(''); // 선택 해제
+      setSelectedDate('');
     } else {
-      setSelectedDate(day.dateString); // 날짜 선택
+      setSelectedDate(day.dateString);
     }
   };
 
@@ -176,6 +173,15 @@ const ScheduleMainScreen = ({ navigation }) => {
         theme={{
           selectedDayBackgroundColor: colors.GREEN_700,
           arrowColor: colors.GREEN_700,
+          textDayFontSize: 16,
+          textMonthFontSize: 16,
+          textDayHeaderFontSize: 16,
+          textSaturday: { color: 'blue' },
+          textSunday: { color: 'red' },
+          'stylesheet.calendar.header': {
+            dayTextAtIndex0: { color: colors.PINK },
+            dayTextAtIndex6: { color: colors.PASTEL_BLUE },
+          },
         }}
         locale={'ko'}
       />

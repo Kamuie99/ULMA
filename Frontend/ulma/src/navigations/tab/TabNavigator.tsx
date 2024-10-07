@@ -27,7 +27,7 @@ function TabNavigator() {
           } else if (route.name === 'Friends') {
             iconName = focused ? 'people' : 'people-outline';
           } else if (route.name === 'Event') {
-            iconName = focused ? 'person' : 'person-outline';
+            iconName = focused ? 'balloon' : 'balloon-outline';
           } else if (route.name === 'MyPage') {
             iconName = focused ? 'apps' : 'apps-outline';
           }

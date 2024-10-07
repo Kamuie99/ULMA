@@ -5,12 +5,44 @@ import { useNavigation } from '@react-navigation/native';
 import axiosInstance from '@/api/axios';
 import Contacts from 'react-native-contacts';
 import Icon from 'react-native-vector-icons/Ionicons';
+import CheckBox from '@react-native-community/checkbox';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 
 const categories = ['가족', '친구', '친척', '직장', '학교', '지인', '기타'];
 
+// 휴대폰 번호 정규식 검증 함수
+function phoneNumberCheck(number) {
+  let result = /^(01[016789]{1})-?[0-9]{3,4}-?[0-9]{4}$/;
+  return result.test(number);
+}
+
+// 전화번호에 하이픈을 넣어주는 함수
+const formatPhoneNumber = (number) => {
+  const cleaned = ('' + number).replace(/\D/g, '');
+  const match = cleaned.match(/^(\d{3})(\d{3,4})(\d{4})$/);
+  if (match) {
+    return `${match[1]}-${match[2]}-${match[3]}`;
+  }
+  return number;
+};
+
+// 하이픈을 제거하고 번호를 반환하는 함수
+const cleanPhoneNumber = (number) => {
+  return number.replace(/-/g, '');
+};
+
+// 카테고리별 색상을 반환하는 함수
+const getCategoryColor = (category) => {
+  switch (category) {
+    case '가족': return colors.PINK;
+    case '친구': return colors.GREEN_700;
+    case '직장': return colors.PASTEL_BLUE;
+    default: return '#e0e0e0';
+  }
+};
+
 function AddFriendScreen() {
-  const [friends, setFriends] = useState([{ name: '', category: '', phoneNumber: '' }]);
+  const [friends, setFriends] = useState([{ name: '', category: '', phoneNumber: '', withoutPhoneNumber: false }]);
   const [modalVisible, setModalVisible] = useState(false);
   const [currentEditIndex, setCurrentEditIndex] = useState(0);
   const [contactsModalVisible, setContactsModalVisible] = useState(false);
@@ -40,20 +72,35 @@ function AddFriendScreen() {
   };
 
   const handleAddFriend = async () => {
-    if (friends.some(friend => !friend.name || !friend.category || !friend.phoneNumber)) {
-      Alert.alert('오류', '모든 필드를 입력해주세요.');
-      return;
+    // 필드 확인 및 휴대폰 번호 정규식 체크
+    for (let friend of friends) {
+      if (!friend.name || !friend.category) {
+        Alert.alert('오류', '이름과 카테고리 선택은 필수입니다!');
+        return;
+      }
+      // 전화번호가 없는 경우는 검증하지 않고 넘어감
+      if (!friend.withoutPhoneNumber && !phoneNumberCheck(cleanPhoneNumber(friend.phoneNumber))) {
+        Alert.alert('오류', '휴대폰 번호를 다시 확인해주세요.');
+        return;
+      }
     }
+
+    // 전송할 친구 목록에서 전화번호가 없는 친구는 phoneNumber 필드를 제거
+    const dataToSend = friends.map(friend => {
+      const { name, category, phoneNumber, withoutPhoneNumber } = friend;
+      return withoutPhoneNumber ? { name, category } : { name, category, phoneNumber: cleanPhoneNumber(phoneNumber) };
+    });
+
     try {
-      const response = await axiosInstance.post('/participant', friends);
+      const response = await axiosInstance.post('/participant', dataToSend);
       if (response.status === 200) {
-        Alert.alert('성공', '지인들이 성공적으로 등록되었습니다.', [
+        Alert.alert('등록 성공', '지인 등록이 성공적으로 완료되었습니다.', [
           { text: '확인', onPress: () => navigation.goBack() }
         ]);
       }
     } catch (error) {
       console.error('지인 등록 실패:', error);
-      Alert.alert('오류', '지인 등록에 실패했습니다. 다시 시도해주세요.');
+      Alert.alert('등록 실패', '이미 등록된 지인이 포함되어 있습니다. \n다시 등록해주세요.');
     }
   };
 
@@ -85,10 +132,21 @@ function AddFriendScreen() {
   const confirmSelectedContacts = () => {
     const newFriends = selectedContacts.map(contact => ({
       name: contact.givenName,
-      phoneNumber: contact.phoneNumbers[0]?.number || '',
-      category: ''
+      phoneNumber: formatPhoneNumber(contact.phoneNumbers[0]?.number || ''),
+      category: '',
+      withoutPhoneNumber: false
     }));
-    setFriends(prevFriends => [...prevFriends, ...newFriends]);
+
+    setFriends(prevFriends => {
+      const updatedFriends = [...prevFriends];
+      // 첫 번째 빈 카드를 덮어쓰기
+      if (updatedFriends[0] && !updatedFriends[0].name) {
+        updatedFriends[0] = newFriends.shift(); // 첫 번째 빈 카드에 연락처 중 하나를 덮어씌움
+      }
+      // 남은 연락처는 추가
+      return [...updatedFriends, ...newFriends];
+    });
+
     setContactsModalVisible(false);
     setSelectedContacts([]);
   };
@@ -118,7 +176,7 @@ function AddFriendScreen() {
   };
 
   const addFriendCard = () => {
-    setFriends([...friends, { name: '', category: '', phoneNumber: '' }]);
+    setFriends([...friends, { name: '', category: '', phoneNumber: '', withoutPhoneNumber: false }]);
   };
 
   const removeFriendCard = (index) => {
@@ -128,7 +186,21 @@ function AddFriendScreen() {
 
   const updateFriendField = (index, field, value) => {
     const updatedFriends = [...friends];
-    updatedFriends[index][field] = value;
+    if (field === 'phoneNumber') {
+      updatedFriends[index][field] = formatPhoneNumber(value);
+    } else {
+      updatedFriends[index][field] = value;
+    }
+    setFriends(updatedFriends);
+  };
+
+  const toggleWithoutPhoneNumber = (index) => {
+    const updatedFriends = [...friends];
+    updatedFriends[index].withoutPhoneNumber = !updatedFriends[index].withoutPhoneNumber;
+    // 전화번호 입력 칸을 지우고 회색 배경으로 설정
+    if (updatedFriends[index].withoutPhoneNumber) {
+      updatedFriends[index].phoneNumber = '';
+    }
     setFriends(updatedFriends);
   };
 
@@ -152,19 +224,41 @@ function AddFriendScreen() {
               placeholder="이름"
               placeholderTextColor={colors.GRAY_300}
             />
-            <TouchableOpacity style={styles.categoryButton} onPress={() => openCategoryModal(index)}>
-              <Text style={styles.categoryButtonText}>{friend.category || '카테고리'}</Text>
+            <TouchableOpacity
+              style={[
+                styles.categoryButton,
+                { backgroundColor: getCategoryColor(friend.category) }
+              ]}
+              onPress={() => openCategoryModal(index)}
+            >
+              <Text
+                style={[
+                  styles.categoryButtonText,
+                  friend.category ? styles.selectedCategoryText : styles.unselectedCategoryText
+                ]}
+              >
+                {friend.category || '카테고리 선택'}
+              </Text>
             </TouchableOpacity>
           </View>
           <View style={styles.phoneRow}>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                friend.withoutPhoneNumber ? styles.disabledInput : null
+              ]}
               value={friend.phoneNumber}
               onChangeText={(text) => updateFriendField(index, 'phoneNumber', text)}
               placeholder="전화번호"
               placeholderTextColor={colors.GRAY_300}
               keyboardType="phone-pad"
+              editable={!friend.withoutPhoneNumber}
             />
+            <CheckBox
+              value={friend.withoutPhoneNumber}
+              onValueChange={() => toggleWithoutPhoneNumber(index)}
+            />
+            <Text>전화번호 없이</Text>
             <TouchableOpacity style={styles.removeButton} onPress={() => removeFriendCard(index)}>
               <Icon name="remove-circle-outline" size={24} color={colors.PINK} />
             </TouchableOpacity>
@@ -293,6 +387,7 @@ const styles = StyleSheet.create({
   phoneRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   input: {
     flex: 1,
@@ -303,17 +398,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginRight: 10,
   },
+  disabledInput: {
+    backgroundColor: colors.GRAY_100, // 전화번호 없는 경우 회색 배경
+  },
   categoryButton: {
-    backgroundColor: colors.GREEN_700,
     padding: 10,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
     minWidth: 100,
   },
+  selectedCategoryButton: {
+    backgroundColor: colors.GREEN_700, // 선택된 카테고리 버튼의 색상
+  },
+  unselectedCategoryButton: {
+    backgroundColor: colors.GRAY_300, // 선택되지 않았을 때의 배경색
+    borderColor: colors.GRAY_300,
+    borderWidth: 1, // 테두리 추가
+  },
   categoryButtonText: {
-    color: colors.WHITE,
     fontSize: 14,
+  },
+  selectedCategoryText: {
+    color: colors.WHITE, // 선택된 카테고리의 텍스트 색상
+  },
+  unselectedCategoryText: {
+    color: colors.WHITE, // 선택되지 않았을 때의 텍스트 색상
   },
   removeButton: {
     justifyContent: 'center',

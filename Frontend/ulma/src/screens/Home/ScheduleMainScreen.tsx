@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react'; // useState, useEffect, useCallback을 React에서 불러옴
 import { View, Text, TouchableOpacity, FlatList, StyleSheet, Alert } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -108,6 +108,11 @@ const ScheduleMainScreen = ({ navigation }) => {
     }
   };
 
+  // 금액 세자리마다 쉼표 추가 함수
+  const formatAmount = (amount) => {
+    return new Intl.NumberFormat().format(amount);
+  };
+
   const renderEventCard = ({ item }) => (
     <Swipeable
       renderRightActions={() => renderRightActions(item.scheduleId)}
@@ -123,10 +128,14 @@ const ScheduleMainScreen = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
         </View>
+
+        {/* 날짜를 거래내역 조회 버튼보다 위로 이동 */}
         <Text style={styles.eventDate}>{item.date.split('T')[0]}</Text>
+
         <View style={styles.eventCardInner}>
-          <Text style={styles.eventExpense}>₩ {-item.paidAmount}</Text>
+          <Text style={styles.eventExpense}>₩ {formatAmount(-item.paidAmount)}</Text>
           <TouchableOpacity
+            style={styles.transactionButton}
             onPress={() => navigation.navigate(friendsNavigations.FREINDS_DETAIL, {
               guestId: item.guestId,
               name: item.guestName,
@@ -134,7 +143,8 @@ const ScheduleMainScreen = ({ navigation }) => {
               phoneNumber: item.phoneNumber,
             })}
           >
-            <Text>{`${item.guestName}님과의 거래내역 조회 ->`}</Text>
+            <Text style={styles.transactionText}>거래내역 조회</Text>
+            <Icon style={styles.toright} name="chevron-forward-outline" size={16} color={colors.GRAY_700} />
           </TouchableOpacity>
         </View>
       </View>
@@ -228,15 +238,17 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   eventName: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: 'bold',
   },
   eventDate: {
     fontSize: 14,
     color: colors.GRAY_700,
+    textAlign: 'right', // 날짜를 오른쪽 정렬
+    marginTop: 5,
   },
   eventExpense: {
-    fontSize: 14,
+    fontSize: 18, // 금액 글씨 크기 키움
     color: colors.PINK,
   },
   deleteButton: {
@@ -271,6 +283,19 @@ const styles = StyleSheet.create({
   categoryText: {
     fontSize: 14,
   },
+  transactionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  transactionText: {
+    fontSize: 14,
+    color: colors.GRAY_700,
+    // marginRight: 5,
+  },
+  toright: {
+    marginTop: 3,
+    alignItems: 'center',
+  }
 });
 
 export default ScheduleMainScreen;

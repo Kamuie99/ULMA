@@ -23,17 +23,23 @@ const eventNavigations = {
   EVENT_DETAIL: 'EVENT_DETAIL',
   AI_RECOMMEND_MESSAGE: 'AIRecommendMessage',
   EVENT_FIX: 'EVENT_FIX',
+<<<<<<< HEAD
+  ACCOUNT_HISTORY: 'AccountHistory',
+  FRIEND_SEARCH: 'Friendsearch',
+=======
+  EVENT_EXCEL: 'ExcelScreen',
+>>>>>>> b527ec73bdb4dbf0ee1b73a19b0d5d6d6136e2b5
 } as const;
 
 const payNavigations = {
   HOME: 'PayHome',
-  ACCOUNT_HISTORY: 'Accounthistory',
+  // ACCOUNT_HISTORY: 'Accounthistory',
   ACCOUNT_INPUT: 'Accountinput',
   ADD_HISTORY: 'Addhistory',
   CHARGER_RESULT: 'Chargerresult',
   PAY_LIST: 'Paylist',
   PAY_RECHARGE: 'Payrecharge',
-  FRIEND_SEARCH: 'Friendsearch',
+  // FRIEND_SEARCH: 'Friendsearch',
   FRIENDHSHIP_SECLECT: 'Friendshipselect',
   RECOMMEND_OPTION: 'RecommendOption',
   SENDING: 'Sending',
@@ -44,6 +50,7 @@ const payNavigations = {
   ADD_ACCOUNT: 'AddAccount',
   ACCOUNT_VERIFY: 'AccountVerify',
   ACCOUNT_DETAIL: 'AccountDetail',
+  EXCEL_SCREEN: 'ExcelScreen',
 } as const;
 
 const mypageNavigations = {

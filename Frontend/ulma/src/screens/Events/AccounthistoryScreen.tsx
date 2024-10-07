@@ -2,7 +2,7 @@
 import axiosInstance from '@/api/axios';
 import CustomButton from '@/components/common/CustomButton';
 import {colors} from '@/constants';
-import {payNavigations} from '@/constants/navigations';
+import {eventNavigations, payNavigations} from '@/constants/navigations';
 import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import useAuthStore from '@/store/useAuthStore';
 import usePayStore from '@/store/usePayStore';
@@ -31,52 +31,56 @@ type AccounthistoryScreenProps = StackScreenProps<
 >;
 
 function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
-  const [accountHistory, setAccountHistory] = useState([]);
+  const [accountHistory, setAccountHistory] = useState<Transaction[]>([]);
   const {accessToken} = useAuthStore();
   const {accountNumber, bankCode} = usePayStore();
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [page, setPage] = useState(0); // 페이지 번호 상태
+  const [hasMore, setHasMore] = useState(true); // 더 가져올 데이터가 있는지 확인하는 상태
+
+  // 데이터 가져오기 함수
+  const fetchAccountHistory = async (newPage: number) => {
+    if (loading || !hasMore) return; // 로딩 중이거나 더 불러올 데이터가 없으면 중단
+
+    setLoading(true);
+    try {
+      const response = await axiosInstance.get(
+        `/account/${accountNumber}/history`,
+        {
+          params: {
+            page: newPage,
+            size: 20,
+          },
+        },
+      );
+      const newData = response.data.data;
+
+      // 새 데이터가 있으면 추가, 없으면 hasMore false로 설정
+      if (newData.length > 0) {
+        setAccountHistory(prev => [...prev, ...newData]);
+        setPage(newPage);
+      } else {
+        setHasMore(false);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 페이지 처음 로드 시 첫 페이지 데이터 가져오기
   useFocusEffect(
     useCallback(() => {
-      const fetchAccountHistory = async () => {
-        setLoading(true);
-        try {
-          const response = await axiosInstance.get(
-            `/account/${accountNumber}/history`,
-            {
-              headers: {
-                Authorization: `Bearer ${accessToken}`,
-              },
-            },
-          );
-          setAccountHistory(response.data);
-          console.log(accountHistory);
-        } catch (err) {
-          setError(err);
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchAccountHistory();
-    }, []),
+      setAccountHistory([]); // 초기화
+      setHasMore(true); // 데이터 더 불러올 수 있도록 설정
+      fetchAccountHistory(0); // 첫 페이지 데이터 불러오기
+    }, [accountNumber]),
   );
 
-  const [data, setData] = useState<Transaction[]>();
-  useEffect(() => {
-    if (accountHistory && accountHistory.length > 0) {
-      const formattedData = accountHistory.map((item, index) => ({
-        id: item.id || String(index),
-        name: item.name,
-        amount: `${item.amount} 원`,
-        selected: false,
-      }));
-      setData(formattedData);
-    }
-  }, [accountHistory]); // accountHistory가 변경될 때마다 실행
-
   const toggleSelect = (id: string) => {
-    setData(prevData =>
+    setAccountHistory(prevData =>
       prevData.map(item =>
         item.id === id ? {...item, selected: !item.selected} : item,
       ),
@@ -101,6 +105,13 @@ function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
     </TouchableOpacity>
   );
 
+  // 스크롤이 끝에 도달했을 때 다음 페이지 데이터 요청
+  const handleEndReached = () => {
+    if (!loading && hasMore) {
+      fetchAccountHistory(page + 1); // 다음 페이지 불러오기
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.cardContiner}>
@@ -109,17 +120,20 @@ function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
           <Text style={styles.accountInfo}>{accountNumber}</Text>
         </View>
         <FlatList
-          data={data}
+          data={accountHistory}
           renderItem={renderItem}
           keyExtractor={item => item.id}
+          onEndReached={handleEndReached} // 끝에 도달 시 호출
+          onEndReachedThreshold={0.5} // 리스트 끝에서 50% 지점에서 데이터 로드
+          ListFooterComponent={loading && <Text>Loading...</Text>} // 로딩 중일 때 표시
           style={styles.list}
         />
-        <CustomButton
-          label="확인"
-          variant="outlined"
-          onPress={() => navigation.navigate(payNavigations.FRIEND_SEARCH)}
-        />
       </View>
+      <CustomButton
+        label="확인"
+        variant="outlined"
+        onPress={() => navigation.navigate(eventNavigations.FRIEND_SEARCH)}
+      />
     </View>
   );
 }
@@ -128,6 +142,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.LIGHTGRAY,
+    padding: 15,
   },
   accountInfoContainer: {
     flexDirection: 'row',
@@ -140,10 +155,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   cardContiner: {
-    flex: 1,
     backgroundColor: colors.WHITE,
-    margin: 20,
-    paddingTop: 20,
+    paddingVertical: 20,
     borderRadius: 15,
     borderColor: colors.GRAY_300,
     borderWidth: 1,
@@ -158,7 +171,7 @@ const styles = StyleSheet.create({
     width: '90%',
   },
   list: {
-    flexGrow: 0,
+    flexGrow: 1,
     paddingHorizontal: 20,
   },
   item: {

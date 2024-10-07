@@ -55,9 +55,10 @@ function PayHomeScreen() {
           const response = await axiosInstance.get('/users/pay', {
             headers: {Authorization: `Bearer ${accessToken}`},
           });
-          console.log(response.data);
 
-          const formattedData: Transaction[] = response.data.map(
+          console.log(response.data.data);
+
+          const formattedData: Transaction[] = response.data.data.map(
             (item: any) => ({
               amount: item.amount,
               date: item.transactionDate.slice(0, 10),

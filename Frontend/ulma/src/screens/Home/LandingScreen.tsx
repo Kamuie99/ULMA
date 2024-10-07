@@ -17,6 +17,7 @@ import useAuthStore from '@/store/useAuthStore';
 import {colors} from '@/constants';
 import Icon from 'react-native-vector-icons/Entypo';
 import CalendarComponent from '@/components/calendar/CalendarButton';
+import usePayStore from '@/store/usePayStore';
 
 const {width} = Dimensions.get('window');
 
@@ -58,6 +59,11 @@ const LandingPage: React.FC = () => {
   const handleScheduleNavigation = () => {
     // navigation.navigate('SchedulePage'); // 네비게이션 경로를 적절하게 설정
   };
+
+  const {getAccountInfo} = usePayStore();
+  useEffect(() => {
+    getAccountInfo();
+  }, []); // 컴포넌트가 마운트될 때 한 번만 호출
 
   return (
     <View style={styles.container}>

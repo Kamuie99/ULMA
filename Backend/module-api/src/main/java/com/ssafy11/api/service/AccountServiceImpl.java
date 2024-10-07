@@ -112,7 +112,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public PaginatedHistory<PayHistoryDTO> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType, int page, int size) {
+    public PaginatedHistory<PayHistoryDTO> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType, Integer page, Integer size) {
 
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             throw new ErrorException(ErrorCode.INVALID_DATE_RANGE);

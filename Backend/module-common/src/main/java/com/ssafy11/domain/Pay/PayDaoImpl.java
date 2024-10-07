@@ -2,6 +2,7 @@ package com.ssafy11.domain.Pay;
 
 import com.ssafy11.domain.Account.Account;
 import com.ssafy11.domain.Account.AccountDao;
+import com.ssafy11.domain.Account.PaginatedHistory;
 import com.ssafy11.ulma.generated.tables.records.AccountRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
@@ -12,6 +13,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import static com.ssafy11.domain.Pay.PayType.*;
 import static com.ssafy11.ulma.generated.Tables.PAYHISTORY;
 import static com.ssafy11.ulma.generated.Tables.USERS;
 import static com.ssafy11.ulma.generated.tables.Account.ACCOUNT;
@@ -137,6 +139,7 @@ public class PayDaoImpl implements PayDao {
             );
 
             // 4. 얼마페이 계좌에서 수신 내역(PayHistory) 생성
+
             String senderUserName = dsl.select(USERS.NAME)
                     .from(USERS)
                     .where(USERS.ID.eq(connectedAccount.userId()))
@@ -288,7 +291,7 @@ public class PayDaoImpl implements PayDao {
     }
 
     @Override
-    public List<PayHistory> findPayHistory(Integer userId, LocalDate startDate, LocalDate endDate, String payType) {
+    public PaginatedHistory<PayHistory> findPayHistory(Integer userId, LocalDate startDate, LocalDate endDate, String payType, Integer page, Integer size) {
         // 1. 해당 userId의 얼마페이 계좌 조회
         Account payAccount = dsl.selectFrom(ACCOUNT)
                 .where(ACCOUNT.USER_ID.eq(userId))
@@ -297,6 +300,14 @@ public class PayDaoImpl implements PayDao {
 
         // 2. 해당 계좌의 PayHistory 내역 조회
         if (payAccount != null) {
+            Integer count = dsl.selectCount()
+                    .from(PAYHISTORY)
+                    .where(PAYHISTORY.ACCOUNT_ID.eq(payAccount.id()))
+                    .fetchOne(0, int.class);
+
+            int totalItemsCount = (count != null) ? count : 0;
+            int totalPages = (int) Math.ceil((double) totalItemsCount/size);
+
             var query = dsl.selectFrom(PAYHISTORY)
                     .where(PAYHISTORY.ACCOUNT_ID.eq(payAccount.id()));
 
@@ -308,14 +319,20 @@ public class PayDaoImpl implements PayDao {
                 query.and(PAYHISTORY.TRANSACTION_DATE.lessThan(endDate.plusDays(1).atStartOfDay()));
             }
 
-            // 4. payType이 지정된 경우 필터링 추가 ("SEND" 또는 "RECEIVE")
-            if (payType != null && (payType.equals("SEND") || payType.equals("RECEIVE") || payType.equals("CHARGE"))) {
+            // 4. payType이 지정된 경우 필터링 추가
+            if (payType != null && (payType.equals(SEND) || payType.equals(RECEIVE) || payType.equals(CHARGE))) {
                 query.and(PAYHISTORY.TRANSACTION_TYPE.eq(payType));
             }
 
-            // 5. 결과를 날짜순으로 정렬하여 반환
-            return query.orderBy(PAYHISTORY.TRANSACTION_DATE.desc())
+            // 페이지네이션 적용
+            List<PayHistory> payHistories = query.orderBy(PAYHISTORY.TRANSACTION_DATE.desc())
+                    .limit(size)
+                    .offset(page * size)
                     .fetchInto(PayHistory.class);
+
+            // 5. 결과를 날짜순으로 정렬하여 반환
+            return new PaginatedHistory<PayHistory>(payHistories, page, totalItemsCount, totalPages);
+
         }
 
         return null;

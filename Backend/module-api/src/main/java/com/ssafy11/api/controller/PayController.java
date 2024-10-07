@@ -7,6 +7,7 @@ import com.ssafy11.api.dto.account.SendPayMoneyRequest;
 import com.ssafy11.api.dto.pay.PayHistoryDTO;
 import com.ssafy11.api.exception.ErrorException;
 import com.ssafy11.api.service.PayService;
+import com.ssafy11.domain.Account.PaginatedHistory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -38,12 +39,13 @@ public class PayController {
 
     // 2. Pay 내역 보기
     @GetMapping
-    public ResponseEntity<List<PayHistoryDTO>> viewPayHistory(
+    public ResponseEntity<PaginatedHistory<PayHistoryDTO>> viewPayHistory(
             @AuthenticationPrincipal User user,
             @RequestParam(value = "start_date", required = false) String startDate,
             @RequestParam(value = "end_date", required = false) String endDate,
-            @RequestParam(value = "pay_type", required = false) String payType
-    ) {
+            @RequestParam(value = "pay_type", required = false) String payType,
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size) {
         Assert.notNull(user, "User must not be null");
         // 문자열 날짜를 LocalDate로 변환
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -58,7 +60,7 @@ public class PayController {
         }
 
         int authenticatedUserId = Integer.parseInt(user.getUsername());
-        List<PayHistoryDTO> history = payService.viewPayHistory(authenticatedUserId, startLocalDate, endLocalDate, payType);
+        PaginatedHistory<PayHistoryDTO> history = payService.viewPayHistory(authenticatedUserId, startLocalDate, endLocalDate, payType, page, size);
         return ResponseEntity.ok(history);
     }
 

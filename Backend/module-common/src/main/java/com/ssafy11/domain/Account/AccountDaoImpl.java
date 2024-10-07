@@ -240,12 +240,12 @@ public class AccountDaoImpl implements AccountDao {
     }
 
     @Override
-    public PaginatedHistory findPayHistory(String accountNumber,
+    public PaginatedHistory<PayHistory> findPayHistory(String accountNumber,
                                            LocalDate startDate,
                                            LocalDate endDate,
                                            String payType,
-                                           int page,
-                                           int size) {
+                                           Integer page,
+                                           Integer size) {
         // 1. 계좌번호로 계좌 조회
         Account account = dsl.selectFrom(ACCOUNT)
                 .where(ACCOUNT.ACCOUNT_NUMBER.eq(accountNumber))
@@ -285,7 +285,7 @@ public class AccountDaoImpl implements AccountDao {
                     .fetchInto(PayHistory.class);
 
             // 5. 결과를 날짜순으로 정렬하여 반환
-            return new PaginatedHistory(payHistories, page, totalItemsCount, totalPages);
+            return new PaginatedHistory<PayHistory>(payHistories, page, totalItemsCount, totalPages);
         }
 
         return null;
@@ -307,8 +307,8 @@ public class AccountDaoImpl implements AccountDao {
         }
 
         Random random = new Random();
-        int number = random.nextInt(1000);
-        String num = String.format("%03d", number);
+        int number = random.nextInt(1000000);
+        String num = String.format("%06d", number);
 
         PayHistory receiveHistory = this.createReceiveHistory(accountNumber, 1L, num, "얼마페이 인증");
 

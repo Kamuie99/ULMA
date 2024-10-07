@@ -19,6 +19,7 @@ function AddAccountScreen() {
   const [selectedBank, setSelectedBank] = useState(''); // 선택된 은행
   const [isModalVisible, setModalVisible] = useState(false); // 모달 가시성
   const navigation = useNavigation();
+  const {accessToken} = useAuthStore();
 
   // 은행 목록
   const banks = [
@@ -36,20 +37,18 @@ function AddAccountScreen() {
   };
 
   const handleVerify = async () => {
-    const {accessToken} = useAuthStore();
     try {
       const response = await axiosInstance.post(
         'users/account/verify',
         {
-          accountNumber: account, // 입력된 계좌 번호 전송
-          bankCode: selectedBank, // 선택된 은행 전송
+          accountNumber: account,
+          bankCode: selectedBank,
         },
         {
-          headers: {Authorization: `Bearer ${accessToken}`}, // 인증 헤더 설정
+          headers: {Authorization: `Bearer ${accessToken}`},
         },
       );
-
-      // 인증 성공 시 다음 페이지로 이동, 결과값 넘기기
+      console.log(response.data.verifyNumber);
       navigation.navigate(payNavigations.ACCOUNT_VERIFY, {
         verifyNumber: response.data.verifyNumber,
       });
@@ -72,7 +71,7 @@ function AddAccountScreen() {
         onChangeText={setAccount}
         keyboardType="numeric"
       />
-      <CustomButton label="인증하기" size="maxSize" />
+      <CustomButton label="인증하기" size="maxSize" onPress={handleVerify} />
 
       {/* 은행 선택 모달 */}
       <Modal

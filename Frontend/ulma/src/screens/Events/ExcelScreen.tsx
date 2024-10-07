@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
@@ -7,10 +7,10 @@ import {
   Alert,
   FlatList,
 } from 'react-native';
-import DocumentPicker, { DocumentPickerResponse } from 'react-native-document-picker';
+import DocumentPicker from 'react-native-document-picker';
 import axiosInstance from '@/api/axios';
-import { NavigationProp, RouteProp } from '@react-navigation/native';
-import { eventStackParamList } from '@/navigations/stack/EventStackNavigator';
+import {NavigationProp, RouteProp} from '@react-navigation/native';
+import {eventStackParamList} from '@/navigations/stack/EventStackNavigator';
 
 interface ExcelScreenProps {
   route: RouteProp<eventStackParamList, 'EVENT_DETAIL'>;
@@ -18,15 +18,39 @@ interface ExcelScreenProps {
 }
 
 interface ExcelEntry {
+  isRegistered: boolean;
+  guestId: number;
   name: string;
   category: string;
   amount: number;
+  phoneNumber?: string;
 }
 
-const ExcelScreen: React.FC<ExcelScreenProps> = ({ route, navigation }) => {
-  const { event_id } = route.params;
-  const [selectedFile, setSelectedFile] = useState<DocumentPickerResponse | null>(null);
+const ExcelScreen: React.FC<ExcelScreenProps> = ({route, navigation}) => {
+  const {event_id} = route.params;
   const [excelData, setExcelData] = useState<ExcelEntry[]>([]);
+  const [unregisteredEntries, setUnregisteredEntries] = useState<ExcelEntry[]>(
+    [],
+  );
+  const [registeredEntries, setRegisteredEntries] = useState<ExcelEntry[]>([]);
+  const [fileSelected, setFileSelected] = useState(false);
+
+  useEffect(() => {
+    fetchRegisteredParticipants();
+  }, []);
+
+  // 기존 등록된 지인 정보 가져오기
+  const fetchRegisteredParticipants = async () => {
+    try {
+      const response = await axiosInstance.get('/participant', {
+        params: {size: 100, page: 1},
+      });
+      setRegisteredEntries(response.data.data);
+    } catch (error) {
+      console.error('지인 정보 가져오기 실패:', error);
+      Alert.alert('오류', '기존 지인 정보를 불러오는 데 실패했습니다.');
+    }
+  };
 
   // 엑셀 파일 선택 및 API 요청 함수
   const pickExcelFile = async () => {
@@ -34,9 +58,7 @@ const ExcelScreen: React.FC<ExcelScreenProps> = ({ route, navigation }) => {
       const res = await DocumentPicker.pick({
         type: [DocumentPicker.types.xlsx],
       });
-      setSelectedFile(res[0]);
 
-      // 서버로 엑셀 파일 전송 및 파싱 요청
       const formData = new FormData();
       formData.append('file', {
         name: res[0].name,
@@ -44,14 +66,26 @@ const ExcelScreen: React.FC<ExcelScreenProps> = ({ route, navigation }) => {
         uri: res[0].uri,
       });
 
-      // API 호출 시 인증 토큰은 axiosInstance에서 자동으로 처리됩니다.
-      const response = await axiosInstance.post('/participant/money/excel', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      const response = await axiosInstance.post(
+        '/participant/money/excel',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         },
-      });
+      );
+
+      const filteredData = response.data.filter(
+        (entry: ExcelEntry) =>
+          !registeredEntries.some(
+            reg => reg.name === entry.name && reg.category === entry.category,
+          ),
+      );
 
       setExcelData(response.data);
+      setUnregisteredEntries(filteredData);
+      setFileSelected(true);
       Alert.alert('파일 업로드 완료', '파일이 성공적으로 업로드되었습니다.');
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
@@ -63,110 +97,70 @@ const ExcelScreen: React.FC<ExcelScreenProps> = ({ route, navigation }) => {
     }
   };
 
-  // 지인 검색 함수
-  const checkParticipant = async (entry: ExcelEntry) => {
+  // 미등록 지인 일괄 등록 함수
+  const registerUnregisteredEntries = async () => {
+    if (unregisteredEntries.length === 0) {
+      Alert.alert('알림', '등록할 지인이 없습니다.');
+      return;
+    }
+
     try {
-      const response = await axiosInstance.get('/participant/same', {
-        params: { name: entry.name, category: entry.category },
+      const dataToSend = unregisteredEntries.map(entry => {
+        return entry.phoneNumber
+          ? {
+              name: entry.name,
+              category: entry.category,
+              phoneNumber: entry.phoneNumber,
+            }
+          : {name: entry.name, category: entry.category};
       });
 
-      if (response.data.data.length > 0) {
-        const participant = response.data.data[0];
-        Alert.alert(
-          '확인',
-          `지인 "${participant.name}"이(가) 발견되었습니다. 이 사용자가 맞습니까?`,
-          [
-            {
-              text: '아니요',
-              onPress: () => registerNewParticipant(entry),
+      const response = await axiosInstance.post('/participant', dataToSend);
+
+      if (response.status === 200) {
+        Alert.alert('등록 성공', '미등록 지인이 성공적으로 등록되었습니다.', [
+          {
+            text: '확인',
+            onPress: () => {
+              setUnregisteredEntries([]); // 등록 후 미등록 목록 초기화
             },
-            {
-              text: '예',
-              onPress: () => registerTransaction(entry, participant.guestId),
-            },
-          ],
-        );
-      } else {
-        Alert.alert(
-          '새 지인 등록',
-          `${entry.name}(${entry.category}) 지인이 없습니다. 등록하시겠습니까?`,
-          [
-            { text: '취소', onPress: () => console.log('등록 취소') },
-            {
-              text: '등록',
-              onPress: () => registerNewParticipant(entry),
-            },
-          ],
-        );
+          },
+        ]);
       }
     } catch (error) {
-      console.error('지인 검색 중 오류 발생:', error);
-      Alert.alert('오류', '지인 검색 중 오류가 발생했습니다.');
+      console.error('지인 등록 실패:', error);
+      Alert.alert('등록 실패', '지인 등록 중 오류가 발생했습니다.');
     }
   };
 
-  // 지인 등록 함수
-  const registerNewParticipant = async (entry: ExcelEntry) => {
-    try {
-      const response = await axiosInstance.post('/participant', {
-        name: entry.name,
-        category: entry.category,
-        phoneNumber: '',
-      });
-
-      registerTransaction(entry, response.data.guestId);
-    } catch (error) {
-      console.error('지인 등록 중 오류 발생:', error);
-      Alert.alert('오류', '지인 등록 중 오류가 발생했습니다.');
-    }
-  };
-
-  // 거래내역 추가 함수
-  const registerTransaction = async (entry: ExcelEntry, guestId: number) => {
-    try {
-      await axiosInstance.post('/participant/money', {
-        eventId: event_id,
-        guestId: guestId,
-        amount: entry.amount,
-      });
-
-      Alert.alert('성공', `${entry.name}님의 거래내역이 등록되었습니다.`);
-    } catch (error) {
-      console.error('거래내역 등록 중 오류 발생:', error);
-      Alert.alert('오류', '거래내역 등록 중 오류가 발생했습니다.');
-    }
-  };
-
-  // 각 항목별 지인 조회 및 거래내역 등록 함수
-  const processEntries = async () => {
-    for (const entry of excelData) {
-      await checkParticipant(entry);
-    }
-  };
-
-  const renderItem = ({ item }: { item: ExcelEntry }) => (
+  const renderUnregisteredItem = ({item}: {item: ExcelEntry}) => (
     <View style={styles.itemContainer}>
-      <Text style={styles.itemText}>이름: {item.name}</Text>
-      <Text style={styles.itemText}>카테고리: {item.category}</Text>
-      <Text style={styles.itemText}>금액: {item.amount}원</Text>
+      <Text style={styles.itemText}>
+        {item.name} / {item.category}
+      </Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.button} onPress={pickExcelFile}>
-        <Text style={styles.buttonText}>엑셀 파일 선택하기</Text>
-      </TouchableOpacity>
-      {excelData.length > 0 && (
+      {!fileSelected && (
+        <TouchableOpacity style={styles.button} onPress={pickExcelFile}>
+          <Text style={styles.buttonText}>엑셀 파일 선택하기</Text>
+        </TouchableOpacity>
+      )}
+      {unregisteredEntries.length > 0 && (
         <>
+          <Text style={styles.sectionTitle}>미등록 지인 목록</Text>
           <FlatList
-            data={excelData}
-            renderItem={renderItem}
+            data={unregisteredEntries}
+            renderItem={renderUnregisteredItem}
             keyExtractor={(item, index) => index.toString()}
             style={styles.list}
           />
-          <TouchableOpacity style={styles.processButton} onPress={processEntries}>
-            <Text style={styles.buttonText}>거래내역 등록하기</Text>
+          <TouchableOpacity
+            style={styles.processButton}
+            onPress={registerUnregisteredEntries}>
+            <Text style={styles.buttonText}>미등록 지인 일괄 등록하기</Text>
           </TouchableOpacity>
         </>
       )}
@@ -196,24 +190,29 @@ const styles = StyleSheet.create({
   },
   list: {
     width: '100%',
+    marginVertical: 10,
   },
   itemContainer: {
     backgroundColor: '#ffffff',
-    padding: 15,
-    borderRadius: 10,
+    padding: 10,
+    borderRadius: 5,
     marginVertical: 5,
     borderWidth: 1,
     borderColor: '#ddd',
   },
   itemText: {
     fontSize: 14,
-    marginVertical: 2,
   },
   processButton: {
     backgroundColor: '#2ecc71',
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 10,
+    marginTop: 10,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
     marginTop: 20,
   },
 });

@@ -9,19 +9,14 @@ import {ScrollView} from 'react-native-gesture-handler';
 import usePayStore from '@/store/usePayStore';
 import Toast from 'react-native-toast-message';
 import {payNavigations} from '@/constants/navigations'; // payNavigations import 추가
+import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 
 function AccountInfoScreen() {
   const navigation = useNavigation();
   const {accountNumber} = usePayStore(); // Zustand에서 accountNumber 가져오기
-  const [accessToken, setAccessToken] = useState('');
+  const {accessToken} = useAuthStore();
   const [accountInfo, setAccountInfo] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState(null);
-
-  // accessToken 설정
-  useEffect(() => {
-    const token = useAuthStore.getState().accessToken;
-    setAccessToken(token);
-  }, []);
 
   // 계좌 정보 가져오기
   useEffect(() => {
@@ -53,10 +48,10 @@ function AccountInfoScreen() {
   }, [accessToken, accountNumber]); // accountNumber가 바뀌면 다시 실행
 
   const handleSelectAccount = account => {
-    setSelectedAccount(account);
-    navigation.navigate(payNavigations.ACCOUNT_HISTORY, {
-      accountNumber: account.accountNumber, // 선택된 계좌 번호를 전달
-      bankCode: account.bankCode, // 선택된 은행 코드를 전달
+    // setSelectedAccount(account);
+    navigation.navigate<payStackParamList>(payNavigations.ACCOUNT_DETAIL, {
+      accountNumber: account.accountNumber,
+      bankCode: account.bankCode,
     });
   };
 

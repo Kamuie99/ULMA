@@ -136,7 +136,17 @@ function AddFriendScreen() {
       category: '',
       withoutPhoneNumber: false
     }));
-    setFriends(prevFriends => [...prevFriends, ...newFriends]);
+
+    setFriends(prevFriends => {
+      const updatedFriends = [...prevFriends];
+      // 첫 번째 빈 카드를 덮어쓰기
+      if (updatedFriends[0] && !updatedFriends[0].name) {
+        updatedFriends[0] = newFriends.shift(); // 첫 번째 빈 카드에 연락처 중 하나를 덮어씌움
+      }
+      // 남은 연락처는 추가
+      return [...updatedFriends, ...newFriends];
+    });
+
     setContactsModalVisible(false);
     setSelectedContacts([]);
   };
@@ -217,7 +227,7 @@ function AddFriendScreen() {
             <TouchableOpacity
               style={[
                 styles.categoryButton,
-                { backgroundColor: getCategoryColor(friend.category) } // 카테고리 색상 적용
+                { backgroundColor: getCategoryColor(friend.category) }
               ]}
               onPress={() => openCategoryModal(index)}
             >

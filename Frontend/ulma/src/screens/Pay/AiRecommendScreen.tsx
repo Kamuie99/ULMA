@@ -150,14 +150,17 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
         userInfo?.gender === 'M' ? '남' : '여'
       })님, ${event} 행사, 관계 점수 ${relationship}, 연 소득 ${income}으로 맞춤 추천합니다.`;
 
+      // 필요한 모든 데이터를 백엔드로 보냄
       const response = await axiosInstance.post('/events/ai/recommend/money', {
         gptQuotes,
+        event, // 어떤 이벤트가 예정되었는지
+        relationship, // 관계 점수
+        income, // 연 소득
       });
 
-      // 서버에서 받은 데이터가 예상대로 텍스트 형태의 금액일 때
+      // 서버에서 받은 데이터 그대로 사용
       if (response.data && typeof response.data === 'string') {
-        const amount = response.data.replace(/[^0-9]/g, ''); // 숫자만 추출
-        return `${amount}만원`; // '000만원' 형식으로 보여주기
+        return response.data; // 필터 없이 그대로 반환
       } else {
         throw new Error('추천 금액을 찾을 수 없습니다.');
       }

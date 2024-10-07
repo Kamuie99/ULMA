@@ -13,7 +13,12 @@ import FriendshipselectScreen from '@/screens/Pay/FriendshipselectScreen';
 import SendresultScreen from '@/screens/Pay/SendresultScreen';
 import PaylistScreen from '@/screens/Pay/PaylistScreen';
 import PayrechargingScreen from '@/screens/Pay/PayrechargingScreen';
-import AiRecommendScreen from '@/screens/Pay/AiRecommendScreen';
+import RecommendOptionScreen from '@/screens/Pay/RecommendOptionScreen';
+import SendingScreen from '@/screens/Pay/SendingScreen';
+import AccounthistoryScreen from '@/screens/Events/AccounthistoryScreen';
+import FriendsearchScreen from '@/screens/Events/FriendsearchScreen';
+import InputAmountScreen from '@/screens/Pay/InputAmountScreen';
+import AiRecommendScreen from '@/screens/Pay/AiRecommendScreen'; // '.1'을 제거한 경로
 import PayHomeScreen from '@/screens/Pay/PayHomeScreen';
 import AccountInfoScreen from '@/screens/Pay/AccountInfoScreen';
 import AddAccountScreen from '@/screens/Pay/AddAccountScreen';
@@ -30,11 +35,11 @@ import {StackScreenProps} from '@react-navigation/stack';
 
 export type payStackParamList = {
   [payNavigations.HOME]: undefined;
-  [payNavigations.ACCOUNT_HISTORY]: undefined;
+  // [payNavigations.ACCOUNT_HISTORY]: undefined;
   [payNavigations.ACCOUNT_INPUT]: undefined;
   [payNavigations.ADD_HISTORY]: undefined;
   [payNavigations.CHARGER_RESULT]: undefined;
-  [payNavigations.FRIEND_SEARCH]: undefined;
+  // [payNavigations.FRIEND_SEARCH]: undefined;
   [payNavigations.FRIENDHSHIP_SECLECT]: undefined;
   [payNavigations.PAY_LIST]: undefined;
   [payNavigations.PAY_RECHARGE]: undefined;
@@ -90,17 +95,6 @@ function PayStackNavigator() {
         }}
       />
       <Stack.Screen
-        name={payNavigations.ACCOUNT_HISTORY}
-        component={AccounthistoryScreen}
-        options={{
-          headerTitle: '계좌 내역 확인하기',
-          headerStyle: {backgroundColor: colors.LIGHTGRAY},
-          headerBackImage: () => {
-            return <Icon name="cross" size={24} color={colors.BLACK} />;
-          },
-        }}
-      />
-      <Stack.Screen
         name={payNavigations.INPUT_AMOUNT}
         component={InputAmountScreen}
         options={{
@@ -132,14 +126,6 @@ function PayStackNavigator() {
         component={ChangeresultScreen}
         options={{
           headerTitle: 'Pay 충전 결과',
-        }}
-      />
-      <Stack.Screen
-        name={payNavigations.FRIEND_SEARCH}
-        component={FriendsearchScreen}
-        options={{
-          headerTitle: '계좌 내역 확인하기',
-          headerStyle: {backgroundColor: colors.LIGHTGRAY},
         }}
       />
       <Stack.Screen

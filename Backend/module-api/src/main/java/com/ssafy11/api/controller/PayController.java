@@ -90,7 +90,6 @@ public class PayController {
             @AuthenticationPrincipal User user,
             @RequestBody SendPayMoneyRequest request) {
         Assert.notNull(user, "User must not be null");
-        Assert.notNull(request, "SendPayMoney must not be null");
         int authenticatedUserId = Integer.parseInt(user.getUsername());
         PayHistoryDTO sendHistory = payService.sendPayMoney(authenticatedUserId, request.info(), request.targetAccountNumber(), request.amount());
         return ResponseEntity.ok(sendHistory);

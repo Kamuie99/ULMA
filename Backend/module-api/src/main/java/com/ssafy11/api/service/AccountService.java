@@ -17,6 +17,6 @@ public interface AccountService {
     Account findByAccountId(Integer accountId);
     PayHistoryDTO chargeBalance(String accountNumber, Long amount);
     PayHistoryDTO sendMoney(String senderAccountNumber, String info, String targetAccountNumber, Long amount);
-    PaginatedHistory findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType, int page, int size);
+    PaginatedHistory<PayHistoryDTO> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType, Integer page, Integer size);
     VerifyNumber verifyMyAccount(Integer userId, String bankCode, String accountNumber);
 }

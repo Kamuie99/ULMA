@@ -109,7 +109,6 @@ public class AccountController {
             @RequestBody AccountConnectRequest request
     ) {
         Assert.notNull(user, "User must not be null");
-        Assert.notNull(request, "계좌 정보를 입력해주세요.");
         int authenticatedUserId = Integer.parseInt(user.getUsername());
         VerifyNumber verifyNumber = accountService.verifyMyAccount(authenticatedUserId, request.bankCode(), request.accountNumber());
         return ResponseEntity.ok(verifyNumber);

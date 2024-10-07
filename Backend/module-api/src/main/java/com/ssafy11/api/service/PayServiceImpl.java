@@ -63,7 +63,13 @@ public class PayServiceImpl implements PayService {
         if (amount > 2000000) {
             throw new ErrorException(ErrorCode.LIMIT_EXCEEDED);
         }
+        if (amount <= 0) {
+            throw new ErrorException(ErrorCode.NEGATIVE_VALUE_NOT_ALLOWED);
+        }
         PayHistory sendHistory = payDao.sendPayMoney(userId, info, targetAccountNumber, amount);
+        if (sendHistory == null) {
+            throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND);
+        }
         return new PayHistoryDTO(
                 sendHistory.amount(),
                 sendHistory.balanceAfterTransaction(),

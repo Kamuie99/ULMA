@@ -14,6 +14,7 @@ import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import {eventNavigations, payNavigations} from '@/constants/navigations';
 import usePayStore from '@/store/usePayStore';
 import {colors} from '@/constants';
+import useEventStore from '@/store/useEventStore';
 
 interface InputOptionModalProps {
   isVisible: boolean;
@@ -49,8 +50,8 @@ function InputOptionModal({
   onDirectRegister,
 }: InputOptionModalProps) {
   const navigation = useNavigation<NavigationProp<payStackParamList>>();
-
   const {getAccountInfo} = usePayStore();
+
   // 계좌 내역 불러오기
   const handleAccountHistory = () => {
     console.log('계좌 내역 불러오기 실행');

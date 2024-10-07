@@ -37,4 +37,12 @@ public class GuestDaoImpl implements GuestDao {
         return result;
     }
 
+    @Override
+    public String isGuestPhoneNumber(Integer guestId, String phoneNumber) {
+        return dsl.select(GUEST.PHONE_NUMBER)
+                .from(GUEST)
+                .where(GUEST.ID.eq(guestId))
+                .fetchOne(GUEST.PHONE_NUMBER);
+    }
+
 }

@@ -16,7 +16,7 @@ import axiosInstance from '@/api/axios';
 import useAuthStore from '@/store/useAuthStore';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
-import {payNavigations} from '@/constants/navigations';
+import {eventNavigations, payNavigations} from '@/constants/navigations';
 import usePayStore from '@/store/usePayStore';
 
 const options = [
@@ -51,7 +51,7 @@ function InputOptionModal({isVisible, onClose, onDirectRegister}) {
     // 계좌 내역 불러오기 로직 구현
     console.log('계좌 내역 불러오기 실행');
     getAccountInfo();
-    navigation.navigate('Pay', {screen: payNavigations.ACCOUNT_HISTORY});
+    navigation.navigate(eventNavigations.ACCOUNT_HISTORY);
     onClose(); // 모달 닫기
   };
 

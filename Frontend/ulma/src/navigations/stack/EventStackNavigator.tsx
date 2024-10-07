@@ -8,6 +8,7 @@ import EventScreen from '@/screens/Events/EventScreen';
 import EventDetailScreen from '@/screens/Events/EventDetailScreen';
 import AIRecommendMessage from '@/screens/Events/AIRecommendMessage';
 import EventFixScreen from '@/screens/Events/EventFixScreen';
+import ExcelScreen from '@/screens/Events/ExcelScreen';
 export type eventStackParamList = {
   [eventNavigations.EVENT_ADD]: undefined;
   [eventNavigations.EVENT]: undefined;
@@ -16,6 +17,7 @@ export type eventStackParamList = {
   [eventNavigations.EVENT_DETAIL]: {event_id: string}; // 이벤트 상세 내역에 대한 타입
   [eventNavigations.EVENT_FIX]: {event_id: string}; // event_id를 사용한 타입 정의
   [eventNavigations.AI_RECOMMEND_MESSAGE]: undefined; // AI 추천 메시지
+  [eventNavigations.EVENT_EXCEL]: {event_id: string; excelData: any};
 };
 
 const Stack = createStackNavigator<eventStackParamList>();
@@ -74,6 +76,13 @@ function EventStackNavigator() {
         component={EventFixScreen}
         options={{
           headerTitle: '이벤트 수정하기',
+        }}
+      />
+      <Stack.Screen
+        name={eventNavigations.EVENT_EXCEL}
+        component={ExcelScreen}
+        options={{
+          headerTitle: '엑셀 추가하기',
         }}
       />
     </Stack.Navigator>

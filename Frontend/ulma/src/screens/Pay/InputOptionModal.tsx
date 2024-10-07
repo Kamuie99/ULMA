@@ -16,6 +16,7 @@ import axiosInstance from '@/api/axios';
 import useAuthStore from '@/store/useAuthStore';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {payNavigations} from '@/constants/navigations';
+import usePayStore from '@/store/usePayStore';
 import {DocumentPickerResponse} from 'react-native-document-picker';
 
 const options = [
@@ -39,6 +40,20 @@ const options = [
   },
 ];
 
+function InputOptionModal({isVisible, onClose, onDirectRegister}) {
+  const [excelFile, setExcelFile] = useState(null);
+  const {accessToken} = useAuthStore();
+  const navigation = useNavigation();
+  const {getAccountInfo} = usePayStore();
+
+  // 계좌 내역 불러오기
+  const handleAccountHistory = () => {
+    // 계좌 내역 불러오기 로직 구현
+    console.log('계좌 내역 불러오기 실행');
+    getAccountInfo();
+    navigation.navigate('Pay', {screen: payNavigations.ACCOUNT_HISTORY});
+    onClose(); // 모달 닫기
+  };
 function InputOptionModal({ isVisible, onClose, onDirectRegister, onSubmit }) {
   const [excelFile, setExcelFile] = useState<DocumentPickerResponse | null>(null);
 

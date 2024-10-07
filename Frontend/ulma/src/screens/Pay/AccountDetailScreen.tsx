@@ -1,42 +1,39 @@
-//입출금 내역 선택 페이지
 import axiosInstance from '@/api/axios';
 import CustomButton from '@/components/common/CustomButton';
 import {colors} from '@/constants';
 import {payNavigations} from '@/constants/navigations';
 import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import useAuthStore from '@/store/useAuthStore';
-import usePayStore from '@/store/usePayStore';
 import {useFocusEffect} from '@react-navigation/native';
 import {StackScreenProps} from '@react-navigation/stack';
 import React, {useCallback, useEffect, useState} from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  Button,
-} from 'react-native';
+import {View, Text, FlatList, StyleSheet} from 'react-native';
 
 interface Transaction {
   id: string;
   name: string;
   amount: string;
-  selected: boolean;
 }
 
-type AccounthistoryScreenProps = StackScreenProps<
+type AccountDetailScreenProps = StackScreenProps<
   payStackParamList,
-  typeof payNavigations.ACCOUNT_HISTORY
->;
+  typeof payNavigations.ACCOUNT_DETAIL
+> & {
+  accountNumber: string;
+  bankCode: string;
+};
 
-function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
+function AccountDetailScreen({
+  navigation,
+  accountNumber,
+  bankCode,
+}: AccountDetailScreenProps) {
   const [accountHistory, setAccountHistory] = useState([]);
   const {accessToken} = useAuthStore();
-  const {accountNumber, bankCode} = usePayStore();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
   useFocusEffect(
     useCallback(() => {
       const fetchAccountHistory = async () => {
@@ -59,7 +56,7 @@ function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
         }
       };
       fetchAccountHistory();
-    }, []),
+    }, [accountNumber, accessToken]),
   );
 
   const [data, setData] = useState<Transaction[]>();
@@ -69,36 +66,18 @@ function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
         id: item.id || String(index),
         name: item.name,
         amount: `${item.amount} 원`,
-        selected: false,
       }));
       setData(formattedData);
     }
-  }, [accountHistory]); // accountHistory가 변경될 때마다 실행
-
-  const toggleSelect = (id: string) => {
-    setData(prevData =>
-      prevData.map(item =>
-        item.id === id ? {...item, selected: !item.selected} : item,
-      ),
-    );
-  };
+  }, [accountHistory]);
 
   const renderItem = ({item}: {item: Transaction}) => (
-    <TouchableOpacity
-      style={[styles.item, item.selected && styles.selectedItem]}
-      onPress={() => toggleSelect(item.id)}>
-      <Text>
-        {item.selected ? (
-          <Text style={styles.check}>√</Text>
-        ) : (
-          <Text style={styles.noCheck}>▢</Text>
-        )}
-      </Text>
+    <View style={styles.item}>
       <View style={styles.textContainer}>
         <Text style={styles.name}>{item.name}</Text>
         <Text style={styles.amount}>{item.amount}</Text>
       </View>
-    </TouchableOpacity>
+    </View>
   );
 
   return (
@@ -148,8 +127,8 @@ const styles = StyleSheet.create({
     borderColor: colors.GRAY_300,
     borderWidth: 1,
     shadowColor: colors.BLACK,
-    shadowOpacity: 0.25, // 그림자의 투명도
-    shadowRadius: 20, // 그림자의 흐림 정도
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
     elevation: 4,
   },
   textContainer: {
@@ -166,11 +145,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 10,
     paddingVertical: 10,
-    // borderRadius: 10,
     marginVertical: 2,
-  },
-  selectedItem: {
-    backgroundColor: '#FDEDEC', // 선택된 항목 배경색
   },
   name: {
     fontSize: 16,
@@ -180,15 +155,6 @@ const styles = StyleSheet.create({
   amount: {
     fontSize: 16,
   },
-  noCheck: {
-    fontSize: 18,
-    fontWeight: '800',
-  },
-  check: {
-    fontSize: 18,
-    color: colors.PINK,
-    fontWeight: '800',
-  },
 });
 
-export default AccounthistoryScreen;
+export default AccountDetailScreen;

@@ -5,18 +5,19 @@ import { useNavigation } from '@react-navigation/native';
 import axiosInstance from '@/api/axios';
 import Contacts from 'react-native-contacts';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 
 const categories = ['가족', '친구', '친척', '직장', '학교', '지인', '기타'];
 
 function AddFriendScreen() {
-  const [name, setName] = useState('');
-  const [category, setCategory] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [friends, setFriends] = useState([{ name: '', category: '', phoneNumber: '' }]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [currentEditIndex, setCurrentEditIndex] = useState(0);
   const [contactsModalVisible, setContactsModalVisible] = useState(false);
   const [contacts, setContacts] = useState([]);
   const [filteredContacts, setFilteredContacts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedContacts, setSelectedContacts] = useState([]);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -26,21 +27,27 @@ function AddFriendScreen() {
     }
   }, [contacts]);
 
+  const requestContactsPermission = async () => {
+    const result = await check(PERMISSIONS.ANDROID.READ_CONTACTS);
+    if (result === RESULTS.DENIED) {
+      const permissionResult = await request(PERMISSIONS.ANDROID.READ_CONTACTS);
+      if (permissionResult !== RESULTS.GRANTED) {
+        Alert.alert('오류', '연락처 접근 권한이 필요합니다.');
+        return false;
+      }
+    }
+    return true;
+  };
+
   const handleAddFriend = async () => {
-    if (!name || !category || !phoneNumber) {
-      Alert.alert('오류', '이름, 카테고리, 전화번호를 모두 입력해주세요.');
+    if (friends.some(friend => !friend.name || !friend.category || !friend.phoneNumber)) {
+      Alert.alert('오류', '모든 필드를 입력해주세요.');
       return;
     }
-
     try {
-      const response = await axiosInstance.post('/participant', [{
-        name,
-        category,
-        phoneNumber,
-      }]);
-
+      const response = await axiosInstance.post('/participant', friends);
       if (response.status === 200) {
-        Alert.alert('성공', '지인이 성공적으로 등록되었습니다.', [
+        Alert.alert('성공', '지인들이 성공적으로 등록되었습니다.', [
           { text: '확인', onPress: () => navigation.goBack() }
         ]);
       }
@@ -50,7 +57,10 @@ function AddFriendScreen() {
     }
   };
 
-  const openContacts = () => {
+  const openContacts = async () => {
+    const hasPermission = await requestContactsPermission();
+    if (!hasPermission) return;
+
     Contacts.getAll().then(contacts => {
       const sortedContacts = contacts.sort((a, b) => a.givenName.localeCompare(b.givenName));
       setContacts(sortedContacts);
@@ -62,18 +72,36 @@ function AddFriendScreen() {
     });
   };
 
-  const selectContact = (contact) => {
-    setName(contact.givenName);
-    setPhoneNumber(contact.phoneNumbers[0]?.number || '');
-    setContactsModalVisible(false);
+  const toggleContactSelection = (contact) => {
+    setSelectedContacts(prevSelected => {
+      if (prevSelected.some(c => c.recordID === contact.recordID)) {
+        return prevSelected.filter(c => c.recordID !== contact.recordID);
+      } else {
+        return [...prevSelected, contact];
+      }
+    });
   };
 
-  const openCategoryModal = () => {
+  const confirmSelectedContacts = () => {
+    const newFriends = selectedContacts.map(contact => ({
+      name: contact.givenName,
+      phoneNumber: contact.phoneNumbers[0]?.number || '',
+      category: ''
+    }));
+    setFriends(prevFriends => [...prevFriends, ...newFriends]);
+    setContactsModalVisible(false);
+    setSelectedContacts([]);
+  };
+
+  const openCategoryModal = (index) => {
+    setCurrentEditIndex(index);
     setModalVisible(true);
   };
 
   const selectCategory = (category) => {
-    setCategory(category);
+    const updatedFriends = [...friends];
+    updatedFriends[currentEditIndex].category = category;
+    setFriends(updatedFriends);
     setModalVisible(false);
   };
 
@@ -89,46 +117,73 @@ function AddFriendScreen() {
     }
   };
 
+  const addFriendCard = () => {
+    setFriends([...friends, { name: '', category: '', phoneNumber: '' }]);
+  };
+
+  const removeFriendCard = (index) => {
+    const updatedFriends = friends.filter((_, i) => i !== index);
+    setFriends(updatedFriends);
+  };
+
+  const updateFriendField = (index, field, value) => {
+    const updatedFriends = [...friends];
+    updatedFriends[index][field] = value;
+    setFriends(updatedFriends);
+  };
+
+  const selectAllContacts = () => {
+    setSelectedContacts(filteredContacts);
+  };
+
+  const deselectAllContacts = () => {
+    setSelectedContacts([]);
+  };
+
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.fieldContainer}>
-        <Text style={styles.label}>이름</Text>
-        <View style={styles.nameContainer}>
-          <TextInput
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
-            placeholder="지인의 이름을 입력하세요"
-            placeholderTextColor={colors.GRAY_300}
-          />
-          <TouchableOpacity style={styles.iconButton} onPress={openContacts}>
-            <Icon name="person-circle-outline" size={28} color={colors.WHITE} />
-          </TouchableOpacity>
+      {friends.map((friend, index) => (
+        <View key={index} style={styles.friendCard}>
+          <View style={styles.nameRow}>
+            <TextInput
+              style={styles.input}
+              value={friend.name}
+              onChangeText={(text) => updateFriendField(index, 'name', text)}
+              placeholder="이름"
+              placeholderTextColor={colors.GRAY_300}
+            />
+            <TouchableOpacity style={styles.categoryButton} onPress={() => openCategoryModal(index)}>
+              <Text style={styles.categoryButtonText}>{friend.category || '카테고리'}</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.phoneRow}>
+            <TextInput
+              style={styles.input}
+              value={friend.phoneNumber}
+              onChangeText={(text) => updateFriendField(index, 'phoneNumber', text)}
+              placeholder="전화번호"
+              placeholderTextColor={colors.GRAY_300}
+              keyboardType="phone-pad"
+            />
+            <TouchableOpacity style={styles.removeButton} onPress={() => removeFriendCard(index)}>
+              <Icon name="remove-circle-outline" size={24} color={colors.PINK} />
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      ))}
 
-      <View style={styles.fieldContainer}>
-        <Text style={styles.label}>전화번호</Text>
-        <TextInput
-          style={styles.input}
-          value={phoneNumber}
-          onChangeText={setPhoneNumber}
-          placeholder="전화번호를 입력하세요"
-          placeholderTextColor={colors.GRAY_300}
-          keyboardType="phone-pad"
-        />
-      </View>
+      <TouchableOpacity style={styles.addButton} onPress={addFriendCard}>
+        <Icon name="add-circle-outline" size={24} color={colors.GREEN_700} />
+        <Text style={styles.addButtonText}>지인 추가</Text>
+      </TouchableOpacity>
 
-      <View style={styles.fieldContainer}>
-        <Text style={styles.label}>카테고리</Text>
-        <TouchableOpacity style={styles.dropdown} onPress={openCategoryModal}>
-          <Text style={styles.dropdownText}>{category || '카테고리를 선택하세요'}</Text>
-          <Icon name="chevron-down-outline" size={24} color={colors.GRAY_700} />
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity style={styles.contactsButton} onPress={openContacts}>
+        <Icon name="people-outline" size={24} color={colors.WHITE} />
+        <Text style={styles.contactsButtonText}>연락처에서 가져오기</Text>
+      </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={handleAddFriend}>
-        <Text style={styles.buttonText}>등록</Text>
+      <TouchableOpacity style={styles.registerButton} onPress={handleAddFriend}>
+        <Text style={styles.registerButtonText}>등록</Text>
       </TouchableOpacity>
 
       {/* 카테고리 선택 모달 */}
@@ -176,18 +231,41 @@ function AddFriendScreen() {
             value={searchTerm}
             onChangeText={handleSearch}
           />
+          {/* 전체 선택 / 전체 해제 버튼 */}
+          <View style={styles.selectButtonsContainer}>
+            <TouchableOpacity style={styles.selectButton} onPress={selectAllContacts}>
+              <Text style={styles.selectButtonText}>전체 선택</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.selectButton} onPress={deselectAllContacts}>
+              <Text style={styles.selectButtonText}>전체 해제</Text>
+            </TouchableOpacity>
+          </View>
           <FlatList
             data={filteredContacts}
             keyExtractor={item => item.recordID}
             renderItem={({ item }) => (
-              <TouchableOpacity onPress={() => selectContact(item)} style={styles.contactItem}>
+              <TouchableOpacity 
+                onPress={() => toggleContactSelection(item)} 
+                style={[
+                  styles.contactItem,
+                  selectedContacts.some(c => c.recordID === item.recordID) && styles.selectedContactItem
+                ]}
+              >
                 <Text style={styles.contactItemText}>{item.givenName} - {item.phoneNumbers[0]?.number}</Text>
+                {selectedContacts.some(c => c.recordID === item.recordID) && (
+                  <Icon name="checkmark-circle" size={24} color={colors.GREEN_700} />
+                )}
               </TouchableOpacity>
             )}
           />
-          <TouchableOpacity onPress={() => setContactsModalVisible(false)} style={styles.closeModalButton}>
-            <Text style={styles.closeModalText}>닫기</Text>
-          </TouchableOpacity>
+          <View style={styles.contactModalFooter}>
+            <TouchableOpacity onPress={() => setContactsModalVisible(false)} style={styles.cancelButton}>
+              <Text style={styles.cancelButtonText}>취소</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={confirmSelectedContacts} style={styles.confirmButton}>
+              <Text style={styles.confirmButtonText}>확인 ({selectedContacts.length})</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </Modal>
     </ScrollView>
@@ -200,59 +278,80 @@ const styles = StyleSheet.create({
     backgroundColor: colors.WHITE,
     padding: 20,
   },
-  fieldContainer: {
+  friendCard: {
     marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    color: colors.GRAY_700,
-    marginBottom: 5,
-  },
-  input: {
-    height: 50,
-    flex: 1,
     borderWidth: 1,
     borderColor: colors.GRAY_300,
     borderRadius: 8,
     padding: 10,
-    fontSize: 16,
-    color: colors.BLACK,
   },
-  nameContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  dropdown: {
+  nameRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    height: 50,
+    marginBottom: 10,
+  },
+  phoneRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  input: {
+    flex: 1,
+    height: 40,
     borderWidth: 1,
     borderColor: colors.GRAY_300,
     borderRadius: 8,
-    padding: 10,
+    paddingHorizontal: 10,
+    marginRight: 10,
   },
-  dropdownText: {
-    fontSize: 16,
-    color: colors.GRAY_700,
-  },
-  iconButton: {
-    marginLeft: 10,
+  categoryButton: {
     backgroundColor: colors.GREEN_700,
-    padding: 8,
+    padding: 10,
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',
-    height: 50,
-    width: 50,
+    minWidth: 100,
   },
-  button: {
+  categoryButtonText: {
+    color: colors.WHITE,
+    fontSize: 14,
+  },
+  removeButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 40,
+  },
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  addButtonText: {
+    marginLeft: 10,
+    color: colors.GREEN_700,
+    fontSize: 16,
+  },
+  contactsButton: {
+    flexDirection: 'row',
+    backgroundColor: colors.GREEN_700,
+    padding: 15,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  contactsButtonText: {
+    color: colors.WHITE,
+    fontSize: 16,
+    marginLeft: 10,
+  },
+  registerButton: {
     backgroundColor: colors.GREEN_700,
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
   },
-  buttonText: {
+  registerButtonText: {
     color: colors.WHITE,
     fontSize: 18,
     fontWeight: 'bold',
@@ -297,12 +396,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   contactItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 15,
     borderBottomWidth: 1,
     borderBottomColor: colors.GRAY_100,
   },
+  selectedContactItem: {
+    backgroundColor: colors.GREEN_300,
+  },
   contactItemText: {
-    fontSize: 18,
+    fontSize: 16,
   },
   contactsContainer: {
     flex: 1,
@@ -318,6 +423,52 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.BLACK,
     marginBottom: 20,
+  },
+  selectButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  selectButton: {
+    padding: 10,
+    backgroundColor: colors.GREEN_700,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  selectButtonText: {
+    color: colors.WHITE,
+    fontSize: 16,
+  },
+  contactModalFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  cancelButton: {
+    padding: 15,
+    backgroundColor: colors.GRAY_300,
+    borderRadius: 8,
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 10,
+  },
+  cancelButtonText: {
+    color: colors.BLACK,
+    fontSize: 16,
+  },
+  confirmButton: {
+    padding: 15,
+    backgroundColor: colors.GREEN_700,
+    borderRadius: 8,
+    alignItems: 'center',
+    flex: 1,
+  },
+  confirmButtonText: {
+    color: colors.WHITE,
+    fontSize: 16,
   },
 });
 

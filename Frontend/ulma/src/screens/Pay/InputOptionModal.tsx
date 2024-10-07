@@ -1,4 +1,3 @@
-import {colors} from '@/constants';
 import React, {useState} from 'react';
 import {
   View,
@@ -7,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
 import Modal from 'react-native-modal';
@@ -15,8 +15,8 @@ import DocumentPicker from 'react-native-document-picker';
 import axiosInstance from '@/api/axios';
 import useAuthStore from '@/store/useAuthStore';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
-import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import {payNavigations} from '@/constants/navigations';
+import {DocumentPickerResponse} from 'react-native-document-picker';
 
 const options = [
   {
@@ -39,18 +39,8 @@ const options = [
   },
 ];
 
-function InputOptionModal({isVisible, onClose, onDirectRegister}) {
-  const [excelFile, setExcelFile] = useState(null);
-  const {accessToken} = useAuthStore();
-  const navigation = useNavigation();
-
-  // 계좌 내역 불러오기
-  const handleAccountHistory = () => {
-    // 계좌 내역 불러오기 로직 구현
-    console.log('계좌 내역 불러오기 실행');
-    navigation.navigate(payNavigations.ACCOUNT_HISTORY);
-    onClose(); // 모달 닫기
-  };
+function InputOptionModal({ isVisible, onClose, onDirectRegister, onSubmit }) {
+  const [excelFile, setExcelFile] = useState<DocumentPickerResponse | null>(null);
 
   // 엑셀 파일 선택
   const pickExcelFile = async () => {
@@ -71,76 +61,24 @@ function InputOptionModal({isVisible, onClose, onDirectRegister}) {
   };
 
   // 엑셀 파일 업로드
-  const handleSubmit = async () => {
-    if (!excelFile) {
-      Toast.show({
-        type: 'error',
-        text1: '엑셀 파일을 선택해주세요.',
-      });
-      return;
+  const handleSubmit = () => {
+    if (excelFile) {
+      onSubmit(excelFile); // 부모 컴포넌트로 파일 전달
+      onClose(); // 모달 닫기
+    } else {
+      Alert.alert('엑셀 파일을 선택해주세요.');
     }
-
-    const formData = new FormData();
-    const name = excelFile.name;
-    formData.append('file', {
-      name,
-      type: excelFile.type,
-      uri: excelFile.uri,
-    });
-
-    try {
-      const {
-        data: {path},
-      } = await axiosInstance.post('/participant/money/excel', formData, {
-        headers: {
-          'content-type': 'multipart/form-data',
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      Toast.show({
-        type: 'success',
-        text1: '파일 업로드 성공',
-      });
-      onClose();
-    } catch (e) {
-      Toast.show({
-        type: 'error',
-        text1: '파일 업로드 실패',
-        text2: '다시 시도해주세요.',
-      });
-    }
-  };
-
-  // 직접 등록하기
-  const handleDirectRegister = () => {
-    onDirectRegister(); // 직접 등록하기 호출
-    onClose(); // 모달 닫기
   };
 
   const handlePress = (key: string) => {
     if (key === '1') {
-      handleAccountHistory();
+      // 계좌 내역 불러오기
     } else if (key === '2') {
       pickExcelFile();
     } else if (key === '3') {
-      handleDirectRegister();
+      onDirectRegister(); // 직접 등록하기 로직
     }
   };
-
-  const renderItem = ({item}: {item: (typeof options)[0]}) => (
-    <TouchableOpacity onPress={() => handlePress(item.key)}>
-      <View style={styles.optionContainer}>
-        <Image style={styles.icon} source={item.imageUrl} />
-        <View style={styles.textContainer}>
-          <Text style={styles.optionLabel}>{item.label}</Text>
-          <Text style={styles.optionDescription}>{item.description}</Text>
-        </View>
-        <View style={styles.arrow}>
-          <Icon name="chevron-right" size={20} color={colors.BLACK} />
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
 
   return (
     <Modal
@@ -150,7 +88,20 @@ function InputOptionModal({isVisible, onClose, onDirectRegister}) {
       <View style={styles.modalBody}>
         <FlatList
           data={options}
-          renderItem={renderItem}
+          renderItem={({item}) => (
+            <TouchableOpacity onPress={() => handlePress(item.key)}>
+              <View style={styles.optionContainer}>
+                <Image style={styles.icon} source={item.imageUrl} />
+                <View style={styles.textContainer}>
+                  <Text style={styles.optionLabel}>{item.label}</Text>
+                  <Text style={styles.optionDescription}>
+                    {item.description}
+                  </Text>
+                </View>
+                <Icon name="chevron-right" size={20} color="#000" />
+              </View>
+            </TouchableOpacity>
+          )}
           keyExtractor={item => item.key}
         />
       </View>
@@ -177,21 +128,21 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   modalBody: {
-    backgroundColor: colors.WHITE,
+    backgroundColor: 'white',
     paddingBottom: '20%',
     paddingTop: '3%',
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
   },
   uploadButton: {
-    backgroundColor: colors.PRIMARY,
+    backgroundColor: '#00C77F',
     padding: 15,
     margin: 20,
     borderRadius: 10,
     alignItems: 'center',
   },
   uploadButtonText: {
-    color: colors.WHITE,
+    color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -212,7 +163,7 @@ const styles = StyleSheet.create({
   optionDescription: {
     fontSize: 13,
     fontWeight: '400',
-    color: colors.GRAY_700,
+    color: '#777',
     marginTop: 5,
   },
   arrow: {

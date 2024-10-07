@@ -15,6 +15,8 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import axiosInstance from '@/api/axios';
 import {eventStackParamList} from '@/navigations/stack/EventStackNavigator';
 import InputOptionModal from '@/screens/Pay/InputOptionModal'; // 모달 컴포넌트 import
+import DocumentPicker from 'react-native-document-picker'; // 파일 선택 모듈 추가
+
 
 type EventDetailScreenRouteProp = RouteProp<
   eventStackParamList,
@@ -35,7 +37,7 @@ interface Guest {
 
 const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
   route,
-  navigation, // 추가
+  navigation,
 }) => {
   const {event_id} = route.params;
   const [guests, setGuests] = useState<Guest[]>([]);
@@ -53,6 +55,52 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
   const [searchExpanded, setSearchExpanded] = useState(false);
   const [expandedGuests, setExpandedGuests] = useState<number | null>(null);
   const [inputOptionModalVisible, setInputOptionModalVisible] = useState(false); // 새로운 모달 상태 추가
+  const {event_id} = route.params;
+  const [guests, setGuests] = useState<Guest[]>([]);
+  const [filteredGuests, setFilteredGuests] = useState<Guest[]>([]);
+  const [excelFile, setExcelFile] = useState<any>(null); // 엑셀 파일 상태
+
+  // 엑셀 데이터를 추가하는 함수
+  const handleSubmitExcel = async (file: any) => {
+    if (!excelFile) {
+      Alert.alert('에러', '엑셀 파일을 선택해주세요.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', {
+      name: file.name,
+      type: file.type,
+      uri: file.uri,
+    });
+
+    try {
+      const {data} = await axiosInstance.post(
+        '/participant/money/excel',
+        formData,
+        {
+          headers: {
+            'content-type': 'multipart/form-data',
+          },
+        },
+      );
+
+      const formattedData = data.map((item: any) => ({
+        guestId: Math.random(),
+        guestName: item.name,
+        category: item.category,
+        amount: item.amount,
+      }));
+
+      setGuests(prevGuests => [...prevGuests, ...formattedData]);
+      setFilteredGuests(prevGuests => [...prevGuests, ...formattedData]);
+
+      Alert.alert('성공', '엑셀 데이터가 성공적으로 추가되었습니다.');
+    } catch (error) {
+      console.error('엑셀 파일 업로드 중 오류 발생:', error);
+      Alert.alert('에러', '엑셀 파일 업로드 중 오류가 발생했습니다.');
+    }
+  };
 
   // 이벤트 상세 내역 불러오기
   const fetchEventDetail = async (newPage = 1) => {
@@ -65,8 +113,8 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
       );
       const newGuests = response.data.data;
 
-      setGuests(prevGuests => [...prevGuests, ...newGuests]);
-      setFilteredGuests(prevGuests => [...prevGuests, ...newGuests]); // 초기 데이터로 설정
+      setGuests(prevGuests => [...prevGuests, ...formattedData]);
+      setFilteredGuests(prevGuests => [...prevGuests, ...formattedData]); // 초기 데이터로 설정
 
       if (newGuests.length === 0 || response.data.totalPages <= newPage) {
         setHasMoreData(false);
@@ -310,7 +358,8 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
       <InputOptionModal
         isVisible={inputOptionModalVisible}
         onClose={() => setInputOptionModalVisible(false)}
-        onDirectRegister={() => setModalVisible(true)} // 직접 등록하기 클릭 시 기존 모달 열기
+        onDirectRegister={() => setModalVisible(true)}
+        onSubmit={handleSubmitExcel} // 엑셀 파일을 처리하는 함수 연결
       />
 
       <Modal

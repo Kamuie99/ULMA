@@ -1,4 +1,8 @@
 package com.ssafy11.api.dto.account;
 
-public record AccountConnectRequest(String bankCode, String accountNumber) {
+import org.jetbrains.annotations.NotNull;
+
+public record AccountConnectRequest(
+        @NotNull String bankCode,
+        @NotNull String accountNumber) {
 }

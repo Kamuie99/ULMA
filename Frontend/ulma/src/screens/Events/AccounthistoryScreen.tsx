@@ -5,6 +5,7 @@ import {eventNavigations, payNavigations} from '@/constants/navigations';
 import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import useAuthStore from '@/store/useAuthStore';
 import usePayStore from '@/store/usePayStore';
+import useEventStore from '@/store/useEventStore'; // eventStore 추가
 import {useFocusEffect} from '@react-navigation/native';
 import {StackScreenProps} from '@react-navigation/stack';
 import React, {useCallback, useState} from 'react';
@@ -26,6 +27,7 @@ type AccounthistoryScreenProps = StackScreenProps<
 function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
   const [accountHistory, setAccountHistory] = useState<Transaction[]>([]);
   const {accountNumber, bankCode} = usePayStore();
+  const {setSelectedTransactions} = useEventStore(); // eventStore에서 메서드 가져오기
 
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(0);
@@ -91,6 +93,13 @@ function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
     return transactionType === 'send' ? `-${formattedAmount}` : formattedAmount;
   };
 
+  // 선택된 항목을 eventStore에 저장하는 함수
+  const handleConfirm = () => {
+    const selectedTransactions = accountHistory.filter(item => item.selected); // 선택된 항목만 필터링
+    setSelectedTransactions(selectedTransactions); // 선택된 항목을 eventStore에 저장
+    navigation.navigate(eventNavigations.FRIEND_SEARCH); // 다음 페이지로 이동
+  };
+
   const renderItem = ({item}: {item: Transaction}) => (
     <TouchableOpacity
       style={[styles.item, item.selected && styles.selectedItem]}
@@ -143,7 +152,7 @@ function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
       <CustomButton
         label="확인"
         variant="outlined"
-        onPress={() => navigation.navigate(eventNavigations.FRIEND_SEARCH)}
+        onPress={handleConfirm} // 선택된 항목을 eventStore에 저장하고 페이지 이동
         disabled={!accountHistory.some(item => item.selected)} // 선택된 항목이 없으면 버튼 비활성화
       />
     </View>

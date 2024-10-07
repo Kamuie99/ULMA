@@ -6,7 +6,6 @@ interface Transaction {
   amount: string;
   selected: boolean;
   transactionType: string;
-  eventID: string;
 }
 
 interface EventStore {

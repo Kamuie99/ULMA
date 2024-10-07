@@ -4,6 +4,7 @@ import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.events.dto.Event;
 import com.ssafy11.domain.common.PageResponse;
 import com.ssafy11.domain.events.dto.EventCommand;
+import com.ssafy11.domain.events.dto.recommendAmount;
 import com.ssafy11.domain.participant.dto.EventParticipant;
 
 public interface EventDao {
@@ -13,4 +14,6 @@ public interface EventDao {
     PageResponse<Event> getEvents(Integer userId, PageDto pageDto);
     PageResponse<EventParticipant> getEvent(Integer eventId, PageDto pageDto);
     Integer getEventByUserId(Integer eventId);
+    Integer deleteEvent(Integer eventId, Integer userId);
+    recommendAmount getRecommendAmount(String category, Integer userId);
 }

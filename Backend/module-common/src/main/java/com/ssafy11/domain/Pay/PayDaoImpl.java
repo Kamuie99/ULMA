@@ -145,14 +145,14 @@ public class PayDaoImpl implements PayDao {
                     .where(USERS.ID.eq(connectedAccount.userId()))
                     .fetchOneInto(String.class);
 
-            PayHistory receiveHistory = createReceiveHistory(
+            PayHistory chargeHistory = createChargeHistory(
                     payAccount.accountNumber(),
                     amount,
                     senderUserName,
                     connectedAccount.accountNumber()
             );
 
-            return receiveHistory;
+            return chargeHistory;
         }
 
         return null;
@@ -226,8 +226,8 @@ public class PayDaoImpl implements PayDao {
             int sendId = dsl.insertInto(PAYHISTORY)
                     .set(PAYHISTORY.ACCOUNT_ID, sendAccount.id())
                     .set(PAYHISTORY.AMOUNT, amount)
-                    .set(PAYHISTORY.BALANCE_AFTER_TRANSACTION, sendAccount.balance() - amount)
-                    .set(PAYHISTORY.TRANSACTION_TYPE, SEND.name())
+                    .set(PAYHISTORY.BALANCE_AFTER_TRANSACTION, sendAccount.balance())
+                    .set(PAYHISTORY.TRANSACTION_TYPE, PayType.SEND.name())
                     .set(PAYHISTORY.COUNTERPARTY_NAME, target)
                     .set(PAYHISTORY.COUNTERPARTY_ACCOUNT_NUMBER, targetAccountNumber)
                     .set(PAYHISTORY.DESCRIPTION, info)
@@ -250,8 +250,32 @@ public class PayDaoImpl implements PayDao {
             int receiveId = dsl.insertInto(PAYHISTORY)
                     .set(PAYHISTORY.ACCOUNT_ID, receiveAccount.id())
                     .set(PAYHISTORY.AMOUNT, amount)
-                    .set(PAYHISTORY.BALANCE_AFTER_TRANSACTION, receiveAccount.balance() + amount)
-                    .set(PAYHISTORY.TRANSACTION_TYPE, RECEIVE.name())
+                    .set(PAYHISTORY.BALANCE_AFTER_TRANSACTION, receiveAccount.balance())
+                    .set(PAYHISTORY.TRANSACTION_TYPE, PayType.RECEIVE.name())
+                    .set(PAYHISTORY.COUNTERPARTY_NAME, sender)
+                    .set(PAYHISTORY.COUNTERPARTY_ACCOUNT_NUMBER, senderAccountNumber)
+                    .set(PAYHISTORY.DESCRIPTION, sender)
+                    .returning(PAYHISTORY.ID)
+                    .fetchOne()
+                    .getValue(PAYHISTORY.ID);
+
+            return dsl.selectFrom(PAYHISTORY)
+                    .where(PAYHISTORY.ID.eq(receiveId))
+                    .fetchOneInto(PayHistory.class);
+        }
+        return null;
+    }
+
+
+    public PayHistory createChargeHistory(String accountNumber, Long amount, String sender, String senderAccountNumber) {
+        Account receiveAccount = accountDao.findByAccountNumber(accountNumber);
+
+        if (receiveAccount != null) {
+            int receiveId = dsl.insertInto(PAYHISTORY)
+                    .set(PAYHISTORY.ACCOUNT_ID, receiveAccount.id())
+                    .set(PAYHISTORY.AMOUNT, amount)
+                    .set(PAYHISTORY.BALANCE_AFTER_TRANSACTION, receiveAccount.balance())
+                    .set(PAYHISTORY.TRANSACTION_TYPE, PayType.CHARGE.name())
                     .set(PAYHISTORY.COUNTERPARTY_NAME, sender)
                     .set(PAYHISTORY.COUNTERPARTY_ACCOUNT_NUMBER, senderAccountNumber)
                     .set(PAYHISTORY.DESCRIPTION, sender)

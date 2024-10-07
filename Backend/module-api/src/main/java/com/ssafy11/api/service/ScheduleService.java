@@ -1,7 +1,7 @@
 package com.ssafy11.api.service;
 
-import com.ssafy11.domain.participant.dto.UserRelation;
 import com.ssafy11.domain.schedule.ScheduleDao;
+import com.ssafy11.domain.schedule.dto.RecentSchedule;
 import com.ssafy11.domain.schedule.dto.Schedule;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +29,10 @@ public class ScheduleService {
 
         Assert.isTrue(isMyGuest(userId, schedule.guestId()),"지인관계가 아닙니다.");
 
+        if(schedule.paidAmount()!=0){
+            Assert.isTrue(schedule.paidAmount()<0, "값이 음수여야 합니다.");
+        }
+
         Integer resultId = scheduleDao.addSchedule(schedule, Integer.parseInt(userId));
         Assert.notNull(resultId, "resultId is required");
         return resultId;
@@ -40,6 +44,10 @@ public class ScheduleService {
 
         if(schedule.guestId()!=null){
             Assert.isTrue(isMyGuest(userId, schedule.guestId()),"지인관계가 아닙니다.");
+        }
+
+        if(schedule.paidAmount()!=0){
+            Assert.isTrue(schedule.paidAmount()<0, "값이 음수여야 합니다.");
         }
 
         Integer resultId = scheduleDao.updateSchedule(schedule);
@@ -63,6 +71,15 @@ public class ScheduleService {
         Assert.notNull(month, "Month must not be null");
 
         List<Schedule> scheduleList = scheduleDao.getSchedule(Integer.parseInt(userId), year, month);
+        Assert.notNull(scheduleList, "scheduleList is required");
+        return scheduleList;
+    }
+
+    @Transactional(readOnly = true)
+    public List<RecentSchedule> getRecentSchedule(String userId){
+        Assert.hasText(userId, "UserId must not be null");
+
+        List<RecentSchedule> scheduleList = scheduleDao.getRecentSchedule(Integer.parseInt(userId));
         Assert.notNull(scheduleList, "scheduleList is required");
         return scheduleList;
     }

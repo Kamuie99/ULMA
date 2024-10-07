@@ -1,5 +1,6 @@
 package com.ssafy11.domain.schedule;
 
+import com.ssafy11.domain.schedule.dto.RecentSchedule;
 import com.ssafy11.domain.schedule.dto.Schedule;
 
 import java.util.List;
@@ -10,4 +11,5 @@ public interface ScheduleDao {
     Integer deleteSchedule(Integer scheduleId);
     List<Schedule> getSchedule(Integer userId, Integer year, Integer month);
     boolean isMyGuest(Integer userId, Integer guestId);
+    List<RecentSchedule> getRecentSchedule(Integer userId);
 }

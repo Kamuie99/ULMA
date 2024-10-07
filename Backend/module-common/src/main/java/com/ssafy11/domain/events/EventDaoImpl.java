@@ -4,6 +4,7 @@ import com.ssafy11.domain.common.PageDto;
 import com.ssafy11.domain.events.dto.Event;
 import com.ssafy11.domain.common.PageResponse;
 import com.ssafy11.domain.events.dto.EventCommand;
+import com.ssafy11.domain.events.dto.recommendAmount;
 import com.ssafy11.domain.participant.dto.EventParticipant;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
@@ -20,6 +21,7 @@ import java.util.Map;
 
 import static com.ssafy11.ulma.generated.Tables.*;
 
+@Transactional
 @RequiredArgsConstructor
 @Repository
 public class EventDaoImpl implements EventDao{
@@ -126,5 +128,36 @@ public class EventDaoImpl implements EventDao{
                 .where(EVENT.ID.eq(eventId))
                 .fetchOne();
         return eventUserId != null ? eventUserId.value1() : null;
+    }
+
+    @Override
+    public Integer deleteEvent(Integer eventId, Integer userId) {
+        Integer participationUpdateCount = dsl.update(PARTICIPATION)
+                .set(PARTICIPATION.GUEST_ID, (Integer)null)
+                .where(PARTICIPATION.EVENT_ID.eq(eventId))
+                .and(PARTICIPATION.GUEST_ID.eq(userId))
+                .execute();
+
+        return dsl.update(EVENT)
+                .set(EVENT.USERS_ID, (Integer)null)
+                .where(EVENT.ID.eq(eventId))
+                .execute();
+    }
+
+    @Transactional(readOnly = true)
+    @Override
+    public recommendAmount getRecommendAmount(String category, Integer userId) {
+        return dsl.select(PAYMENT_ANALYSIS.UNDER_50K_RATIO,
+                PAYMENT_ANALYSIS.BETWEEN_50K_100K_RATIO,
+                PAYMENT_ANALYSIS.BETWEEN_100K_150K_RATIO,
+                PAYMENT_ANALYSIS.ABOVE_150K_RATIO,
+                PAYMENT_ANALYSIS.MIN_AMOUNT,
+                PAYMENT_ANALYSIS.MAX_AMOUNT,
+                PAYMENT_ANALYSIS.TOP_AMOUNT)
+                .from(PAYMENT_ANALYSIS)
+                .where(PAYMENT_ANALYSIS.CATEGORY.eq(category))
+                .orderBy(PAYMENT_ANALYSIS.CREATE_AT.desc())
+                .limit(1)
+                .fetchOneInto(recommendAmount.class);
     }
 }

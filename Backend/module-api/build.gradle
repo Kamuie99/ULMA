@@ -6,7 +6,6 @@ dependencies {
     implementation project(':module-common')
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.modelmapper:modelmapper:3.2.1'
 
     // jwt
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'

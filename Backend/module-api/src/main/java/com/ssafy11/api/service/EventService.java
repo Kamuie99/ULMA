@@ -5,6 +5,7 @@ import com.ssafy11.domain.events.dto.EventCommand;
 import com.ssafy11.domain.events.EventDao;
 import com.ssafy11.domain.events.dto.Event;
 import com.ssafy11.domain.common.PageResponse;
+import com.ssafy11.domain.events.dto.recommendAmount;
 import com.ssafy11.domain.participant.dto.EventParticipant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -64,4 +65,23 @@ public class EventService {
         return guestsList;
     }
 
+    public Integer deleteEvent(Integer eventId, String userId) {
+        Assert.notNull(eventId, "eventId must not be null");
+        Assert.hasText(userId, "UserId must not be null");
+        Assert.isTrue(Integer.parseInt(userId)==(eventDao.getEventByUserId(eventId)), "유저가 만든 이벤트가 아닙니다.");
+
+        Integer resultId = eventDao.deleteEvent(eventId, Integer.parseInt(userId));
+        Assert.notNull(resultId, "Event id must not be null");
+        return resultId;
+
+    }
+
+    public recommendAmount getRecommendAmount(String category, String userId){
+        Assert.hasText(category, "category must not be null");
+        Assert.hasText(userId, "userId must not be null");
+
+        recommendAmount recommendAmount = eventDao.getRecommendAmount(category, Integer.parseInt(userId));
+        Assert.notNull(recommendAmount, "recommendAmount must not be null");
+        return recommendAmount;
+    }
 }

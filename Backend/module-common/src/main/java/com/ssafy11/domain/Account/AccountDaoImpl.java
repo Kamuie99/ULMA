@@ -201,7 +201,7 @@ public class AccountDaoImpl implements AccountDao {
             int sendId = dsl.insertInto(PAYHISTORY)
                     .set(PAYHISTORY.ACCOUNT_ID, sendAccount.id())
                     .set(PAYHISTORY.AMOUNT, amount)
-                    .set(PAYHISTORY.BALANCE_AFTER_TRANSACTION, sendAccount.balance() - amount)
+                    .set(PAYHISTORY.BALANCE_AFTER_TRANSACTION, sendAccount.balance())
                     .set(PAYHISTORY.TRANSACTION_TYPE, PayType.SEND.name())
                     .set(PAYHISTORY.COUNTERPARTY_NAME, target)
                     .set(PAYHISTORY.COUNTERPARTY_ACCOUNT_NUMBER, targetAccountNumber)
@@ -224,7 +224,7 @@ public class AccountDaoImpl implements AccountDao {
             int receiveId = dsl.insertInto(PAYHISTORY)
                     .set(PAYHISTORY.ACCOUNT_ID, receiveAccount.id())
                     .set(PAYHISTORY.AMOUNT, amount)
-                    .set(PAYHISTORY.BALANCE_AFTER_TRANSACTION, receiveAccount.balance() + amount)
+                    .set(PAYHISTORY.BALANCE_AFTER_TRANSACTION, receiveAccount.balance())
                     .set(PAYHISTORY.TRANSACTION_TYPE, PayType.RECEIVE.name())
                     .set(PAYHISTORY.COUNTERPARTY_NAME, sender)
                     .set(PAYHISTORY.COUNTERPARTY_ACCOUNT_NUMBER, senderAccountNumber)
@@ -307,8 +307,8 @@ public class AccountDaoImpl implements AccountDao {
         }
 
         Random random = new Random();
-        int number = random.nextInt(1000);
-        String num = String.format("%03d", number);
+        int number = random.nextInt(1000000);
+        String num = String.format("%06d", number);
 
         PayHistory receiveHistory = this.createReceiveHistory(accountNumber, 1L, num, "얼마페이 인증");
 

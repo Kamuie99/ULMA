@@ -1,4 +1,3 @@
-//입출금 내역 선택 페이지
 import axiosInstance from '@/api/axios';
 import CustomButton from '@/components/common/CustomButton';
 import {colors} from '@/constants';
@@ -8,21 +7,15 @@ import useAuthStore from '@/store/useAuthStore';
 import usePayStore from '@/store/usePayStore';
 import {useFocusEffect} from '@react-navigation/native';
 import {StackScreenProps} from '@react-navigation/stack';
-import React, {useCallback, useEffect, useState} from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  Button,
-} from 'react-native';
+import React, {useCallback, useState} from 'react';
+import {View, Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
 
 interface Transaction {
   id: string;
   name: string;
   amount: string;
   selected: boolean;
+  transactionType: string;
 }
 
 type AccounthistoryScreenProps = StackScreenProps<
@@ -32,16 +25,15 @@ type AccounthistoryScreenProps = StackScreenProps<
 
 function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
   const [accountHistory, setAccountHistory] = useState<Transaction[]>([]);
-  const {accessToken} = useAuthStore();
   const {accountNumber, bankCode} = usePayStore();
 
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(0); // 페이지 번호 상태
-  const [hasMore, setHasMore] = useState(true); // 더 가져올 데이터가 있는지 확인하는 상태
+  const [page, setPage] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
 
   // 데이터 가져오기 함수
   const fetchAccountHistory = async (newPage: number) => {
-    if (loading || !hasMore) return; // 로딩 중이거나 더 불러올 데이터가 없으면 중단
+    if (loading || !hasMore) return;
 
     setLoading(true);
     try {
@@ -56,9 +48,16 @@ function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
       );
       const newData = response.data.data;
 
-      // 새 데이터가 있으면 추가, 없으면 hasMore false로 설정
       if (newData.length > 0) {
-        setAccountHistory(prev => [...prev, ...newData]);
+        const mappedData = newData.map(item => ({
+          id: item.transactionDate, // transactionDate를 id로 사용
+          name: item.counterpartyName,
+          amount: item.amount,
+          selected: false,
+          transactionType: item.transactionType, // transactionType 추가
+        }));
+
+        setAccountHistory(prev => [...prev, ...mappedData]);
         setPage(newPage);
       } else {
         setHasMore(false);
@@ -70,21 +69,26 @@ function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
     }
   };
 
-  // 페이지 처음 로드 시 첫 페이지 데이터 가져오기
   useFocusEffect(
     useCallback(() => {
-      setAccountHistory([]); // 초기화
-      setHasMore(true); // 데이터 더 불러올 수 있도록 설정
-      fetchAccountHistory(0); // 첫 페이지 데이터 불러오기
+      setAccountHistory([]);
+      setHasMore(true);
+      fetchAccountHistory(0);
     }, [accountNumber]),
   );
 
   const toggleSelect = (id: string) => {
     setAccountHistory(prevData =>
-      prevData.map(item =>
-        item.id === id ? {...item, selected: !item.selected} : item,
+      prevData.map(
+        item => (item.id === id ? {...item, selected: !item.selected} : item), // 선택된 항목만 상태 변경
       ),
     );
+  };
+
+  // 금액 포맷 함수: 3자리마다 쉼표 추가 및 send일 경우 '-' 부호 붙이기
+  const formatAmount = (amount: string, transactionType: string) => {
+    const formattedAmount = parseFloat(amount).toLocaleString(); // 3자리마다 쉼표 추가
+    return transactionType === 'send' ? `-${formattedAmount}` : formattedAmount;
   };
 
   const renderItem = ({item}: {item: Transaction}) => (
@@ -100,15 +104,16 @@ function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
       </Text>
       <View style={styles.textContainer}>
         <Text style={styles.name}>{item.name}</Text>
-        <Text style={styles.amount}>{item.amount}</Text>
+        <Text style={styles.amount}>
+          {formatAmount(item.amount, item.transactionType)}
+        </Text>
       </View>
     </TouchableOpacity>
   );
 
-  // 스크롤이 끝에 도달했을 때 다음 페이지 데이터 요청
   const handleEndReached = () => {
     if (!loading && hasMore) {
-      fetchAccountHistory(page + 1); // 다음 페이지 불러오기
+      fetchAccountHistory(page + 1);
     }
   };
 
@@ -123,9 +128,15 @@ function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
           data={accountHistory}
           renderItem={renderItem}
           keyExtractor={item => item.id}
-          onEndReached={handleEndReached} // 끝에 도달 시 호출
-          onEndReachedThreshold={0.5} // 리스트 끝에서 50% 지점에서 데이터 로드
-          ListFooterComponent={loading && <Text>Loading...</Text>} // 로딩 중일 때 표시
+          onEndReached={handleEndReached}
+          onEndReachedThreshold={0.5}
+          initialNumToRender={20} // FlatList 성능 최적화
+          getItemLayout={(data, index) => ({
+            length: 60, // 아이템 높이
+            offset: 60 * index,
+            index,
+          })}
+          ListFooterComponent={loading && <Text>Loading...</Text>}
           style={styles.list}
         />
       </View>
@@ -133,6 +144,7 @@ function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
         label="확인"
         variant="outlined"
         onPress={() => navigation.navigate(eventNavigations.FRIEND_SEARCH)}
+        disabled={!accountHistory.some(item => item.selected)} // 선택된 항목이 없으면 버튼 비활성화
       />
     </View>
   );
@@ -161,8 +173,8 @@ const styles = StyleSheet.create({
     borderColor: colors.GRAY_300,
     borderWidth: 1,
     shadowColor: colors.BLACK,
-    shadowOpacity: 0.25, // 그림자의 투명도
-    shadowRadius: 20, // 그림자의 흐림 정도
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
     elevation: 4,
   },
   textContainer: {
@@ -178,20 +190,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 10,
-    paddingVertical: 10,
-    // borderRadius: 10,
     marginVertical: 2,
   },
   selectedItem: {
-    backgroundColor: '#FDEDEC', // 선택된 항목 배경색
+    backgroundColor: '#FDEDEC',
   },
   name: {
     fontSize: 16,
     width: '50%',
-    alignItems: 'flex-start',
+    textAlign: 'left',
   },
   amount: {
     fontSize: 16,
+    textAlign: 'right', // 금액 오른쪽 정렬
   },
   noCheck: {
     fontSize: 18,

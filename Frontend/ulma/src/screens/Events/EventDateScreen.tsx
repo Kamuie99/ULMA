@@ -29,7 +29,7 @@ const EventDateScreen = () => {
     }
     // navigation.navigate('다음페이지'); // 다음 페이지로 이동-내비게이션나중에설정
   };
-
+  ///
   return (
     <View style={styles.container}>
       <TitleTextField

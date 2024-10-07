@@ -23,6 +23,7 @@ const eventNavigations = {
   EVENT_DETAIL: 'EVENT_DETAIL',
   AI_RECOMMEND_MESSAGE: 'AIRecommendMessage',
   EVENT_FIX: 'EVENT_FIX',
+  EVENT_EXCEL: 'ExcelScreen',
 } as const;
 
 const payNavigations = {
@@ -44,6 +45,7 @@ const payNavigations = {
   ADD_ACCOUNT: 'AddAccount',
   ACCOUNT_VERIFY: 'AccountVerify',
   ACCOUNT_DETAIL: 'AccountDetail',
+  EXCEL_SCREEN: 'ExcelScreen',
 } as const;
 
 const mypageNavigations = {

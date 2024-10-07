@@ -20,6 +20,7 @@ import usePayStore from '@/store/usePayStore';
 import CustomButton from '@/components/common/CustomButton';
 
 interface Transaction {
+  id: string;
   date: string;
   guest: string;
   amount: string;
@@ -37,8 +38,9 @@ function PayHomeScreen() {
     useCallback(() => {
       const fetchData = async () => {
         try {
-          await getPayInfo(); // Pay 정보 가져오기
-          await getAccountInfo(); // Account 정보 가져오기
+          console.log(accessToken);
+          await getPayInfo();
+          await getAccountInfo();
         } catch (error) {
           console.error('데이터를 불러오는 중 에러가 발생했습니다.', error);
         }
@@ -52,13 +54,10 @@ function PayHomeScreen() {
     useCallback(() => {
       const fetchData = async () => {
         try {
-          const response = await axiosInstance.get('/users/pay', {
-            headers: {Authorization: `Bearer ${accessToken}`},
-          });
-          console.log(response.data);
-
-          const formattedData: Transaction[] = response.data.map(
+          const response = await axiosInstance.get('/users/pay');
+          const formattedData: Transaction[] = response.data.data.map(
             (item: any) => ({
+              id: item.transactionDate,
               amount: item.amount,
               date: item.transactionDate.slice(0, 10),
               guest: item.counterpartyName,
@@ -72,9 +71,8 @@ function PayHomeScreen() {
           console.error('계좌 이력을 불러오는 중 에러가 발생했습니다:', error);
         }
       };
-
       fetchData();
-    }, [accessToken]), // 의존성 배열에 accessToken 추가
+    }, []),
   );
 
   // 거래 내역
@@ -99,14 +97,10 @@ function PayHomeScreen() {
     </View>
   );
 
-  const bankImages = {
-    하나은행: require('../../assets/Pay/banks/하나은행.png'),
-  };
-
   const navigation = useNavigation();
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.boxContainer}>
         <Text style={styles.title}>페이머니</Text>
         {balance ? (
@@ -139,15 +133,6 @@ function PayHomeScreen() {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate(payNavigations.ADD_ACCOUNT)}>
-            <Image
-              source={require('@/assets/Pay/menu/accountEdit.png')}
-              style={styles.buttonImage}
-            />
-            <Text>새 계좌 등록</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.button}
             onPress={() => navigation.navigate(payNavigations.SEND_ACCOUNT)}>
             <Image
               source={require('@/assets/Pay/menu/sendMoney.png')}
@@ -172,20 +157,30 @@ function PayHomeScreen() {
           {payHistory.length > 0 ? (
             <>
               <View>
-                {/* 송금 내역 리스트 */}
-                <FlatList
-                  data={payHistory.slice(0, 5)} // 10개의 항목만 전달
-                  renderItem={renderTransaction}
-                  keyExtractor={item => item.id}
-                />
+                <View>
+                  {/* 송금 내역 리스트 */}
+                  <FlatList
+                    data={[
+                      ...payHistory.slice(0, 5),
+                      {id: 'loadMore', type: 'loadMore'},
+                    ]} // 데이터에 더보기 항목 추가
+                    renderItem={({item}) =>
+                      item.type === 'loadMore' ? (
+                        <TouchableOpacity
+                          onPress={() =>
+                            navigation.navigate(payNavigations.PAY_LIST)
+                          }>
+                          <Text style={styles.moreBtn}>더보기</Text>
+                        </TouchableOpacity>
+                      ) : (
+                        renderTransaction({item})
+                      )
+                    }
+                    keyExtractor={item => item.id}
+                    style={{maxHeight: '90%'}}
+                  />
+                </View>
               </View>
-
-              {payHistory.length > 5 && (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate(payNavigations.PAY_LIST)}>
-                  <Text style={styles.moreBtn}>더보기</Text>
-                </TouchableOpacity>
-              )}
             </>
           ) : (
             <Text>내역이 없습니다.</Text> // 데이터가 없을 때 표시
@@ -222,7 +217,7 @@ function PayHomeScreen() {
           </View>
         </View>
       </Modal>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -231,14 +226,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.LIGHTGRAY,
-    overflow: 'scroll',
     padding: 15,
+    gap: 15,
   },
   boxContainer: {
     backgroundColor: colors.WHITE,
     borderRadius: 15,
     padding: 20,
-    marginVertical: 10,
   },
   title: {
     fontWeight: 'bold',
@@ -274,8 +268,8 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingVertical: 20,
     justifyContent: 'space-between',
+    paddingHorizontal: 5,
   },
   button: {
     justifyContent: 'center',
@@ -367,7 +361,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.LIGHTGRAY,
     borderRadius: 8,
     flex: 1,
-    overflow: 'scroll',
   },
 });
 

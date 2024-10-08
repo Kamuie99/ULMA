@@ -105,7 +105,7 @@ function AccountInfoScreen() {
                         //   bankColors[account.bankCode],
                         //   1,
                         // ),
-                        backgroundColor: colors.GREEN_300,
+                        backgroundColor: colors.YELLOW,
                       }
                     : {},
                 ]}>

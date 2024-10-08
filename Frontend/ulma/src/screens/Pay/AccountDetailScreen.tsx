@@ -44,7 +44,6 @@ const AccountDetailScreen: React.FC = () => {
               type: 'error',
               text1: '로그인이 만료되었습니다.',
             });
-            navigation.navigate('Auth', {screen: 'LoginScreen'});
           }
           Toast.show({
             type: 'error',
@@ -136,7 +135,7 @@ const styles = StyleSheet.create({
   textContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '90%',
+    width: '100%',
   },
   list: {
     flexGrow: 0,

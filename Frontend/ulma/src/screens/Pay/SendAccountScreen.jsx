@@ -16,21 +16,14 @@ import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {payNavigations} from '@/constants/navigations';
 import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import Toast from 'react-native-toast-message';
+import {banks} from '@/constants/banks';
+import Icon from 'react-native-vector-icons/Entypo';
 
 function SendAccountScreen() {
   const navigation = useNavigation();
   const [targetAccountNumber, setTargetAccountNumber] = useState('');
   const [selectedBank, setSelectedBank] = useState(''); // 선택된 은행
   const [isModalVisible, setModalVisible] = useState(false); // 모달 가시성
-
-  // 은행 목록
-  const banks = [
-    {id: '1', name: 'KB국민은행'},
-    {id: '2', name: '신한은행'},
-    {id: '3', name: '우리은행'},
-    {id: '4', name: '하나은행'},
-    {id: '5', name: '카카오뱅크'},
-  ];
 
   // 은행 선택 핸들러
   const selectBank = bankName => {
@@ -73,8 +66,19 @@ function SendAccountScreen() {
         {/* 은행 선택 버튼 */}
         <TouchableOpacity
           onPress={() => setModalVisible(true)}
-          style={styles.bankSelectButton}>
+          style={[
+            styles.bankSelectButton,
+            selectedBank ? styles.selectedBank : null,
+          ]}>
           <Text>{selectedBank ? selectedBank : '은행 선택'}</Text>
+          {!selectedBank ? (
+            <Icon
+              name="chevron-down"
+              size={24}
+              color={colors.GRAY_700}
+              onPress={() => setSelectedBank('')}
+            />
+          ) : null}
         </TouchableOpacity>
 
         {/* 계좌번호 입력 박스 */}
@@ -83,11 +87,16 @@ function SendAccountScreen() {
             style={styles.amountInput}
             value={targetAccountNumber}
             onChangeText={setTargetAccountNumber}
-            placeholder="계좌번호"
+            placeholder="계좌번호 입력"
           />
         </View>
-        <CustomButton label="확인" variant="outlined" onPress={handlePress} />
       </View>
+      <CustomButton
+        label="확인"
+        variant="outlined"
+        onPress={handlePress}
+        size="large"
+      />
 
       {/* 은행 선택 모달 */}
       <Modal
@@ -104,11 +113,12 @@ function SendAccountScreen() {
             <FlatList
               data={banks}
               keyExtractor={item => item.id}
+              contentContainerStyle={styles.flatListContainer}
               renderItem={({item}) => (
                 <TouchableOpacity
                   style={styles.bankItem}
                   onPress={() => selectBank(item.name)}>
-                  <Text>{item.name}</Text>
+                  <Text style={styles.bankName}>{item.name}</Text>
                 </TouchableOpacity>
               )}
             />
@@ -136,12 +146,14 @@ const styles = StyleSheet.create({
   },
   bankSelectButton: {
     padding: 15,
-    borderWidth: 1,
-    borderColor: '#ccc',
+    borderBottomWidth: 1,
+    borderColor: colors.GREEN_700,
     borderRadius: 5,
     marginBottom: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 15,
+    marginHorizontal: 10,
+    flexDirection: 'row',
   },
   amountContainer: {
     flexDirection: 'row',
@@ -153,11 +165,8 @@ const styles = StyleSheet.create({
   },
   amountInput: {
     flex: 1,
-    fontSize: 18,
-    fontFamily: 'SamsungGothicCondensed',
     fontWeight: '400',
     color: 'black',
-    textAlign: 'right',
   },
   modalContainer: {
     flex: 1,
@@ -166,22 +175,30 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    width: 300,
-    backgroundColor: 'white',
+    width: '80%',
+    maxHeight: '60%',
+    backgroundColor: colors.WHITE,
     borderRadius: 10,
     padding: 20,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   modalTitle: {
     fontSize: 18,
-    marginBottom: 10,
+    fontWeight: 'bold',
+    marginBottom: 15,
   },
   bankItem: {
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: colors.GRAY_300,
     width: '100%',
     alignItems: 'center',
+    paddingHorizontal: 50,
+  },
+  selectedBank: {
+    colors: colors.BLACK,
+    fontWeight: 'bold',
   },
 });
 

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,11 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
-import {RouteProp, NavigationProp} from '@react-navigation/native';
+import {
+  RouteProp,
+  NavigationProp,
+  useFocusEffect,
+} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axiosInstance from '@/api/axios';
 import {eventStackParamList} from '@/navigations/stack/EventStackNavigator';
@@ -84,7 +88,11 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
       setIsFetchingMore(false);
     }
   };
-
+  useEffect(() => {
+    if (route.params?.refresh) {
+      setRefresh(prev => !prev); // refresh 값을 토글하여 데이터가 다시 로드되도록 함
+    }
+  }, [route.params?.refresh]);
   useEffect(() => {
     fetchEventDetail();
   }, [event_id]);
@@ -99,6 +107,12 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
       setFilteredGuests(filtered);
     }
   }, [searchQuery, guests]);
+  const [refresh, setRefresh] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      fetchEventDetail(1); // 첫 페이지부터 다시 데이터 가져오기
+    }, [event_id, refresh]),
+  );
 
   const loadMoreData = () => {
     if (!isFetchingMore && hasMoreData) {
@@ -245,7 +259,7 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
         <View
           style={
             searchExpanded
-              ? styles.searchBoxExpanded``
+              ? styles.searchBoxExpanded
               : styles.searchBoxCollapsed
           }>
           {searchExpanded && (
@@ -270,7 +284,7 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
 
       <FlatList
         data={filteredGuests}
-        keyExtractor={item => item.guestId.toString()}
+        keyExtractor={(item, index) => `${item.guestId}-${index}`}
         renderItem={({item}) => (
           <View style={styles.guestBox}>
             <Text style={styles.guestName}>{item.guestName}</Text>
@@ -311,6 +325,7 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
         isVisible={inputOptionModalVisible}
         onClose={() => setInputOptionModalVisible(false)}
         onDirectRegister={() => setModalVisible(true)} // 직접 등록하기 클릭 시 기존 모달 열기
+        eventId={event_id} // event_id를 prop으로 전달
       />
 
       <Modal
@@ -409,7 +424,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     marginBottom: 16,
   },
   title: {

@@ -112,7 +112,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public PaginatedHistory<PayHistoryDTO> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType, Integer page, Integer size) {
+    public PaginatedHistory<PayHistory> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType, Integer page, Integer size) {
 
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             throw new ErrorException(ErrorCode.INVALID_DATE_RANGE);
@@ -130,7 +130,6 @@ public class AccountServiceImpl implements AccountService {
             }
         }
 
-
         PaginatedHistory<PayHistory> paginatedHistory = accountDao.findPayHistory(accountNumber, startDate, endDate, payType, page, size);
 
         if (paginatedHistory == null) {
@@ -138,12 +137,12 @@ public class AccountServiceImpl implements AccountService {
         }
 
         // PayHistory 데이터를 PayHistoryDTO로 변환
-        List<PayHistoryDTO> payHistoryDTOList = paginatedHistory.data().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+//        List<PayHistoryDTO> payHistoryDTOList = paginatedHistory.data().stream()
+//                .map(this::convertToDTO)
+//                .collect(Collectors.toList());
 
         // PayHistoryDTO 타입의 PaginatedHistory 반환
-        return new PaginatedHistory<>(payHistoryDTOList, page, paginatedHistory.totalItemsCount(), paginatedHistory.totalPages());
+        return paginatedHistory;
     }
 
 

@@ -22,11 +22,12 @@ interface CustomButtonProps extends PressableProps {
 }
 
 const deviceHeight = Dimensions.get('screen').height;
+const deviceWidth = Dimensions.get('screen').width;
 
 function CustomButton({
   label,
   variant = 'filled',
-  size = 'large',
+  size = 'maxSize',
   inValid = false,
   customStyle,
   posY = 30,
@@ -54,9 +55,12 @@ function CustomButton({
 
 const styles = StyleSheet.create({
   wrap: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'absolute',
+    bottom: 0,
+    width: deviceWidth,
+    paddingHorizontal: 10,
   },
   container: {
     borderRadius: 6,

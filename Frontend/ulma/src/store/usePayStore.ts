@@ -8,21 +8,21 @@ interface AccountInfo {
 }
 
 interface PayInfo {
-  balance: number | null;
+  balance: number | -1;
 }
 
 interface PayStore extends AccountInfo, PayInfo {
   getAccountInfo: () => Promise<void>;
   makeAccount: () => Promise<void>;
   setAccountInfo: (data: Partial<AccountInfo>) => void;
-  setPayInfo: (data: Partial<PayInfo>) => void; // PayInfo 업데이트 메서드 추가
+  setPayInfo: (data: Partial<PayInfo>) => void;
   getPayInfo: () => Promise<void>;
 }
 
 const usePayStore = create<PayStore>(set => ({
   accountNumber: null,
   bankCode: null,
-  balance: null,
+  balance: -1,
 
   setAccountInfo: (data: Partial<AccountInfo>) =>
     set(state => ({

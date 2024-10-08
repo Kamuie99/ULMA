@@ -1,7 +1,7 @@
 package com.ssafy11.domain.scheduler;
 
+import com.ssafy11.domain.scheduler.dto.PaymentAnalysisDto;
 import lombok.RequiredArgsConstructor;
-import org.jooq.Record;
 
 import org.jooq.impl.DSL;
 import org.jooq.impl.DefaultDSLContext;
@@ -21,7 +21,7 @@ public class SchedulerDaoImpl implements SchedulerDao {
     private final DefaultDSLContext dslContext;
 
     @Override
-    public Record analyzePay(String category) {
+    public PaymentAnalysisDto analyzePay(String category) {
         LocalDateTime oneYearAgo = LocalDateTime.now().minusYears(1);
 
         return dslContext
@@ -48,7 +48,7 @@ public class SchedulerDaoImpl implements SchedulerDao {
             .join(EVENT).on(PARTICIPATION.EVENT_ID.eq(EVENT.ID))
             .where(EVENT.CATEGORY.eq(category))
             .and(EVENT.DATE.greaterThan(oneYearAgo))
-            .fetchOne();
+            .fetchOneInto(PaymentAnalysisDto.class);
     }
 
     @Override

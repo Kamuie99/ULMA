@@ -1,7 +1,6 @@
 package com.ssafy11.domain.scheduler;
 
 import lombok.RequiredArgsConstructor;
-import org.jooq.DSLContext;
 import org.jooq.Record;
 
 import org.jooq.impl.DSL;

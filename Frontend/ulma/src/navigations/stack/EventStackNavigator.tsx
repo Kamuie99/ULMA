@@ -23,6 +23,7 @@ export type eventStackParamList = {
   [eventNavigations.FRIEND_SEARCH]: undefined;
   [eventNavigations.EVENT_EXCEL]: {event_id: string; excelData: any};
 };
+//
 
 const Stack = createStackNavigator<eventStackParamList>();
 

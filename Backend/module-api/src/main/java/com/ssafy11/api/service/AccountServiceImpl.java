@@ -76,11 +76,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<PayHistoryDTO> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType) {
-        List<PayHistory> payHistoryList = accountDao.findPayHistory(accountNumber, startDate, endDate, payType);
-        return payHistoryList.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public List<PayHistory> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType) {
+        return accountDao.findPayHistory(accountNumber, startDate, endDate, payType);
     }
 
     // PayHistory 엔티티를 PayHistoryDTO로 변환하는 메서드

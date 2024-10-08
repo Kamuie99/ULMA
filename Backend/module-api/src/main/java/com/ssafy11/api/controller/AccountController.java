@@ -4,6 +4,7 @@ import com.ssafy11.api.dto.account.*;
 import com.ssafy11.api.dto.pay.PayHistoryDTO;
 import com.ssafy11.api.service.AccountService;
 import com.ssafy11.domain.Account.Account;
+import com.ssafy11.domain.Pay.PayHistory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -79,12 +80,12 @@ public class AccountController {
 
     // 7. 거래 내역 조회
     @GetMapping("/account/{account_number}/history")
-    public ResponseEntity<List<PayHistoryDTO>> getPayHistory(
+    public ResponseEntity<List<PayHistory>> getPayHistory(
             @PathVariable("account_number") String accountNumber,
             @RequestParam(value = "start_date", required = false) LocalDate startDate,
             @RequestParam(value = "end_date", required = false) LocalDate endDate,
             @RequestParam(value = "pay_type", required = false) String payType) {
-        List<PayHistoryDTO> payHistoryList = accountService.findPayHistory(accountNumber, startDate, endDate, payType);
+        List<PayHistory> payHistoryList = accountService.findPayHistory(accountNumber, startDate, endDate, payType);
         return ResponseEntity.ok(payHistoryList);
     }
 

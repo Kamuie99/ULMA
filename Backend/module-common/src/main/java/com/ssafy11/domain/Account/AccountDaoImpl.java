@@ -316,4 +316,17 @@ public class AccountDaoImpl implements AccountDao {
         return num;
     }
 
+    @Override
+    public Account verifyTargetAccount(String bankCode, String accountNumber) {
+        Account account = dsl.selectFrom(ACCOUNT)
+                .where(ACCOUNT.BANK_CODE.eq(bankCode))
+                .and(ACCOUNT.ACCOUNT_NUMBER.eq(accountNumber))
+                .fetchOneInto(Account.class);
+
+        if (account == null) {
+            return null;
+        }
+
+        return account;
+    }
 }

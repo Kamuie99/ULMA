@@ -10,15 +10,17 @@ import {
 import Icon from 'react-native-vector-icons/Entypo';
 import Modal from 'react-native-modal';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
+import {eventNavigations, payNavigations} from '@/constants/navigations';
+import usePayStore from '@/store/usePayStore';
+// import {payNavigations} from '@/constants/navigations';
+// import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import {colors} from '@/constants';
-import {eventNavigations} from '@/constants/navigations';
-import {eventStackParamList} from '@/navigations/stack/EventStackNavigator';
 
 interface InputOptionModalProps {
   isVisible: boolean;
   onClose: () => void;
   onDirectRegister: () => void;
-  eventId: string; // eventId prop 추가
 }
 
 // 옵션 정의
@@ -43,26 +45,27 @@ const options = [
   },
 ];
 
-const InputOptionModal: React.FC<InputOptionModalProps> = ({
+function InputOptionModal({
   isVisible,
   onClose,
   onDirectRegister,
-  eventId, // eventId prop 받아오기
-}) => {
-  // useNavigation 훅에 eventStackParamList 타입을 명시
-  const navigation = useNavigation<NavigationProp<eventStackParamList>>();
+}: InputOptionModalProps) {
+  const navigation = useNavigation<NavigationProp<payStackParamList>>();
+  const {getAccountInfo} = usePayStore();
 
   // 계좌 내역 불러오기
   const handleAccountHistory = () => {
     console.log('계좌 내역 불러오기 실행');
+    getAccountInfo();
+    navigation.navigate(eventNavigations.ACCOUNT_HISTORY);
     navigation.navigate('Accounthistory');
     onClose(); // 모달 닫기
   };
 
   // 엑셀 화면으로 이동
   const handleExcelRegister = () => {
-    // ExcelScreen으로 eventId를 포함하여 이동
-    navigation.navigate(eventNavigations.EVENT_EXCEL, {event_id: eventId});
+    // ExcelScreen으로 파일 없이 이동
+    navigation.navigate('ExcelScreen', {});
     onClose(); // 모달 닫기
   };
 
@@ -111,7 +114,7 @@ const InputOptionModal: React.FC<InputOptionModalProps> = ({
       </View>
     </Modal>
   );
-};
+}
 
 const styles = StyleSheet.create({
   modalContainer: {

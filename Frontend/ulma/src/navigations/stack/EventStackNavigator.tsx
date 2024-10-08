@@ -8,6 +8,8 @@ import EventScreen from '@/screens/Events/EventScreen';
 import EventDetailScreen from '@/screens/Events/EventDetailScreen';
 import AIRecommendMessage from '@/screens/Events/AIRecommendMessage';
 import EventFixScreen from '@/screens/Events/EventFixScreen';
+import AccounthistoryScreen from '@/screens/Events/AccounthistoryScreen';
+import FriendsearchScreen from '@/screens/Events/FriendsearchScreen';
 import ExcelScreen from '@/screens/Events/ExcelScreen';
 export type eventStackParamList = {
   [eventNavigations.EVENT_ADD]: undefined;
@@ -17,7 +19,9 @@ export type eventStackParamList = {
   [eventNavigations.EVENT_DETAIL]: {event_id: string; refresh?: boolean}; // 이벤트 상세 내역에 대한 타입
   [eventNavigations.EVENT_FIX]: {event_id: string}; // event_id를 사용한 타입 정의
   [eventNavigations.AI_RECOMMEND_MESSAGE]: undefined; // AI 추천 메시지
-  [eventNavigations.EVENT_EXCEL]: {event_id: string; excelData?: any};
+  [eventNavigations.ACCOUNT_HISTORY]: undefined;
+  [eventNavigations.FRIEND_SEARCH]: undefined;
+  [eventNavigations.EVENT_EXCEL]: {event_id: string; excelData: any};
 };
 
 const Stack = createStackNavigator<eventStackParamList>();
@@ -78,6 +82,21 @@ function EventStackNavigator() {
           headerTitle: '이벤트 수정하기',
         }}
       />
+      <Stack.Screen
+        name={eventNavigations.ACCOUNT_HISTORY}
+        component={AccounthistoryScreen}
+        options={{
+          headerTitle: '계좌 이력 불러오기',
+        }}
+      />
+      <Stack.Screen
+        name={eventNavigations.FRIEND_SEARCH}
+        component={FriendsearchScreen}
+        options={{
+          headerTitle: '송금 내역 등록하기',
+        }}
+      />
+
       <Stack.Screen
         name={eventNavigations.EVENT_EXCEL}
         component={ExcelScreen}

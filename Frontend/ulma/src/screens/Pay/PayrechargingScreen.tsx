@@ -14,10 +14,12 @@ import Toast from 'react-native-toast-message';
 import axiosInstance from '@/api/axios';
 import useAuthStore from '@/store/useAuthStore';
 import usePayStore from '@/store/usePayStore';
+import {useNavigation} from '@react-navigation/native';
 
 function PayrechargingScreen() {
   const [amount, setAmount] = useState<number>(0);
   const {getPayInfo} = usePayStore();
+  const navigation = useNavigation();
 
   const handleRecharge = async () => {
     if (amount === 0) {

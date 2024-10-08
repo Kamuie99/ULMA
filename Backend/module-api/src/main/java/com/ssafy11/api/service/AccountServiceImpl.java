@@ -174,4 +174,13 @@ public class AccountServiceImpl implements AccountService {
 
         return new VerifyNumber(result);
     }
+
+    @Override
+    public Account verifyTargetAccount(String bankCode, String accountNumber) {
+        Account account = accountDao.verifyTargetAccount(bankCode, accountNumber);
+        if (account == null) {
+            throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND, "계좌를 다시 확인하여 주십시오.");
+        }
+        return null;
+    }
 }

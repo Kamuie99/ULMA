@@ -14,10 +14,10 @@ export type eventStackParamList = {
   [eventNavigations.EVENT]: undefined;
   [eventNavigations.EVENT_COMMENT]: undefined;
   [eventNavigations.EVENT_COMMENT_RESULT]: undefined;
-  [eventNavigations.EVENT_DETAIL]: {event_id: string}; // 이벤트 상세 내역에 대한 타입
+  [eventNavigations.EVENT_DETAIL]: {event_id: string; refresh?: boolean}; // 이벤트 상세 내역에 대한 타입
   [eventNavigations.EVENT_FIX]: {event_id: string}; // event_id를 사용한 타입 정의
   [eventNavigations.AI_RECOMMEND_MESSAGE]: undefined; // AI 추천 메시지
-  [eventNavigations.EVENT_EXCEL]: {event_id: string; excelData: any};
+  [eventNavigations.EVENT_EXCEL]: {event_id: string; excelData?: any};
 };
 
 const Stack = createStackNavigator<eventStackParamList>();

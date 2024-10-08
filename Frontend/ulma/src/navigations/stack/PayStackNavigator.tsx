@@ -27,10 +27,10 @@ import AccountVerifyScreen from '@/screens/Pay/AccountVerifyScreen';
 import AccountDetailScreen from '@/screens/Pay/AccountDetailScreen';
 import ExcelScreen from '@/screens/Events/ExcelScreen';
 import {DocumentPickerResponse} from 'react-native-document-picker';
-import AccounthistoryScreen from '@/screens/Pay/AccounthistoryScreen';
-import InputAmountScreen from '@/screens/Pay/InputAmountScreen';
-import FriendsearchScreen from '@/screens/Pay/FriendsearchScreen';
-import SendingScreen from '@/screens/Pay/SendingScreen';
+// import AccounthistoryScreen from '@/screens/Pay/AccounthistoryScreen';
+// import InputAmountScreen from '@/screens/Pay/InputAmountScreen';
+// import FriendsearchScreen from '@/screens/Pay/FriendsearchScreen';
+// import SendingScreen from '@/screens/Pay/SendingScreen';
 import {StackScreenProps} from '@react-navigation/stack';
 
 export type payStackParamList = {

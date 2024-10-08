@@ -11,6 +11,7 @@ import usePayStore from '@/store/usePayStore';
 import Toast from 'react-native-toast-message';
 import {payNavigations} from '@/constants/navigations'; // payNavigations import 추가
 import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
+import {bankColors} from '@/constants/bankColors';
 
 function AccountInfoScreen() {
   const navigation = useNavigation();
@@ -79,6 +80,15 @@ function AccountInfoScreen() {
     }
   };
 
+  // 배경 opacity
+  const hexToRgba = (hex, opacity) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  };
+
   return (
     <View style={styles.container}>
       {accountInfo.length > 0 ? (
@@ -90,15 +100,26 @@ function AccountInfoScreen() {
                 style={[
                   styles.accountItemContainer,
                   selectedAccount?.accountNumber === account.accountNumber
-                    ? styles.selectedAccountBox
+                    ? {
+                        // backgroundColor: hexToRgba(
+                        //   bankColors[account.bankCode],
+                        //   1,
+                        // ),
+                        backgroundColor: colors.GREEN_300,
+                      }
                     : {},
                 ]}>
                 <TouchableOpacity
                   style={styles.accountDetails}
                   onPress={() => handleSelectAccount(account)}>
-                  <Text>{account.bankCode}</Text>
-                  <Text>{account.accountNumber}</Text>
-                  <Text>{account.balance} 원</Text>
+                  <Text style={styles.bankCode}>{account.bankCode}</Text>
+
+                  <Text style={styles.accountNumber}>
+                    {account.accountNumber}
+                  </Text>
+                  <Text style={styles.balance}>
+                    {account.balance.toLocaleString()} 원
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.viewButton}
@@ -142,11 +163,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: colors.GRAY_300,
-    padding: 10,
+    padding: 15,
     marginBottom: 10,
   },
-  selectedAccountBox: {
-    backgroundColor: colors.LIGHTPINK,
+  selectedAccount: {
+    color: colors.BLACK,
   },
   accountDetails: {
     flex: 1,
@@ -163,6 +184,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
     fontSize: 18,
+  },
+  bankCode: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: colors.BLACK,
+  },
+  accountNumber: {
+    marginTop: 5,
+    marginBottom: 8,
+  },
+  balance: {
+    fontSize: 16,
+    // textAlign: 'right',
   },
 });
 

@@ -72,9 +72,20 @@ function FriendsListScreen() {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case '가족': return colors.PINK;
-      case '친구': return colors.GREEN_700;
-      case '직장': return colors.PASTEL_BLUE;
+      case '가족':
+        return colors.PINK;
+      case '친척':
+        return colors.PINK;
+      case '친구':
+        return colors.GREEN_700;
+      case '직장':
+        return colors.PASTEL_BLUE;
+      case '지인':
+        return colors.PASTEL_BLUE;
+      case '기타':
+        return colors.GRAY_300;
+      case '학교':
+        return colors.PURPLE;
       default: return '#e0e0e0';
     }
   };
@@ -162,7 +173,7 @@ function FriendsListScreen() {
         </Picker>
         <TextInput
           style={styles.searchInput}
-          placeholder="지인 이름 또는 전화번호로 검색"
+          placeholder="지인 이름으로 검색"
           value={searchQuery}
           onChangeText={setSearchQuery}
         />

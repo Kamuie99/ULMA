@@ -18,7 +18,8 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome';
 import axiosInstance from '@/api/axios';
 import {eventStackParamList} from '@/navigations/stack/EventStackNavigator';
-import InputOptionModal from '@/screens/Pay/InputOptionModal'; // 모달 컴포넌트 import
+import InputOptionModal from '@/screens/Events/InputOptionModal'; // 모달 컴포넌트 import
+import {colors} from '@/constants';
 
 type EventDetailScreenRouteProp = RouteProp<
   eventStackParamList,
@@ -300,7 +301,7 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
         onEndReachedThreshold={0.5}
         ListFooterComponent={
           isFetchingMore ? (
-            <ActivityIndicator size="small" color="#00C77F" />
+            <ActivityIndicator size="small" color={colors.GREEN_700} />
           ) : null
         }
         ListEmptyComponent={
@@ -442,7 +443,7 @@ const styles = StyleSheet.create({
   searchBoxExpanded: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f0f0f0',
+    backgroundColor: colors.WHITE,
     borderRadius: 20,
     paddingHorizontal: 10,
     width: '50%',
@@ -456,7 +457,7 @@ const styles = StyleSheet.create({
   },
   guestBox: {
     padding: 16,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: colors.LIGHTGRAY,
     borderRadius: 8,
     marginBottom: 10,
   },
@@ -475,7 +476,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   addButton: {
-    backgroundColor: '#00C77F',
+    backgroundColor: colors.GREEN_700,
     padding: 16,
     borderRadius: 8,
     marginTop: 16,
@@ -505,7 +506,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   submitButton: {
-    backgroundColor: '#00C77F',
+    backgroundColor: colors.GREEN_700,
     padding: 10,
     borderRadius: 5,
     width: '100%',
@@ -537,7 +538,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   registerButton: {
-    backgroundColor: '#00C77F',
+    backgroundColor: colors.GREEN_700,
     padding: 10,
     borderRadius: 5,
     marginTop: 10,

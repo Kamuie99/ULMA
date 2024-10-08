@@ -6,7 +6,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   KeyboardAvoidingView,
-  Image,
+  Modal,
+  FlatList,
 } from 'react-native';
 import TitleTextField from '@/components/common/TitleTextField';
 import {colors} from '@/constants';
@@ -14,12 +15,54 @@ import CustomButton from '@/components/common/CustomButton';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {payNavigations} from '@/constants/navigations';
 import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
+import Toast from 'react-native-toast-message';
 
 function SendAccountScreen() {
-  // useNavigation에 제네릭 타입을 추가해 navigation 타입을 명시적으로 지정
-  // const navigation = useNavigation<NavigationProp<payStackParamList>>();
   const navigation = useNavigation();
   const [targetAccountNumber, setTargetAccountNumber] = useState('');
+  const [selectedBank, setSelectedBank] = useState(''); // 선택된 은행
+  const [isModalVisible, setModalVisible] = useState(false); // 모달 가시성
+
+  // 은행 목록
+  const banks = [
+    {id: '1', name: 'KB국민은행'},
+    {id: '2', name: '신한은행'},
+    {id: '3', name: '우리은행'},
+    {id: '4', name: '하나은행'},
+    {id: '5', name: '카카오뱅크'},
+  ];
+
+  // 은행 선택 핸들러
+  const selectBank = bankName => {
+    setSelectedBank(bankName);
+    setModalVisible(false);
+  };
+
+  const handlePress = () => {
+    if (!selectedBank) {
+      // 선택된 은행이 없을 때 에러 메시지 표시
+      Toast.show({
+        text1: '은행이 선택되지 않았습니다!',
+        type: 'error',
+      });
+      return;
+    }
+
+    if (!targetAccountNumber) {
+      // 계좌번호가 없을 때 에러 메시지 표시
+      Toast.show({
+        text1: '계좌 번호를 입력해주세요!',
+        type: 'error',
+      });
+      return;
+    }
+
+    // 은행과 계좌번호가 모두 있을 때 화면 이동
+    navigation.navigate(payNavigations.SENDING, {
+      targetAccountNumber: targetAccountNumber,
+      selectedBank: selectedBank,
+    });
+  };
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
@@ -27,7 +70,14 @@ function SendAccountScreen() {
       <View style={styles.contentContainer}>
         <TitleTextField frontLabel="계좌번호를 입력해주세요" />
 
-        {/* 금액 입력 박스 */}
+        {/* 은행 선택 버튼 */}
+        <TouchableOpacity
+          onPress={() => setModalVisible(true)}
+          style={styles.bankSelectButton}>
+          <Text>{selectedBank ? selectedBank : '은행 선택'}</Text>
+        </TouchableOpacity>
+
+        {/* 계좌번호 입력 박스 */}
         <View style={styles.amountContainer}>
           <TextInput
             style={styles.amountInput}
@@ -36,16 +86,35 @@ function SendAccountScreen() {
             placeholder="계좌번호"
           />
         </View>
-        <CustomButton
-          label="확인"
-          variant="outlined"
-          onPress={() =>
-            navigation.navigate(payNavigations.SENDING, {
-              targetAccountNumber: targetAccountNumber,
-            })
-          }
-        />
+        <CustomButton label="확인" variant="outlined" onPress={handlePress} />
       </View>
+
+      {/* 은행 선택 모달 */}
+      <Modal
+        visible={isModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}>
+        <TouchableOpacity
+          style={styles.modalContainer}
+          activeOpacity={1}
+          onPressOut={() => setModalVisible(false)}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>은행 선택</Text>
+            <FlatList
+              data={banks}
+              keyExtractor={item => item.id}
+              renderItem={({item}) => (
+                <TouchableOpacity
+                  style={styles.bankItem}
+                  onPress={() => selectBank(item.name)}>
+                  <Text>{item.name}</Text>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -65,6 +134,15 @@ const styles = StyleSheet.create({
     flex: 1,
     marginVertical: 10,
   },
+  bankSelectButton: {
+    padding: 15,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   amountContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -81,20 +159,29 @@ const styles = StyleSheet.create({
     color: 'black',
     textAlign: 'right',
   },
-  currencyText: {
-    fontSize: 18,
-    fontWeight: '400',
-    color: colors.GRAY_700,
-    marginLeft: 10,
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  recommendationBox: {
+  modalContent: {
+    width: 300,
     backgroundColor: 'white',
-    borderRadius: 8,
-    marginTop: 15,
-    shadowColor: colors.BLACK,
-    shadowOpacity: 0.1,
-    elevation: 3,
-    marginHorizontal: 20,
+    borderRadius: 10,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  bankItem: {
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    width: '100%',
+    alignItems: 'center',
   },
 });
 

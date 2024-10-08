@@ -11,6 +11,7 @@ import {NavigationProp, useFocusEffect} from '@react-navigation/native';
 import axiosInstance from '@/api/axios';
 import {eventNavigations} from '@/constants/navigations';
 import Icon from 'react-native-vector-icons/Ionicons';
+import useEventStore from '@/store/useEventStore';
 
 interface Event {
   id: string;
@@ -22,6 +23,7 @@ interface Event {
 const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const {setEventID} = useEventStore(); // useEventStore는 최상단에서 한 번만 호출
 
   const fetchEvents = async () => {
     try {
@@ -96,15 +98,12 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     return `${date.getHours()}시 ${date.getMinutes()}분`;
   };
 
-  // 시간이 03:33:33인 경우 "종일"로 표시 (원본 eventTime에서 바로 확인)
-  // 시간이 03:33:33인 경우 "종일"로 표시 (원본 이벤트 시간이 null일 때 대비)
-  // 이거 null값으로 보내면 백엔드 로직이랑 db구조랑 프론트 로직 다 바꿔야해서 쩔수임
+  // 시간이 03:33:33인 경우 "종일"로 표시
   const isAllDayEvent = (eventTime: string | null) => {
     if (!eventTime) {
-      return false; // eventTime이 null 또는 undefined일 경우 처리
+      return false;
     }
-
-    return eventTime.includes('03:33:33'); // eventTime에 '03:33:33'이 포함된 경우 '종일'로 판단
+    return eventTime.includes('03:33:33');
   };
 
   const renderItem = ({item}: {item: Event}) => {
@@ -113,14 +112,15 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
         {/* 박스를 클릭했을 때 EventDetailScreen으로 이동 */}
         <TouchableOpacity
           style={styles.eventBox}
-          onPress={() =>
+          onPress={() => {
+            setEventID(item.id); // setEventID 호출
             navigation.navigate(eventNavigations.EVENT_DETAIL, {
               event_id: item.id,
               category: item.category,
               name: item.name,
               eventTime: item.eventTime,
-            })
-          }>
+            });
+          }}>
           <View style={styles.eventHeader}>
             <View
               style={[
@@ -148,7 +148,7 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
         <TouchableOpacity
           style={styles.editButton}
           onPress={() => {
-            console.log('Navigating to EVENT_FIX with event_id:', item.id);
+            setEventID(item.id); // setEventID 호출
             navigation.navigate(eventNavigations.EVENT_FIX, {
               event_id: item.id,
               category: item.category,
@@ -206,16 +206,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: '#fff',
-  },
-  header: {
-    paddingTop: 10,
-    paddingBottom: 20,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
   },
   addButton: {
     backgroundColor: '#00C77F',

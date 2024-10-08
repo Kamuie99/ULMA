@@ -19,7 +19,7 @@ public class GuestService {
 
     public Integer updateGuest(Guest guest, String userId){
         Assert.isTrue(scheduleDao.isMyGuest(Integer.parseInt(userId), guest.getGuestId()), "지인 관계가 아닙니다.");
-        if(!guestDao.isGuestPhoneNumber(guest.getGuestId(), guest.getGuestNumber()).equals(guest.getGuestNumber())){
+        if(guest.getGuestNumber()!= null && !guestDao.isGuestPhoneNumber(guest.getGuestId(), guest.getGuestNumber()).equals(guest.getGuestNumber())){
             Assert.isTrue(!participantDao.isPhoneNumber(guest.getGuestNumber(), Integer.parseInt(userId)), "중복되는 휴대폰 번호가 존재합니다.");
         }
         return guestDao.updateGuest(guest);

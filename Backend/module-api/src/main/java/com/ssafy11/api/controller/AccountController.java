@@ -104,7 +104,7 @@ public class AccountController {
 
     // 8. 1원 인증
     @PostMapping("/users/account/verify")
-    public ResponseEntity<VerifyNumber> VerifyAccount(
+    public ResponseEntity<VerifyNumber> verifyAccount(
             @AuthenticationPrincipal User user,
             @RequestBody AccountConnectRequest request
     ) {
@@ -112,5 +112,13 @@ public class AccountController {
         int authenticatedUserId = Integer.parseInt(user.getUsername());
         VerifyNumber verifyNumber = accountService.verifyMyAccount(authenticatedUserId, request.bankCode(), request.accountNumber());
         return ResponseEntity.ok(verifyNumber);
+    }
+
+    @PostMapping("/users/account/target-verify")
+    public ResponseEntity<Account> verifyTargetAccount(
+            @RequestBody AccountConnectRequest request
+    ) {
+        Account account = accountService.verifyTargetAccount(request.bankCode(), request.accountNumber());
+        return ResponseEntity.ok(account);
     }
 }

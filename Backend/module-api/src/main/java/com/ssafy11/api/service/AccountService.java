@@ -20,4 +20,5 @@ public interface AccountService {
     PayHistoryDTO sendMoney(String senderAccountNumber, String info, String targetAccountNumber, Long amount);
     PaginatedHistory<PayHistory> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType, Integer page, Integer size);
     VerifyNumber verifyMyAccount(Integer userId, String bankCode, String accountNumber);
+    Account verifyTargetAccount(String bankCode, String accountNumber);
 }

@@ -19,7 +19,6 @@ import static com.ssafy11.ulma.generated.Tables.*;
 @Repository
 public class SchedulerDaoImpl implements SchedulerDao {
 
-    private final DSLContext dsl;
     private final DefaultDSLContext dslContext;
 
     @Override

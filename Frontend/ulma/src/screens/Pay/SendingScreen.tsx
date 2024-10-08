@@ -52,7 +52,7 @@ function SendingScreen({route}: SendingScreenProps) {
       const response = await axiosInstance.post(
         '/users/pay/send',
         {
-          info: '결혼식',
+          info: '',
           targetAccountNumber: targetAccountNumber, // 수신 계좌 번호
           amount: parseInt(amount, 10), // 송금 금액 (정수로 변환)
         },

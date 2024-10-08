@@ -2,7 +2,8 @@ import {colors} from '@/constants';
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 
-type Label = '결혼' | '생일' | '돌잔치' | '장례식' | '기타';
+// type Label = '결혼' | '생일' | '돌잔치' | '장례식' | '기타';
+type Label = string;
 
 interface EventTagProps {
   label: Label;
@@ -43,9 +44,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors.YELLOW,
     paddingHorizontal: 10,
   },
-  기타: {
-    paddingHorizontal: 10,
-  },
+  // 기타: {
+  //   paddingHorizontal: 10,
+  // },
 });
 
 export default EventTag;

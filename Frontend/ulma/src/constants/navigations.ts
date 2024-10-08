@@ -4,6 +4,7 @@ const homeNavigations = {
   SCHEDULE_ADD: 'ScheduleAdd',
   SELECT_FRIEND: 'SelectFriend',
   FRIENDS_DETAIL: 'FriendsDetail',
+  IMAGE_OCR: 'ImageOCR',
 } as const;
 
 const authNavigations = {

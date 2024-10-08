@@ -194,7 +194,11 @@ const ScheduleAddScreen = () => {
       <TouchableOpacity style={styles.addButton} onPress={addSchedule}>
         <Text style={styles.addButtonText}>추가</Text>
       </TouchableOpacity>
-      <CustomButton label="이미지 입력하기" variant="outlined" />
+      <CustomButton
+        label="이미지 입력하기"
+        variant="outlined"
+        onPress={() => navigation.navigate(homeNavigations.IMAGE_OCR)}
+      />
     </ScrollView>
   );
 };

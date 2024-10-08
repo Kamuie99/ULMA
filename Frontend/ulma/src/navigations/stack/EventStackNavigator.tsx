@@ -95,7 +95,7 @@ function EventStackNavigator() {
         options={{
           headerTitle: '송금 내역 등록하기',
         }}
-        />
+      />
 
       <Stack.Screen
         name={eventNavigations.EVENT_EXCEL}

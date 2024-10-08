@@ -51,6 +51,7 @@ function InputOptionModal({
   onDirectRegister,
 }: InputOptionModalProps) {
   const navigation = useNavigation<NavigationProp<payStackParamList>>();
+  const {getAccountInfo} = usePayStore();
 
   // 계좌 내역 불러오기
   const handleAccountHistory = () => {

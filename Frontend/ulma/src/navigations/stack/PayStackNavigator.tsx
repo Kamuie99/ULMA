@@ -14,7 +14,6 @@ import SendresultScreen from '@/screens/Pay/SendresultScreen';
 import PaylistScreen from '@/screens/Pay/PaylistScreen';
 import PayrechargingScreen from '@/screens/Pay/PayrechargingScreen';
 import RecommendOptionScreen from '@/screens/Pay/RecommendOptionScreen';
-import SendingScreen from '@/screens/Pay/SendingScreen';
 import AccounthistoryScreen from '@/screens/Events/AccounthistoryScreen';
 import FriendsearchScreen from '@/screens/Events/FriendsearchScreen';
 import InputAmountScreen from '@/screens/Pay/InputAmountScreen';

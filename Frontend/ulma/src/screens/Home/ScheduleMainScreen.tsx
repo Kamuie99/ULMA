@@ -1,17 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react'; // useState, useEffect, useCallback을 React에서 불러옴
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, Alert } from 'react-native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, Alert, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axiosInstance from '@/api/axios';
 import { colors } from '@/constants';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useFocusEffect } from '@react-navigation/native';
-import { friendsNavigations, homeNavigations } from '@/constants/navigations';
+import { friendsNavigations } from '@/constants/navigations';
 
 const ScheduleMainScreen = ({ navigation }) => {
   const [selectedDate, setSelectedDate] = useState('');
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [currentMonth, setCurrentMonth] = useState({ year: 2024, month: 10 });
+  const [editingId, setEditingId] = useState(null); // 수정 중인 이벤트 ID
+  const [editedAmount, setEditedAmount] = useState(''); // 수정된 금액
 
   const fetchEvents = async (year, month) => {
     try {
@@ -73,6 +75,35 @@ const ScheduleMainScreen = ({ navigation }) => {
     );
   };
 
+  const handleEditAmount = (scheduleId, paidAmount) => {
+    setEditingId(scheduleId);
+    setEditedAmount(Math.abs(paidAmount).toString()); // 음수 부호를 제거한 값으로 수정
+  };
+
+  const saveEditedAmount = async (scheduleId) => {
+    if (editingId && editedAmount !== '') {
+      try {
+        const updatedAmount = -parseInt(editedAmount.replace(/,/g, ''), 10); // 음수로 변환하여 요청
+        await axiosInstance.patch(`/schedule`, {
+          scheduleId,
+          paidAmount: updatedAmount,
+        });
+        setUpcomingEvents(prevEvents => prevEvents.map(event => {
+          if (event.scheduleId === scheduleId) {
+            return { ...event, paidAmount: updatedAmount };
+          }
+          return event;
+        }));
+        setEditingId(null); // 수정 완료 후 초기화
+        setEditedAmount('');
+        Alert.alert('수정 완료', '금액이 수정되었습니다.');
+      } catch (error) {
+        console.error('금액 수정에 실패했습니다:', error);
+        Alert.alert('수정 실패', '금액 수정에 실패했습니다.');
+      }
+    }
+  };
+
   const renderRightActions = (scheduleId) => {
     return (
       <TouchableOpacity
@@ -88,10 +119,18 @@ const ScheduleMainScreen = ({ navigation }) => {
     switch (category) {
       case '가족':
         return colors.PINK;
+      case '친척':
+        return colors.PINK;
       case '친구':
         return colors.GREEN_700;
       case '직장':
         return colors.PASTEL_BLUE;
+      case '지인':
+        return colors.PASTEL_BLUE;
+      case '기타':
+        return colors.GRAY_300;
+      case '학교':
+        return colors.PURPLE;
       default:
         return '#e0e0e0';
     }
@@ -119,7 +158,7 @@ const ScheduleMainScreen = ({ navigation }) => {
     >
       <View style={styles.eventCard}>
         <View style={styles.eventCardInner}>
-          <Text style={styles.eventName}>{item.name}</Text>
+          <Text style={styles.eventName} ellipsizeMode="tail"  numberOfLines={2}>{item.name}</Text>
           <TouchableOpacity
             style={[styles.categoryButton, { backgroundColor: getCategoryColor(item.category) }]}
           >
@@ -129,11 +168,29 @@ const ScheduleMainScreen = ({ navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* 날짜를 거래내역 조회 버튼보다 위로 이동 */}
         <Text style={styles.eventDate}>{item.date.split('T')[0]}</Text>
 
         <View style={styles.eventCardInner}>
-          <Text style={styles.eventExpense}>₩ {formatAmount(-item.paidAmount)}</Text>
+          {editingId === item.scheduleId ? (
+            <>
+              <TextInput
+                value={editedAmount}
+                onChangeText={setEditedAmount}
+                keyboardType="numeric"
+                style={styles.editAmountInput}
+              />
+              <TouchableOpacity onPress={() => saveEditedAmount(item.scheduleId)}>
+                <Text style={styles.saveButton}>수정</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <TouchableOpacity onPress={() => handleEditAmount(item.scheduleId, item.paidAmount)}>
+                <Text style={styles.eventExpense}>₩ {formatAmount(Math.abs(item.paidAmount))}</Text>
+              </TouchableOpacity>
+            </>
+          )}
+
           <TouchableOpacity
             style={styles.transactionButton}
             onPress={() => navigation.navigate(friendsNavigations.FREINDS_DETAIL, {
@@ -167,51 +224,58 @@ const ScheduleMainScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Calendar
-        onDayPress={handleDayPress}
-        onMonthChange={month => setCurrentMonth({ year: month.year, month: month.month })}
-        markedDates={{
-          ...markedDates,
-          [selectedDate]: {
-            selected: true,
-            marked: !!markedDates[selectedDate],
-            selectedColor: colors.GREEN_700,
-          },
-        }}
-        monthFormat={'yyyy년 MM월'}
-        theme={{
-          selectedDayBackgroundColor: colors.GREEN_700,
-          arrowColor: colors.GREEN_700,
-          textDayFontSize: 16,
-          textMonthFontSize: 16,
-          textDayHeaderFontSize: 14,
-          textSaturday: { color: 'blue' },
-          textSunday: { color: 'red' },
-          'stylesheet.calendar.header': {
-            dayTextAtIndex0: { color: colors.PINK },
-            dayTextAtIndex6: { color: colors.PASTEL_BLUE },
-          },
-        }}
-        locale={'ko'}
-      />
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : null}
+    >
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <View style={styles.container}>
+          <Calendar
+            onDayPress={handleDayPress}
+            onMonthChange={month => setCurrentMonth({ year: month.year, month: month.month })}
+            markedDates={{
+              ...markedDates,
+              [selectedDate]: {
+                selected: true,
+                marked: !!markedDates[selectedDate],
+                selectedColor: colors.GREEN_700,
+              },
+            }}
+            monthFormat={'yyyy년 MM월'}
+            theme={{
+              selectedDayBackgroundColor: colors.GREEN_700,
+              arrowColor: colors.GREEN_700,
+              textDayFontSize: 16,
+              textMonthFontSize: 16,
+              textDayHeaderFontSize: 14,
+              textSaturday: { color: 'blue' },
+              textSunday: { color: 'red' },
+              'stylesheet.calendar.header': {
+                dayTextAtIndex0: { color: colors.PINK },
+                dayTextAtIndex6: { color: colors.PASTEL_BLUE },
+              },
+            }}
+            locale={'ko'}
+          />
 
-      <View style={styles.upcomingContainer}>
-        <Text style={styles.sectionTitle}>
-          {selectedDate
-            ? `${formatDateToKorean(selectedDate)} 경조사`
-            : `${currentMonth.month}월 전체 경조사`}
-        </Text>
-        <FlatList
-          data={eventsForSelectedDate}
-          keyExtractor={(item) => item.scheduleId.toString()}
-          ListEmptyComponent={<Text style={styles.noEventsText}>해당 날짜에 경조사가 없습니다.</Text>}
-          renderItem={renderEventCard}
-          style={styles.eventList}
-          contentContainerStyle={styles.eventListContent}
-        />
-      </View>
-    </View>
+          <View style={styles.upcomingContainer}>
+            <Text style={styles.sectionTitle}>
+              {selectedDate
+                ? `${formatDateToKorean(selectedDate)} 경조사`
+                : `${currentMonth.month}월 전체 경조사`}
+            </Text>
+            <FlatList
+              data={eventsForSelectedDate}
+              keyExtractor={(item) => item.scheduleId.toString()}
+              ListEmptyComponent={<Text style={styles.noEventsText}>해당 날짜에 경조사가 없습니다.</Text>}
+              renderItem={renderEventCard}
+              style={styles.eventList}
+              contentContainerStyle={styles.eventListContent}
+            />
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -240,6 +304,8 @@ const styles = StyleSheet.create({
   eventName: {
     fontSize: 17,
     fontWeight: 'bold',
+    flex: 1,
+    marginRight: 20,
   },
   eventDate: {
     fontSize: 14,
@@ -295,7 +361,18 @@ const styles = StyleSheet.create({
   toright: {
     marginTop: 3,
     alignItems: 'center',
-  }
+  },
+  editAmountInput: {
+    borderBottomWidth: 1,
+    borderColor: colors.GRAY_300,
+    fontSize: 18,
+    paddingHorizontal: 8,
+  },
+  saveButton: {
+    fontSize: 16,
+    color: colors.GREEN_700,
+    marginTop: 10,
+  },
 });
 
 export default ScheduleMainScreen;

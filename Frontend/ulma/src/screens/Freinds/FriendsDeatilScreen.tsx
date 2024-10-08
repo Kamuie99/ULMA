@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, TextInput, Modal, ScrollView } from 'react-native';
 import axiosInstance from '@/api/axios';
-import { RouteProp } from '@react-navigation/native';
+import { RouteProp, useNavigation } from '@react-navigation/native';
 import { colors } from '@/constants';
 
 interface FriendSummary {
@@ -18,14 +18,21 @@ interface Transaction {
 }
 
 interface FriendsDetailScreenProps {
-  route: RouteProp<{ params: { guestId: number; name: string; category: string; phoneNumber: string | null } }, 'params'>;
+  route: RouteProp<{ params: { guestId: number; name: string; category: string; phoneNumber: string | null; isEditing: boolean } }, 'params'>;
 }
 
+const categoryOptions = ['가족', '친척', '친구', '직장', '지인', '기타', '학교'];
+
 function FriendsDetailScreen({ route }: FriendsDetailScreenProps) {
-  const { guestId, name, category, phoneNumber } = route.params;
+  const { guestId, name: initialName, category: initialCategory, phoneNumber: initialPhoneNumber, isEditing = false } = route.params;
+  const navigation = useNavigation();
   const [summary, setSummary] = useState<FriendSummary | null>(null);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [name, setName] = useState(initialName);
+  const [category, setCategory] = useState(initialCategory);
+  const [phoneNumber, setPhoneNumber] = useState(initialPhoneNumber || '');
+  const [isCategoryModalVisible, setIsCategoryModalVisible] = useState(false); // 카테고리 모달 상태
 
   const fetchFriendDetails = useCallback(async () => {
     try {
@@ -45,9 +52,26 @@ function FriendsDetailScreen({ route }: FriendsDetailScreenProps) {
     fetchFriendDetails();
   }, [fetchFriendDetails]);
 
+  const handleSave = async () => {
+    try {
+      await axiosInstance.patch(`/guest`, {
+        guestId: guestId,
+        guestName: name,
+        guestCategory: category,
+        guestNumber: phoneNumber,
+      });
+      navigation.setParams({ isEditing: false }); // 수정 후 수정 모드 해제
+      fetchFriendDetails(); // 저장 후 최신 정보 다시 불러오기
+    } catch (error) {
+      console.error('친구 정보를 저장하는 데 실패했습니다:', error);
+    }
+  };
+
   const getCategoryColor = (category: string) => {
     switch (category) {
       case '가족':
+        return colors.PINK;
+      case '친척':
         return colors.PINK;
       case '친구':
         return colors.GREEN_700;
@@ -57,6 +81,8 @@ function FriendsDetailScreen({ route }: FriendsDetailScreenProps) {
         return colors.PASTEL_BLUE;
       case '기타':
         return colors.GRAY_300;
+      case '학교':
+        return colors.PURPLE;
       default:
         return '#e0e0e0';
     }
@@ -65,13 +91,41 @@ function FriendsDetailScreen({ route }: FriendsDetailScreenProps) {
   const renderFriendSummaryCard = () => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
-        <Text style={styles.name}>{name}</Text>
-        <TouchableOpacity style={[styles.categoryButton, { backgroundColor: getCategoryColor(category) }]}>
-          <Text style={styles.categoryText}>{category}</Text>
-        </TouchableOpacity>
+        {isEditing ? (
+          <TextInput
+            style={styles.nameInput}
+            value={name}
+            onChangeText={setName}
+            placeholder="이름을 입력하세요"
+          />
+        ) : (
+          <Text style={styles.name}>{name}</Text>
+        )}
+
+        {isEditing ? (
+          <TouchableOpacity style={[styles.categoryButton, { backgroundColor: getCategoryColor(category) }]} onPress={() => setIsCategoryModalVisible(true)}>
+            <Text style={styles.categoryText}>{category}</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={[styles.categoryButton, { backgroundColor: getCategoryColor(category) }]}>
+            <Text style={styles.categoryText}>{category}</Text>
+          </TouchableOpacity>
+        )}
       </View>
+
       <Text style={styles.phoneNumber}>
-        Phone <Text style={styles.colorGreen}>|</Text> {formatPhoneNumber(phoneNumber)}
+        Phone <Text style={styles.colorGreen}>|</Text>{' '}
+        {isEditing ? (
+          <TextInput
+            style={[styles.phoneNumberInput, { borderWidth: 1, borderColor: colors.GRAY_300, padding: 10 }]} // 테두리와 패딩 추가
+            value={phoneNumber || ''} // phoneNumber 값을 올바르게 설정
+            onChangeText={(text) => setPhoneNumber(text)} // phoneNumber 업데이트
+            placeholder="휴대폰 번호를 입력하세요"
+            keyboardType="phone-pad"
+          />
+        ) : (
+          formatPhoneNumber(phoneNumber)
+        )}
       </Text>
 
       <View style={styles.separator} />
@@ -94,12 +148,45 @@ function FriendsDetailScreen({ route }: FriendsDetailScreenProps) {
 
   const renderTransactionCard = ({ item }: { item: Transaction }) => (
     <View style={[styles.transactionCard, item.amount > 0 ? styles.received : styles.given]}>
-      <Text style={styles.transactionName}>{item.Name}</Text>
-      <Text style={styles.transactionAmount}>
-        {item.amount > 0 ? `+${item.amount.toLocaleString()}원` : `${item.amount.toLocaleString()}원`}
-      </Text>
-      <Text style={styles.transactionDate}>{new Date(item.date).toLocaleDateString()}</Text>
+      <View style={styles.transactionLeftContent}>
+        <Text style={styles.transactionName} numberOfLines={1} ellipsizeMode="tail">{item.Name}</Text>
+      </View>
+      <View style={styles.transactionRightContent}>
+        <Text style={[styles.transactionAmount, item.amount > 0 ? styles.receivedText : styles.givenText]}>
+          {item.amount > 0 ? `+${item.amount.toLocaleString()}원` : `${item.amount.toLocaleString()}원`}
+        </Text>
+        <Text style={styles.transactionDate}>{new Date(item.date).toLocaleDateString()}</Text>
+      </View>
     </View>
+  );
+
+  const renderCategoryModal = () => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={isCategoryModalVisible}
+      onRequestClose={() => setIsCategoryModalVisible(false)}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>카테고리 선택</Text>
+          <ScrollView>
+            {categoryOptions.map((option) => (
+              <TouchableOpacity
+                key={option}
+                style={[styles.categoryOption, { backgroundColor: getCategoryColor(option) }]}
+                onPress={() => {
+                  setCategory(option);
+                  setIsCategoryModalVisible(false);
+                }}
+              >
+                <Text style={styles.categoryOptionText}>{option}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
   );
 
   if (loading) {
@@ -108,8 +195,14 @@ function FriendsDetailScreen({ route }: FriendsDetailScreenProps) {
 
   return (
     <View style={styles.container}>
-      {/* 친구 카드 + 금액 요약 카드 렌더링 */}
       {renderFriendSummaryCard()}
+      {renderCategoryModal()}
+
+      {isEditing ? (
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.saveButtonText}>저장</Text>
+        </TouchableOpacity>
+      ) : null}
 
       {transactions.length > 0 ? (
         <FlatList
@@ -149,17 +242,26 @@ const styles = StyleSheet.create({
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   name: {
     fontSize: 18,
     fontWeight: 'bold',
     color: colors.BLACK,
   },
+  nameInput: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.BLACK,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.GRAY_300,
+    paddingBottom: 4,
+    width: '70%',
+  },
   categoryButton: {
     borderRadius: 16,
     paddingVertical: 4,
     paddingHorizontal: 12,
-    alignSelf: 'flex-start',
   },
   categoryText: {
     fontSize: 14,
@@ -168,7 +270,14 @@ const styles = StyleSheet.create({
   phoneNumber: {
     fontSize: 14,
     color: '#666',
-    marginBottom: 16,
+    marginTop: 8,
+  },
+  phoneNumberInput: {
+    fontSize: 14,
+    color: '#666',
+    borderBottomWidth: 1,
+    borderBottomColor: colors.GRAY_300,
+    paddingBottom: 4,
   },
   colorGreen: {
     color: colors.GREEN_700,
@@ -187,7 +296,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   receivedText: {
-    color: colors.BLUE,
+    color: colors.GREEN_700,
   },
   givenText: {
     color: colors.PINK,
@@ -211,24 +320,39 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 16,
     borderRadius: 8,
-    marginBottom: 16,
+    marginBottom: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   received: {
     borderLeftColor: colors.GREEN_700,
-    borderLeftWidth: 5,
+    borderLeftWidth: 4,
   },
   given: {
     borderLeftColor: colors.PINK,
-    borderLeftWidth: 5,
+    borderLeftWidth: 4,
+  },
+  transactionLeftContent: {
+    flex: 1,
+    marginRight: 8,
+  },
+  transactionRightContent: {
+    alignItems: 'flex-end',
   },
   transactionName: {
     fontSize: 16,
+    fontWeight: '500',
   },
   transactionAmount: {
     fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
   },
   transactionDate: {
     fontSize: 12,
@@ -239,6 +363,49 @@ const styles = StyleSheet.create({
     color: '#888',
     marginTop: 20,
   },
+  saveButton: {
+    marginBottom: 16,
+    backgroundColor: colors.GREEN_700,
+    borderRadius: 8,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color: colors.WHITE,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 20,
+    width: '80%',
+    maxHeight: '50%',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  categoryOption: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    marginVertical: 6,
+    alignItems: 'center',
+  },
+  categoryOptionText: {
+    fontSize: 16,
+    color: 'white',
+  },
 });
 
 export default FriendsDetailScreen;
+

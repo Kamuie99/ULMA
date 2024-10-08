@@ -13,8 +13,9 @@ import {NavigationProp, useNavigation} from '@react-navigation/native';
 import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import {eventNavigations, payNavigations} from '@/constants/navigations';
 import usePayStore from '@/store/usePayStore';
+// import {payNavigations} from '@/constants/navigations';
+// import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import {colors} from '@/constants';
-import useEventStore from '@/store/useEventStore';
 
 interface InputOptionModalProps {
   isVisible: boolean;
@@ -57,6 +58,7 @@ function InputOptionModal({
     console.log('계좌 내역 불러오기 실행');
     getAccountInfo();
     navigation.navigate(eventNavigations.ACCOUNT_HISTORY);
+    navigation.navigate('Accounthistory');
     onClose(); // 모달 닫기
   };
 

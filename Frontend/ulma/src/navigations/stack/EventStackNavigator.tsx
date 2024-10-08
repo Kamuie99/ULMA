@@ -8,12 +8,9 @@ import EventScreen from '@/screens/Events/EventScreen';
 import EventDetailScreen from '@/screens/Events/EventDetailScreen';
 import AIRecommendMessage from '@/screens/Events/AIRecommendMessage';
 import EventFixScreen from '@/screens/Events/EventFixScreen';
-<<<<<<< HEAD
 import AccounthistoryScreen from '@/screens/Events/AccounthistoryScreen';
 import FriendsearchScreen from '@/screens/Events/FriendsearchScreen';
-=======
 import ExcelScreen from '@/screens/Events/ExcelScreen';
->>>>>>> b527ec73bdb4dbf0ee1b73a19b0d5d6d6136e2b5
 export type eventStackParamList = {
   [eventNavigations.EVENT_ADD]: undefined;
   [eventNavigations.EVENT]: undefined;
@@ -22,12 +19,9 @@ export type eventStackParamList = {
   [eventNavigations.EVENT_DETAIL]: {event_id: string}; // 이벤트 상세 내역에 대한 타입
   [eventNavigations.EVENT_FIX]: {event_id: string}; // event_id를 사용한 타입 정의
   [eventNavigations.AI_RECOMMEND_MESSAGE]: undefined; // AI 추천 메시지
-<<<<<<< HEAD
   [eventNavigations.ACCOUNT_HISTORY]: undefined;
   [eventNavigations.FRIEND_SEARCH]: undefined;
-=======
   [eventNavigations.EVENT_EXCEL]: {event_id: string; excelData: any};
->>>>>>> b527ec73bdb4dbf0ee1b73a19b0d5d6d6136e2b5
 };
 
 const Stack = createStackNavigator<eventStackParamList>();

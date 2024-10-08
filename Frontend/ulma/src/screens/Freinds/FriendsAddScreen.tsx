@@ -8,7 +8,7 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import CheckBox from '@react-native-community/checkbox';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 
-const categories = ['가족', '친구', '친척', '직장', '학교', '지인', '기타'];
+const categories = ['가족', '친척', '친구', '직장', '지인', '학교', '기타'];
 
 // 휴대폰 번호 정규식 검증 함수
 function phoneNumberCheck(number) {
@@ -34,9 +34,20 @@ const cleanPhoneNumber = (number) => {
 // 카테고리별 색상을 반환하는 함수
 const getCategoryColor = (category) => {
   switch (category) {
-    case '가족': return colors.PINK;
-    case '친구': return colors.GREEN_700;
-    case '직장': return colors.PASTEL_BLUE;
+    case '가족':
+      return colors.PINK;
+    case '친척':
+      return colors.PINK;
+    case '친구':
+      return colors.GREEN_700;
+    case '직장':
+      return colors.PASTEL_BLUE;
+    case '지인':
+      return colors.PASTEL_BLUE;
+    case '기타':
+      return colors.GRAY_300;
+    case '학교':
+      return colors.PURPLE;
     default: return '#e0e0e0';
   }
 };
@@ -259,8 +270,14 @@ function AddFriendScreen() {
               onValueChange={() => toggleWithoutPhoneNumber(index)}
             />
             <Text>전화번호 없이</Text>
-            <TouchableOpacity style={styles.removeButton} onPress={() => removeFriendCard(index)}>
-              <Icon name="remove-circle-outline" size={24} color={colors.PINK} />
+            <TouchableOpacity 
+              style={styles.removeButton} 
+              onPress={() => removeFriendCard(index)}
+              disabled={friends.length === 1} // 카드가 1개일 때 비활성화
+            >
+              {friends.length > 1 && (
+                <Icon name="remove-circle-outline" size={24} color={colors.PINK} />
+              )}
             </TouchableOpacity>
           </View>
         </View>

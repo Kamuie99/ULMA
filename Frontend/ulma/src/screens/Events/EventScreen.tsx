@@ -12,6 +12,8 @@ import axiosInstance from '@/api/axios';
 import {eventNavigations} from '@/constants/navigations';
 import Icon from 'react-native-vector-icons/Ionicons';
 import useEventStore from '@/store/useEventStore';
+import EventTag from '@/components/common/EventTag';
+import {colors} from '@/constants';
 
 interface Event {
   id: string;
@@ -23,7 +25,7 @@ interface Event {
 const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const {setEventID} = useEventStore(); // useEventStore는 최상단에서 한 번만 호출
+  const {setEventID} = useEventStore();
 
   const fetchEvents = async () => {
     try {
@@ -68,22 +70,6 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     }, []),
   );
 
-  // eventTitle 값에 따라 배경색을 변경
-  const getEventTitleStyle = (eventTitle: string) => {
-    switch (eventTitle.trim().toLowerCase()) {
-      case '결혼':
-        return {backgroundColor: '#ffc0cb', color: '#fff'};
-      case '생일':
-        return {backgroundColor: '#97deb3', color: '#fff'};
-      case '돌잔치':
-        return {backgroundColor: '#87CEFA', color: '#fff'};
-      case '장례식':
-        return {backgroundColor: '#A9A9A9', color: '#fff'};
-      default:
-        return {backgroundColor: '#9aa160', color: '#fff'};
-    }
-  };
-
   // 날짜를 '2024년 8월 11일' 형식으로 변환
   const formatKoreanDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -122,13 +108,7 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
             });
           }}>
           <View style={styles.eventHeader}>
-            <View
-              style={[
-                styles.eventTitleContainer,
-                getEventTitleStyle(item.name), // name에 따라 배경색 변경
-              ]}>
-              <Text style={styles.eventTitle}>{item.name}</Text>
-            </View>
+            <EventTag label={item.name} />
           </View>
 
           <View style={styles.eventCategoryContainer}>
@@ -208,7 +188,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   addButton: {
-    backgroundColor: '#00C77F',
+    backgroundColor: colors.GREEN_700,
     padding: 16,
     borderRadius: 8,
     marginTop: 'auto',

@@ -64,7 +64,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     display: 'flex',
     alignItems: 'center',
-    position: 'absolute',
   },
   inValid: {
     opacity: 0.5,

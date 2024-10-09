@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.GRAY_300,
     paddingVertical: 4,
     paddingHorizontal: 7,
-    borderRadius: 12,
+    borderRadius: 5,
     fontWeight: 'bold',
     color: colors.BLACK,
     alignItems: 'center',
@@ -37,8 +37,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.BLUE,
   },
   장례식: {
-    backgroundColor: colors.BLACK,
-    color: colors.WHITE,
+    backgroundColor: colors.GRAY_700,
+    // color: colors.WHITE,
   },
   생일: {
     backgroundColor: colors.YELLOW,

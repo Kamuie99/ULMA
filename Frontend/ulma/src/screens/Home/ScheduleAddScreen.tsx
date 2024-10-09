@@ -6,7 +6,10 @@ import {
   Text,
   Alert,
   TouchableOpacity,
+  KeyboardAvoidingView, // 추가
+  Platform, // 추가
   ScrollView,
+  Keyboard,
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CheckBox from '@react-native-community/checkbox';
@@ -16,6 +19,7 @@ import {homeNavigations} from '@/constants/navigations';
 import {colors} from '@/constants';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomButton from '@/components/common/CustomButton';
+import Toast from 'react-native-toast-message';
 
 const ScheduleAddScreen = () => {
   const navigation = useNavigation();
@@ -28,6 +32,28 @@ const ScheduleAddScreen = () => {
   const [isPaidUndefined, setIsPaidUndefined] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        setKeyboardVisible(true);
+      },
+    );
+
+    const keyboardDidHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      () => {
+        setKeyboardVisible(false);
+      },
+    );
+
+    return () => {
+      keyboardDidShowListener.remove();
+      keyboardDidHideListener.remove();
+    };
+  }, []);
 
   useEffect(() => {
     if (
@@ -62,7 +88,10 @@ const ScheduleAddScreen = () => {
 
   const addSchedule = async () => {
     if (!selectedUser || !name || (!paidAmount && !isPaidUndefined)) {
-      Alert.alert('모든 필드를 입력해주세요.');
+      Toast.show({
+        text1: '모든 필드를 입력해주세요!',
+        type: 'error',
+      });
       return;
     }
 
@@ -83,123 +112,142 @@ const ScheduleAddScreen = () => {
           : -Math.abs(parseInt(paidAmount.replace(/,/g, ''))),
         name,
       });
-
-      Alert.alert('경조사가 추가되었습니다.');
       navigation.goBack();
     } catch (error) {
       console.error('경조사 추가 실패:', error);
-      Alert.alert('경조사 추가에 실패했습니다.');
+      Toast.show({
+        text1: '추가에 실패하였습니다.',
+        type: 'error',
+      });
     }
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.card}>
-        <View style={styles.fieldContainer}>
-          <Text style={styles.label}>누구의 경조사 인가요?</Text>
-          <TouchableOpacity
-            style={styles.selectButton}
-            onPress={() => navigation.navigate(homeNavigations.SELECT_FRIEND)}>
-            <Text style={styles.selectButtonText}>
-              {selectedUser ? `${selectedUser.name} 님의 경조사` : '지인 선택'}
-            </Text>
-            <Icon name="arrow-forward-ios" size={20} color={colors.GREEN_700} />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.fieldContainer}>
-          <Text style={styles.label}>어떤 경조사인가요?</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="간단한 설명을 적어주세요"
-            value={name}
-            onChangeText={setName}
-          />
-        </View>
-
-        <View style={styles.dateTimeContainer}>
-          <View style={styles.dateTimeField}>
-            <Text style={styles.label}>날짜</Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined} // iOS에서만 패딩 적용
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0} // iOS에선 약간의 오프셋을 추가해줄 수 있습니다
+    >
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.card}>
+          <View style={styles.fieldContainer}>
+            <Text style={styles.label}>누구의 경조사 인가요?</Text>
             <TouchableOpacity
-              style={styles.dateTimeButton}
-              onPress={() => setShowDatePicker(true)}>
-              <Text style={styles.dateTimeText}>
-                {date.getFullYear()}/
-                {(date.getMonth() + 1).toString().padStart(2, '0')}/
-                {date.getDate().toString().padStart(2, '0')}
+              style={styles.selectButton}
+              onPress={() =>
+                navigation.navigate(homeNavigations.SELECT_FRIEND)
+              }>
+              <Text style={styles.selectButtonText}>
+                {selectedUser
+                  ? `${selectedUser.name} 님의 경조사`
+                  : '지인 선택'}
               </Text>
-              <Icon name="event" size={20} color={colors.GREEN_700} />
-            </TouchableOpacity>
-          </View>
-          <View style={styles.dateTimeField}>
-            <Text style={styles.label}>시간</Text>
-            <TouchableOpacity
-              style={styles.dateTimeButton}
-              onPress={() => setShowTimePicker(true)}>
-              <Text style={styles.dateTimeText}>
-                {time.toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </Text>
-              <Icon name="access-time" size={20} color={colors.GREEN_700} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {showDatePicker && (
-          <DateTimePicker
-            value={date}
-            mode="date"
-            display="default"
-            onChange={onDateChange}
-          />
-        )}
-        {showTimePicker && (
-          <DateTimePicker
-            value={time}
-            mode="time"
-            display="default"
-            onChange={onTimeChange}
-          />
-        )}
-
-        <View style={styles.fieldContainer}>
-          <Text style={styles.label}>얼마를 드렸나요?</Text>
-          <View style={styles.amountContainer}>
-            <TextInput
-              style={[
-                styles.input,
-                styles.amountInput,
-                isPaidUndefined && styles.disabledInput,
-              ]}
-              placeholder="지불 금액"
-              value={paidAmount}
-              onChangeText={handlePaidAmountChange}
-              keyboardType="numeric"
-              editable={!isPaidUndefined}
-            />
-            <View style={styles.checkboxContainer}>
-              <CheckBox
-                value={isPaidUndefined}
-                onValueChange={setIsPaidUndefined}
-                tintColors={{true: colors.GREEN_700, false: colors.GRAY_500}}
+              <Icon
+                name="arrow-forward-ios"
+                size={20}
+                color={colors.GREEN_700}
               />
-              <Text style={styles.checkboxLabel}>아직</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* 기타 입력 필드들 */}
+          <View style={styles.fieldContainer}>
+            <Text style={styles.label}>어떤 경조사인가요?</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="간단한 설명을 적어주세요"
+              value={name}
+              onChangeText={setName}
+            />
+          </View>
+
+          <View style={styles.dateTimeContainer}>
+            <View style={styles.dateTimeField}>
+              <Text style={styles.label}>날짜</Text>
+              <TouchableOpacity
+                style={styles.dateTimeButton}
+                onPress={() => setShowDatePicker(true)}>
+                <Text style={styles.dateTimeText}>
+                  {date.getFullYear()}/
+                  {(date.getMonth() + 1).toString().padStart(2, '0')}/
+                  {date.getDate().toString().padStart(2, '0')}
+                </Text>
+                <Icon name="event" size={20} color={colors.GREEN_700} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.dateTimeField}>
+              <Text style={styles.label}>시간</Text>
+              <TouchableOpacity
+                style={styles.dateTimeButton}
+                onPress={() => setShowTimePicker(true)}>
+                <Text style={styles.dateTimeText}>
+                  {time.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </Text>
+                <Icon name="access-time" size={20} color={colors.GREEN_700} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={date}
+              mode="date"
+              display="default"
+              onChange={onDateChange}
+            />
+          )}
+          {showTimePicker && (
+            <DateTimePicker
+              value={time}
+              mode="time"
+              display="default"
+              onChange={onTimeChange}
+            />
+          )}
+
+          <View style={styles.fieldContainer}>
+            <Text style={styles.label}>얼마를 드렸나요?</Text>
+            <View style={styles.amountContainer}>
+              <TextInput
+                style={[
+                  styles.input,
+                  styles.amountInput,
+                  isPaidUndefined && styles.disabledInput,
+                ]}
+                placeholder="지불 금액"
+                value={paidAmount}
+                onChangeText={handlePaidAmountChange}
+                keyboardType="numeric"
+                editable={!isPaidUndefined}
+              />
+              <View style={styles.checkboxContainer}>
+                <CheckBox
+                  value={isPaidUndefined}
+                  onValueChange={setIsPaidUndefined}
+                  tintColors={{true: colors.GREEN_700, false: colors.GRAY_500}}
+                />
+                <Text style={styles.checkboxLabel}>아직</Text>
+              </View>
             </View>
           </View>
         </View>
-      </View>
 
-      <TouchableOpacity style={styles.addButton} onPress={addSchedule}>
-        <Text style={styles.addButtonText}>추가</Text>
-      </TouchableOpacity>
-      <CustomButton
-        label="이미지 입력하기"
-        variant="outlined"
-        onPress={() => navigation.navigate(homeNavigations.IMAGE_OCR)}
-      />
-    </ScrollView>
+        {!isKeyboardVisible && (
+          <>
+            <CustomButton label="추가하기" onPress={addSchedule} posY={100} />
+            <CustomButton
+              label="이미지 입력하기"
+              variant="outlined"
+              posY={40}
+              onPress={() => navigation.navigate(homeNavigations.IMAGE_OCR)}
+            />
+          </>
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -207,6 +255,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.GRAY_100,
+  },
+  scrollContainer: {
+    flexGrow: 1,
   },
   card: {
     backgroundColor: colors.WHITE,
@@ -290,18 +341,6 @@ const styles = StyleSheet.create({
   },
   disabledInput: {
     backgroundColor: colors.GRAY_100,
-  },
-  addButton: {
-    backgroundColor: colors.GREEN_700,
-    padding: 16,
-    borderRadius: 8,
-    margin: 16,
-    alignItems: 'center',
-  },
-  addButtonText: {
-    color: colors.WHITE,
-    fontSize: 18,
-    fontWeight: 'bold',
   },
 });
 

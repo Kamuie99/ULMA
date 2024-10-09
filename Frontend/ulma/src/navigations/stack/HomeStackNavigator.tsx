@@ -61,13 +61,6 @@ function HomeStackNavigator() {
           headerTitle: '지인 선택',
         }}
       />
-      {/* <Stack.Screen
-        name={homeNavigations.FRIENDS_DETAIL}
-        component={FriendsDetailScreen}
-        options={{
-          headerTitle: '거래내역 조회',
-        }}
-      /> */}
       <Stack.Screen
         name={homeNavigations.IMAGE_OCR}
         component={ImageOCRScreen}

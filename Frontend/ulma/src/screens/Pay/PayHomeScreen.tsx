@@ -29,7 +29,6 @@ interface Transaction {
 }
 
 function PayHomeScreen() {
-  const {accessToken} = useAuthStore();
   const {makeAccount, getPayInfo, getAccountInfo, balance} = usePayStore();
   const [payHistory, setPayHistory] = useState<Transaction[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -46,8 +45,12 @@ function PayHomeScreen() {
 
   const fetchPayHistory = async () => {
     try {
-      const response = await axiosInstance.get('/users/pay');
-      // console.log(response.data.data);
+      const response = await axiosInstance.get('/users/pay', {
+        params: {
+          page: 0, // 현재 페이지
+          size: 10, // 페이지당 항목 수
+        },
+      });
       const formattedData: Transaction[] = response.data.data.map(
         (item: any) => ({
           id: item.transactionDate,
@@ -94,7 +97,9 @@ function PayHomeScreen() {
           styles.amountText,
           item.type === 'send' ? styles.negative : styles.positive,
         ]}>
-        {item.type === 'send' ? `-${item.amount}` : item.amount}
+        {item.type === 'send'
+          ? `-${Number(item.amount).toLocaleString()}`
+          : Number(item.amount).toLocaleString()}
       </Text>
     </View>
   );
@@ -102,7 +107,7 @@ function PayHomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.boxContainer}>
-        <Text style={styles.title}>페이머니</Text>
+        <Text style={styles.title}>Pay 머니</Text>
         {balance >= 0 ? (
           <>
             <Text style={styles.balance}>{balance} 원</Text>
@@ -160,10 +165,7 @@ function PayHomeScreen() {
                 <View>
                   {/* 송금 내역 리스트 */}
                   <FlatList
-                    data={[
-                      ...payHistory.slice(0, 5),
-                      {id: 'loadMore', type: 'loadMore'},
-                    ]} // 데이터에 더보기 항목 추가
+                    data={[...payHistory, {id: 'loadMore', type: 'loadMore'}]} // 데이터에 더보기 항목 추가
                     renderItem={({item}) =>
                       item.type === 'loadMore' ? (
                         <TouchableOpacity

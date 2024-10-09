@@ -1,45 +1,24 @@
-//메인페이지 - 슬라이드 넘어가지게
-
-import CustomButton from '@/components/common/CustomButton';
-import {colors} from '@/constants';
-import {authNavigations} from '@/constants/navigations';
-import {AuthStackParamList} from '@/navigations/stack/AuthStackNavigator';
-import {RouteProp, useNavigation} from '@react-navigation/native';
-import {StackNavigationProp, StackScreenProps} from '@react-navigation/stack';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
-  Text,
   FlatList,
   StyleSheet,
   Animated,
   Dimensions,
   NativeSyntheticEvent,
   NativeScrollEvent,
-  TouchableOpacity,
-  Image,
+  Text,
 } from 'react-native';
+import CustomButton from '@/components/common/CustomButton';
 import FastImage from 'react-native-fast-image';
+import {colors} from '@/constants';
+import {authNavigations} from '@/constants/navigations';
+import {StackScreenProps} from '@react-navigation/stack';
+import {AuthStackParamList} from '@/navigations/stack/AuthStackNavigator';
 
 const {width} = Dimensions.get('window');
 
-interface Slide {
-  id: string;
-  image: any;
-  title: string;
-  description: string;
-}
-
-interface PaginationProps {
-  data: Slide[];
-  scrollX: Animated.Value;
-}
-
-interface SlideItemProps {
-  item: Slide;
-}
-
-const slides: Slide[] = [
+const slides = [
   {
     id: '1',
     image: require('@/assets/Home/home1.gif'),
@@ -60,60 +39,10 @@ const slides: Slide[] = [
   },
 ];
 
-const SlideItem: React.FC<SlideItemProps> = ({item}) => {
-  return (
-    <View style={styles.slide}>
-      <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.description}>{item.description}</Text>
-      <FastImage
-        source={item.image}
-        style={styles.image}
-        resizeMode={FastImage.resizeMode.contain}
-      />
-    </View>
-  );
-};
-
-const Pagination: React.FC<PaginationProps> = ({data, scrollX}) => {
-  return (
-    <View style={{flexDirection: 'row'}}>
-      {data.map((_, i) => {
-        const inputRange = [(i - 1) * width, i * width, (i + 1) * width];
-        const dotWidth = scrollX.interpolate({
-          inputRange,
-          outputRange: [8, 16, 8],
-          extrapolate: 'clamp',
-        });
-        const opacity = scrollX.interpolate({
-          inputRange,
-          outputRange: [0.3, 1, 0.3],
-          extrapolate: 'clamp',
-        });
-        return (
-          <Animated.View
-            key={i.toString()}
-            style={[
-              styles.dot,
-              {
-                width: dotWidth,
-                opacity,
-              },
-            ]}
-          />
-        );
-      })}
-    </View>
-  );
-};
-
-type AuthHomeScreenProps = StackScreenProps<
-  AuthStackParamList,
-  typeof authNavigations.AUTH_HOME
->;
-
-function AuthHomeScreen({navigation}: AuthHomeScreenProps) {
+const AuthHomeScreen = ({navigation}) => {
   const scrollX = useRef(new Animated.Value(0)).current;
-  const [, setCurrentSlideIndex] = useState(0);
+  const flatListRef = useRef<FlatList>(null);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   const updateCurrentSlideIndex = (
     e: NativeSyntheticEvent<NativeScrollEvent>,
@@ -123,10 +52,27 @@ function AuthHomeScreen({navigation}: AuthHomeScreenProps) {
     setCurrentSlideIndex(currentIndex);
   };
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      let nextIndex = currentSlideIndex + 1;
+      if (nextIndex >= slides.length) {
+        nextIndex = 0; // 마지막 슬라이드 후 다시 처음으로
+      }
+      flatListRef.current?.scrollToOffset({
+        offset: nextIndex * width,
+        animated: true,
+      });
+      setCurrentSlideIndex(nextIndex);
+    }, 2000); // 2초마다 슬라이드 전환
+
+    return () => clearInterval(interval); // 컴포넌트가 언마운트될 때 타이머 정리
+  }, [currentSlideIndex]);
+
   return (
     <View style={styles.container}>
       <FlatList
         data={slides}
+        ref={flatListRef}
         renderItem={({item}) => <SlideItem item={item} />}
         horizontal
         pagingEnabled
@@ -137,15 +83,55 @@ function AuthHomeScreen({navigation}: AuthHomeScreenProps) {
         )}
         onMomentumScrollEnd={updateCurrentSlideIndex}
       />
-      <Pagination data={slides} scrollX={scrollX} />
+      <View style={{marginBottom: 200}}>
+        <Pagination data={slides} scrollX={scrollX} />
+      </View>
 
       <CustomButton
         label="시작하기"
+        posY={100}
+        size="large"
         onPress={() => navigation.navigate(authNavigations.LOGIN_HOME)}
       />
     </View>
   );
-}
+};
+
+const SlideItem = ({item}) => (
+  <View style={styles.slide}>
+    <Text style={styles.title}>{item.title}</Text>
+    <Text style={styles.description}>{item.description}</Text>
+    <FastImage
+      source={item.image}
+      style={styles.image}
+      resizeMode={FastImage.resizeMode.contain}
+    />
+  </View>
+);
+
+const Pagination = ({data, scrollX}) => (
+  <View style={{flexDirection: 'row'}}>
+    {data.map((_, i) => {
+      const inputRange = [(i - 1) * width, i * width, (i + 1) * width];
+      const dotWidth = scrollX.interpolate({
+        inputRange,
+        outputRange: [8, 16, 8],
+        extrapolate: 'clamp',
+      });
+      const opacity = scrollX.interpolate({
+        inputRange,
+        outputRange: [0.3, 1, 0.3],
+        extrapolate: 'clamp',
+      });
+      return (
+        <Animated.View
+          key={i.toString()}
+          style={[styles.dot, {width: dotWidth, opacity}]}
+        />
+      );
+    })}
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: {

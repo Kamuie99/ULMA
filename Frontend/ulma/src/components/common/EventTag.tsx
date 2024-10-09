@@ -37,8 +37,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.BLUE,
   },
   장례식: {
-    backgroundColor: colors.GRAY_700,
-    // color: colors.WHITE,
+    backgroundColor: colors.BLACK,
+    color: colors.WHITE,
   },
   생일: {
     backgroundColor: colors.YELLOW,

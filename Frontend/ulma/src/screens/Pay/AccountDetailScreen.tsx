@@ -67,8 +67,8 @@ const AccountDetailScreen: React.FC = () => {
         name: item.counterpartyName,
         amount:
           item.transactionType === 'SEND'
-            ? `- ${item.amount} 원`
-            : `${item.amount} 원`,
+            ? `-${Number(item.amount).toLocaleString()} 원`
+            : `${Number(item.amount).toLocaleString()} 원`,
       }));
       setData(formattedData);
     }

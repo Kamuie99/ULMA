@@ -237,7 +237,6 @@ const ExcelScreen: React.FC<ExcelScreenProps> = ({route, navigation}) => {
       </Text>
     </View>
   );
-
   const renderTransactionItem = ({item}: {item: ExcelEntry}) => (
     <View style={styles.itemContainer}>
       <Text style={styles.itemText}>

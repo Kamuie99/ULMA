@@ -3,7 +3,7 @@ import CustomButton from '@/components/common/CustomButton';
 import InputField from '@/components/common/InputField';
 import TitleTextField from '@/components/common/TitleTextField';
 import {colors} from '@/constants';
-import {payNavigations} from '@/constants/navigations';
+import {eventNavigations, payNavigations} from '@/constants/navigations';
 import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import useAuthStore from '@/store/useAuthStore';
 import useEventStore from '@/store/useEventStore'; // eventStore 임포트
@@ -30,16 +30,16 @@ type InputAmountScreenNavigationProp = StackNavigationProp<
 >;
 
 const FriendsearchScreen = () => {
-  const {accessToken} = useAuthStore();
-  const {selectedTransactions} = useEventStore(); // 선택된 거래 내역 가져오기
-  const [searchQuery, setSearchQuery] = useState('');
+  const {selectedTransactions, eventID} = useEventStore(); // 선택된 거래 내역 가져오기
   const navigation = useNavigation<InputAmountScreenNavigationProp>();
 
   // 선택된 거래 내역을 렌더링하는 함수
   const renderSelectedTransactionItem = ({item}: {item: any}) => (
     <View style={styles.transactionItem}>
       <Text style={styles.transactionDescription}>{item.name}</Text>
-      <Text style={styles.transactionAmount}>{item.amount} 원</Text>
+      <Text style={styles.transactionAmount}>
+        {Number(item.amount).toLocaleString()} 원
+      </Text>
     </View>
   );
 
@@ -47,12 +47,10 @@ const FriendsearchScreen = () => {
     <View style={styles.container}>
       <View style={styles.cardContainer}>
         <View style={{paddingHorizontal: 10, gap: 40}}>
-          <TitleTextField frontLabel="선택된 거래 내역을 확인하세요." />
+          <TitleTextField frontLabel="거래 내역이 등록되었습니다." left={10} />
         </View>
-        <ScrollView style={{paddingHorizontal: 10, marginBottom: 100}}>
-          {selectedTransactions.length > 0 && (
-            <Text style={styles.subheader}>선택된 거래 내역</Text>
-          )}
+        <ScrollView
+          style={{paddingHorizontal: 10, marginBottom: 100, marginTop: 20}}>
           <FlatList
             data={selectedTransactions}
             renderItem={renderSelectedTransactionItem}
@@ -60,13 +58,23 @@ const FriendsearchScreen = () => {
             style={styles.peopleList}
           />
         </ScrollView>
-
-        <CustomButton
-          label="확인"
-          variant="outlined"
-          onPress={() => console.log('확인 버튼 클릭')}
-        />
       </View>
+      <CustomButton
+        label="확인"
+        size="full"
+        onPress={() => {
+          // zustand에서 저장된 이벤트 정보를 가져옴
+          const {eventID, category, name, eventTime} = useEventStore.getState();
+
+          // 이벤트 상세 화면으로 이동
+          navigation.navigate(eventNavigations.EVENT_DETAIL, {
+            event_id: eventID,
+            category: category,
+            name: name,
+            eventTime: eventTime,
+          });
+        }}
+      />
     </View>
   );
 };
@@ -74,7 +82,7 @@ const FriendsearchScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.LIGHTGRAY,
+    backgroundColor: colors.WHITE,
   },
   cardContainer: {
     flex: 1,
@@ -84,15 +92,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     borderColor: colors.GRAY_300,
     borderWidth: 1,
-    shadowColor: colors.BLACK,
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 4,
-  },
-  subheader: {
-    fontSize: 14,
-    marginTop: 10,
-    marginHorizontal: 20,
+    marginBottom: 80,
   },
   transactionItem: {
     flexDirection: 'row',

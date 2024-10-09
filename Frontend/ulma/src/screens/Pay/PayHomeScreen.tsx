@@ -110,7 +110,9 @@ function PayHomeScreen() {
         <Text style={styles.title}>Pay 머니</Text>
         {balance >= 0 ? (
           <>
-            <Text style={styles.balance}>{balance} 원</Text>
+            <Text style={styles.balance}>
+              {Number(balance).toLocaleString()} 원
+            </Text>
           </>
         ) : (
           <>

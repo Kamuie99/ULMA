@@ -15,9 +15,9 @@ import {colors} from '@/constants';
 interface CustomButtonProps extends PressableProps {
   label: string;
   variant?: 'filled' | 'outlined';
-  size?: 'large' | 'medium' | 'maxSize';
+  size?: 'large' | 'full' | 'maxSize';
   inValid?: boolean;
-  customStyle?: StyleProp<ViewStyle>; // 타입을 StyleProp<ViewStyle>로 변경
+  customStyle?: StyleProp<ViewStyle>;
   posY?: number;
 }
 
@@ -41,7 +41,8 @@ function CustomButton({
           styles.container,
           pressed ? styles[`${variant}Pressed`] : styles[variant],
           inValid && styles.inValid,
-          customStyle ? customStyle : null, // customStyle이 있으면 추가
+          customStyle ? customStyle : null,
+          size === 'full' && {borderRadius: 0}, // full일 때 borderRadius 없애기
         ]}
         {...props}>
         <View style={styles[size]}>
@@ -97,12 +98,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
   },
-  medium: {
-    width: '45%',
+  full: {
+    width: deviceWidth + 20,
     paddingVertical: deviceHeight > 700 ? 16 : 10,
     alignItems: 'center',
-    flexDirection: 'row',
     justifyContent: 'center',
+    textAlign: 'center',
+    paddingLeft: 20,
   },
   text: {
     fontSize: 16,

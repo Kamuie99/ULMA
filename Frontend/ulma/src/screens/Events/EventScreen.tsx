@@ -14,10 +14,6 @@ import axiosInstance from '@/api/axios';
 import {eventNavigations} from '@/constants/navigations';
 import Icon from 'react-native-vector-icons/Ionicons';
 import useEventStore from '@/store/useEventStore';
-<<<<<<< HEAD
-=======
-import EventTag from '@/components/common/EventTag';
->>>>>>> 9ee211a1d9684f449ff2faf32aef5e0fe2b11be9
 import {colors} from '@/constants';
 
 interface Event {
@@ -74,7 +70,6 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     }, []),
   );
 
-<<<<<<< HEAD
   const getEventTitleStyle = (eventTitle: string) => {
     switch (eventTitle.trim().toLowerCase()) {
       case '결혼':
@@ -89,28 +84,21 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
         return {backgroundColor: '#9aa160', color: '#fff'};
     }
   };
-
-=======
-  // 날짜를 '2024년 8월 11일' 형식으로 변환
->>>>>>> 9ee211a1d9684f449ff2faf32aef5e0fe2b11be9
   const formatKoreanDate = (dateString: string) => {
     const date = new Date(dateString);
     return `${date.getFullYear()}년 ${
       date.getMonth() + 1
     }월 ${date.getDate()}일`;
   };
-
   const formatKoreanTime = (dateString: string) => {
     const date = new Date(dateString);
     const hours = date.getHours();
     const minutes = date.getMinutes();
     const seconds = date.getSeconds();
-
     // Check if the time is 00:00:00, which indicates an all-day event
     if (hours === 3 && minutes === 33 && seconds === 33) {
       return '종일';
     }
-
     return `${hours}시 ${minutes}분`;
   };
 
@@ -140,9 +128,8 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
         }
       },
     });
-  
+
     return (
-<<<<<<< HEAD
       <View style={styles.swipeContainer}>
         <Animated.View
           style={[
@@ -169,7 +156,7 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
             <Icon name="pencil" size={24} color="#808080" />
           </TouchableOpacity>
         </Animated.View>
-  
+
         <Animated.View
           style={[
             styles.actionIconRight,
@@ -186,12 +173,9 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
             <Icon name="trash" size={24} color="#808080" />
           </TouchableOpacity>
         </Animated.View>
-  
+
         <Animated.View
-          style={[
-            styles.eventContainer,
-            {transform: [{translateX: pan.x}]},
-          ]}
+          style={[styles.eventContainer, {transform: [{translateX: pan.x}]}]}
           {...panResponder.panHandlers}>
           <TouchableOpacity
             style={styles.eventBox}
@@ -219,59 +203,6 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
             </Text>
           </TouchableOpacity>
         </Animated.View>
-=======
-      <View style={styles.eventContainer}>
-        {/* 박스를 클릭했을 때 EventDetailScreen으로 이동 */}
-        <TouchableOpacity
-          style={styles.eventBox}
-          onPress={() => {
-            setEventID(item.id); // setEventID 호출
-            navigation.navigate(eventNavigations.EVENT_DETAIL, {
-              event_id: item.id,
-              category: item.category,
-              name: item.name,
-              eventTime: item.eventTime,
-            });
-          }}>
-          <View style={styles.eventHeader}>
-            <EventTag label={item.name} />
-          </View>
-
-          <View style={styles.eventCategoryContainer}>
-            <Text style={styles.eventCategory}>{item.category}</Text>
-          </View>
-
-          {/* 시간이 03시 33분 33초일 경우 종일로 표시 */}
-          <Text style={styles.eventDate}>
-            {formatKoreanDate(item.eventTime)} {'\n'}
-            {isAllDayEvent(item.eventTime)
-              ? '종일'
-              : formatKoreanTime(item.eventTime)}
-          </Text>
-        </TouchableOpacity>
-
-        {/* 연필 모양 버튼을 클릭했을 때 EventFixScreen으로 이동 */}
-        <TouchableOpacity
-          style={styles.editButton}
-          onPress={() => {
-            setEventID(item.id); // setEventID 호출
-            navigation.navigate(eventNavigations.EVENT_FIX, {
-              event_id: item.id,
-              category: item.category,
-              name: item.name,
-              eventTime: item.eventTime,
-            });
-          }}>
-          <Icon name="pencil" size={20} color="#808080" />
-        </TouchableOpacity>
-
-        {/* 쓰레기통 모양 버튼을 클릭했을 때 삭제 확인 */}
-        <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={() => confirmDelete(item.id)}>
-          <Icon name="trash" size={20} color="#808080" />
-        </TouchableOpacity>
->>>>>>> 9ee211a1d9684f449ff2faf32aef5e0fe2b11be9
       </View>
     );
   };
@@ -315,21 +246,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#f9f9f9',
   },
   addButton: {
-<<<<<<< HEAD
     position: 'absolute',
     top: 10,
     right: 16,
     zIndex: 1,
-=======
-    backgroundColor: colors.GREEN_700,
-    padding: 16,
-    borderRadius: 8,
-    marginTop: 'auto',
-    marginBottom: 16,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
->>>>>>> 9ee211a1d9684f449ff2faf32aef5e0fe2b11be9
   },
   addButtonText: {
     color: '#fff',
@@ -356,6 +276,7 @@ const styles = StyleSheet.create({
   eventBox: {
     padding: 12,
   },
+
   eventRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',

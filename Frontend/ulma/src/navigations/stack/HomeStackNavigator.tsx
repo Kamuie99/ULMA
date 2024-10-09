@@ -68,13 +68,6 @@ function HomeStackNavigator() {
           headerTitle: '이미지 입력하기',
         }}
       />
-      <Stack.Screen
-        name={homeNavigations.IMAGE_OCR}
-        component={ImageOCRScreen}
-        options={{
-          headerTitle: '이미지 입력하기',
-        }}
-      />
     </Stack.Navigator>
   );
 }

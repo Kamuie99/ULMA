@@ -34,6 +34,7 @@ const ExcelScreen: React.FC<ExcelScreenProps> = ({route, navigation}) => {
   );
   const [registeredEntries, setRegisteredEntries] = useState<ExcelEntry[]>([]);
   const [fileSelected, setFileSelected] = useState(false);
+  const [transactionsRegistered, setTransactionsRegistered] = useState(false); // 거래내역 등록 완료 상태
 
   useEffect(() => {
     fetchRegisteredParticipants();
@@ -133,6 +134,102 @@ const ExcelScreen: React.FC<ExcelScreenProps> = ({route, navigation}) => {
     }
   };
 
+  // 거래내역 일괄 등록 함수
+  const registerAllTransactions = async () => {
+    if (excelData.length === 0) {
+      Alert.alert('알림', '등록할 거래내역이 없습니다.');
+      return;
+    }
+
+    try {
+      const getGuestId = async (name: string, category: string) => {
+        try {
+          const response = await axiosInstance.get('/participant/same', {
+            params: {
+              name,
+              category,
+              size: 1,
+              page: 1,
+            },
+          });
+
+          const data = response.data.data;
+          if (data && data.length > 0) {
+            return data[0].guestId;
+          } else {
+            return null;
+          }
+        } catch (error) {
+          console.error('guestId 조회 실패:', error);
+          return null;
+        }
+      };
+
+      const validTransactions = await Promise.all(
+        excelData.map(async entry => {
+          const guestId = await getGuestId(entry.name, entry.category);
+
+          if (!guestId) {
+            console.warn(
+              `${entry.name} / ${entry.category}의 guestId를 찾지 못했습니다.`,
+            );
+            return null;
+          }
+
+          // 이미 등록된 거래내역 확인
+          if (
+            registeredEntries.some(
+              reg => reg.guestId === guestId && reg.amount === entry.amount,
+            )
+          ) {
+            Alert.alert('이미 등록된 거래 내역입니다.');
+            return null;
+          }
+
+          return {
+            eventId: event_id ? event_id.toString() : '',
+            guestId: guestId ? guestId.toString() : '',
+            amount: entry.amount ? entry.amount.toString() : '',
+          };
+        }),
+      );
+
+      const filteredTransactions = validTransactions.filter(
+        transaction => transaction !== null,
+      );
+
+      if (filteredTransactions.length === 0) {
+        Alert.alert('알림', '유효한 거래내역이 없습니다.');
+        return;
+      }
+
+      const response = await axiosInstance.post(
+        '/participant/money',
+        filteredTransactions,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
+
+      if (response.status === 200) {
+        setTransactionsRegistered(true); // 모든 거래내역 등록 완료 상태로 변경
+      } else {
+        console.error('거래내역 등록 실패:', response.data);
+        throw new Error(
+          `거래내역 등록에 실패했습니다: ${response.data.message}`,
+        );
+      }
+    } catch (error: any) {
+      console.error(
+        '거래내역 등록 중 오류 발생:',
+        error.response?.data || error.message,
+      );
+      Alert.alert('이미 등록된 거래 내역입니다.');
+    }
+  };
+
   const renderUnregisteredItem = ({item}: {item: ExcelEntry}) => (
     <View style={styles.itemContainer}>
       <Text style={styles.itemText}>
@@ -140,32 +237,73 @@ const ExcelScreen: React.FC<ExcelScreenProps> = ({route, navigation}) => {
       </Text>
     </View>
   );
-
-  return (
-    <View style={styles.container}>
-      {!fileSelected && (
-        <TouchableOpacity style={styles.button} onPress={pickExcelFile}>
-          <Text style={styles.buttonText}>엑셀 파일 선택하기</Text>
-        </TouchableOpacity>
-      )}
-      {unregisteredEntries.length > 0 && (
-        <>
-          <Text style={styles.sectionTitle}>미등록 지인 목록</Text>
-          <FlatList
-            data={unregisteredEntries}
-            renderItem={renderUnregisteredItem}
-            keyExtractor={(item, index) => index.toString()}
-            style={styles.list}
-          />
-          <TouchableOpacity
-            style={styles.processButton}
-            onPress={registerUnregisteredEntries}>
-            <Text style={styles.buttonText}>미등록 지인 일괄 등록하기</Text>
-          </TouchableOpacity>
-        </>
-      )}
+  const renderTransactionItem = ({item}: {item: ExcelEntry}) => (
+    <View style={styles.itemContainer}>
+      <Text style={styles.itemText}>
+        {item.name} / {item.category} / 금액: {item.amount.toLocaleString()}원
+      </Text>
     </View>
   );
+
+  const renderContent = () => {
+    if (transactionsRegistered) {
+      return (
+        <View style={styles.centeredContainer}>
+          <Text style={styles.successMessage}>
+            거래내역이 모두 등록 완료되었습니다.
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <>
+        {!fileSelected && (
+          <TouchableOpacity style={styles.button} onPress={pickExcelFile}>
+            <Text style={styles.buttonText}>엑셀 파일 선택하기</Text>
+          </TouchableOpacity>
+        )}
+        {fileSelected && (
+          <>
+            {unregisteredEntries.length > 0 ? (
+              <>
+                <Text style={styles.sectionTitle}>미등록 지인 목록</Text>
+                <FlatList
+                  data={unregisteredEntries}
+                  renderItem={renderUnregisteredItem}
+                  keyExtractor={(item, index) => index.toString()}
+                  style={styles.list}
+                />
+                <TouchableOpacity
+                  style={styles.processButton}
+                  onPress={registerUnregisteredEntries}>
+                  <Text style={styles.buttonText}>
+                    미등록 지인 일괄 등록하기
+                  </Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <Text style={styles.sectionTitle}>모두 등록된 지인입니다</Text>
+            )}
+            <Text style={styles.sectionTitle}>거래내역 목록</Text>
+            <FlatList
+              data={excelData}
+              renderItem={renderTransactionItem}
+              keyExtractor={(item, index) => index.toString()}
+              style={styles.list}
+            />
+            <TouchableOpacity
+              style={styles.processButton}
+              onPress={registerAllTransactions}>
+              <Text style={styles.buttonText}>거래내역 일괄 등록하기</Text>
+            </TouchableOpacity>
+          </>
+        )}
+      </>
+    );
+  };
+
+  return <View style={styles.container}>{renderContent()}</View>;
 };
 
 const styles = StyleSheet.create({
@@ -214,6 +352,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     marginTop: 20,
+  },
+  centeredContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successMessage: {
+    fontSize: 18,
+    marginBottom: 20,
   },
 });
 

@@ -90,17 +90,6 @@ public class PayServiceImpl implements PayService {
             throw new ErrorException(ErrorCode.INVALID_DATE_RANGE);
         }
 
-        if (payType != null) {
-            try {
-                PayType valid = PayType.valueOf(payType.toUpperCase());
-                if (valid.equals(PayType.CHARGE)) {
-                    throw new ErrorException(ErrorCode.BadRequest, "유효하지 않은 결제 유형입니다.");
-                }
-            } catch (IllegalArgumentException e) {
-                throw new ErrorException(ErrorCode.BadRequest, "유효하지 않은 결제 유형입니다.");
-            }
-        }
-
         PaginatedHistory<PayHistory> history = payDao.findPayHistory(userId, startDate, endDate, payType, page, size);
 
         if (history == null) {

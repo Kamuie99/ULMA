@@ -320,8 +320,12 @@ public class PayDaoImpl implements PayDao {
             }
 
             // 4. payType이 지정된 경우 필터링 추가
-            if (payType != null && (payType.equals(SEND) || payType.equals(RECEIVE) || payType.equals(CHARGE))) {
-                query.and(PAYHISTORY.TRANSACTION_TYPE.eq(payType));
+            if (payType != null) {
+                String upperCase = payType.toUpperCase();
+                PayType enumPayType = PayType.valueOf(upperCase);
+                if (enumPayType == PayType.SEND || enumPayType == PayType.RECEIVE || enumPayType == PayType.CHARGE) {
+                    query.and(PAYHISTORY.TRANSACTION_TYPE.eq(enumPayType.name()));
+                }
             }
 
             // 페이지네이션 적용

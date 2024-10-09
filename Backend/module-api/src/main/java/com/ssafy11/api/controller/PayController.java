@@ -41,9 +41,9 @@ public class PayController {
     @GetMapping
     public ResponseEntity<PaginatedHistory<PayHistoryDTO>> viewPayHistory(
             @AuthenticationPrincipal User user,
-            @RequestParam(value = "start_date", required = false) String startDate,
-            @RequestParam(value = "end_date", required = false) String endDate,
-            @RequestParam(value = "pay_type", required = false) String payType,
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate,
+            @RequestParam(value = "payType", required = false) String payType,
             @RequestParam(value = "page", defaultValue = "0") Integer page,
             @RequestParam(value = "size", defaultValue = "10") Integer size) {
         Assert.notNull(user, "User must not be null");
@@ -58,7 +58,7 @@ public class PayController {
         if (endDate != null) {
             endLocalDate = LocalDate.parse(endDate, formatter);
         }
-
+        System.out.println("paytype : " + payType);
         int authenticatedUserId = Integer.parseInt(user.getUsername());
         PaginatedHistory<PayHistoryDTO> history = payService.viewPayHistory(authenticatedUserId, startLocalDate, endLocalDate, payType, page, size);
         return ResponseEntity.ok(history);

@@ -26,15 +26,6 @@ function SendAccountScreen() {
   const [selectedBank, setSelectedBank] = useState(''); // 선택된 은행
   const [isModalVisible, setModalVisible] = useState(false); // 모달 가시성
 
-  // 은행 목록
-  const banks = [
-    {id: '1', name: 'KB국민은행'},
-    {id: '2', name: '신한은행'},
-    {id: '3', name: '우리은행'},
-    {id: '4', name: '하나은행'},
-    {id: '5', name: '카카오뱅크'},
-  ];
-
   // 은행 선택 핸들러
   const selectBank = bankName => {
     setSelectedBank(bankName);

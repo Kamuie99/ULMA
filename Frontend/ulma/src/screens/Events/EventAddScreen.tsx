@@ -177,11 +177,7 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
 
       {/* 확인 버튼 */}
       {isConfirmVisible && (
-        <CustomButton
-          label="저장"
-          // variant="outlined"
-          onPress={handleSaveEvent}
-        />
+        <CustomButton label="저장" size="full" onPress={handleSaveEvent} />
       )}
     </View>
   );
@@ -197,6 +193,7 @@ const styles = StyleSheet.create({
     // justifyContent: 'space-between',
     gap: 10,
     marginBottom: 24,
+    marginTop: 10,
   },
   button: {
     paddingHorizontal: 16,

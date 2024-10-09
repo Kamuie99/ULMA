@@ -47,8 +47,8 @@ function PayHomeScreen() {
     try {
       const response = await axiosInstance.get('/users/pay', {
         params: {
-          page: 0, // 현재 페이지
-          size: 10, // 페이지당 항목 수
+          page: 0,
+          size: 10,
         },
       });
       const formattedData: Transaction[] = response.data.data.map(
@@ -158,7 +158,7 @@ function PayHomeScreen() {
           </TouchableOpacity>
         </View>
       </View>
-      <View style={styles.boxContainer}>
+      <View style={[styles.boxContainer, {marginBottom: 330}]}>
         <Text style={styles.title}>Pay 이력</Text>
         <View>
           {payHistory.length > 0 ? (
@@ -180,8 +180,8 @@ function PayHomeScreen() {
                         renderTransaction({item})
                       )
                     }
+                    style={{marginBottom: 30}}
                     keyExtractor={item => item.id}
-                    style={{maxHeight: '90%'}}
                   />
                 </View>
               </View>
@@ -228,7 +228,6 @@ function PayHomeScreen() {
   );
 }
 
-const screenWidth = Dimensions.get('window').width;
 const styles = StyleSheet.create({
   container: {
     flex: 1,

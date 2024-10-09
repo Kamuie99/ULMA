@@ -11,6 +11,8 @@ import DocumentPicker from 'react-native-document-picker';
 import axiosInstance from '@/api/axios';
 import {NavigationProp, RouteProp} from '@react-navigation/native';
 import {eventStackParamList} from '@/navigations/stack/EventStackNavigator';
+import Toast from 'react-native-toast-message';
+import {colors} from '@/constants';
 
 interface ExcelScreenProps {
   route: RouteProp<eventStackParamList, 'EVENT_DETAIL'>;
@@ -87,13 +89,22 @@ const ExcelScreen: React.FC<ExcelScreenProps> = ({route, navigation}) => {
       setExcelData(response.data);
       setUnregisteredEntries(filteredData);
       setFileSelected(true);
-      Alert.alert('파일 업로드 완료', '파일이 성공적으로 업로드되었습니다.');
+      Toast.show({
+        type: 'success',
+        text1: '파일이 선택되었습니다.',
+      });
     } catch (err) {
       if (DocumentPicker.isCancel(err)) {
-        Alert.alert('취소됨', '파일 선택이 취소되었습니다.');
+        Toast.show({
+          type: 'error',
+          text1: '파일이 선택이 취소되었습니다.',
+        });
       } else {
         console.error('파일 선택 중 오류 발생:', err);
-        Alert.alert('오류', '파일 선택 중 오류가 발생했습니다.');
+        Toast.show({
+          type: 'error',
+          text1: '파일 업로드 중 오류가 발생하였습니다.',
+        });
       }
     }
   };
@@ -315,14 +326,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   button: {
-    backgroundColor: '#3498db',
+    backgroundColor: colors.GREEN_700,
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 10,
     marginBottom: 20,
   },
   buttonText: {
-    color: '#ffffff',
+    color: colors.WHITE,
     fontSize: 16,
     fontWeight: 'bold',
   },
@@ -331,18 +342,18 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   itemContainer: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.WHITE,
     padding: 10,
     borderRadius: 5,
     marginVertical: 5,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.GRAY_300,
   },
   itemText: {
     fontSize: 14,
   },
   processButton: {
-    backgroundColor: '#2ecc71',
+    backgroundColor: colors.GREEN_700,
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 10,

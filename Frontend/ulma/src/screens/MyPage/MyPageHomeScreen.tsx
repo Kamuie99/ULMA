@@ -27,11 +27,6 @@ interface MyPageHomeScreenProps {
 function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
   const {logout, userInfo} = useAuthStore();
   const {balance} = usePayStore();
-  // fetchUserInfo
-
-  // useEffect(() => {
-  //   fetchUserInfo();
-  // }, []);
 
   return (
     <ScrollView style={styles.container}>
@@ -62,7 +57,9 @@ function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
             <Text style={styles.titlecolor}>ULMA</Text> PAY
           </Text>
           <Text style={styles.accountBalance}>
-            {balance === -1 ? '연결된 페이 없음' : `${balance} 원`}
+            {balance === -1
+              ? '연결된 페이 없음'
+              : `${balance.toLocaleString()} 원`}
           </Text>
         </TouchableOpacity>
         <View style={styles.buttonContainer}>
@@ -86,14 +83,6 @@ function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
 
       <View style={styles.InfoBox}>
         <Text>계좌 관리</Text>
-
-        <TouchableOpacity style={styles.InfoBoxInner}>
-          <View style={styles.MenuBar}>
-            <Icon2 name="account-plus" size={24} color="#000" />
-            <Text style={styles.InfoMenu}>내 계좌 등록하기</Text>
-          </View>
-          <Icon name="chevron-forward" size={15} color="#666" />
-        </TouchableOpacity>
 
         <TouchableOpacity style={styles.InfoBoxInner}>
           <View style={styles.MenuBar}>

@@ -14,9 +14,10 @@ import {SafeAreaView} from 'react-native-safe-area-context';
 import axiosInstance from '@/api/axios'; // axiosInstance import
 import useSignupStore from '@/store/useSignupStore';
 import {StackScreenProps} from '@react-navigation/stack';
-import axios, { AxiosError } from 'axios';
-import { authNavigations } from '@/constants/navigations';
-import { AuthStackParamList } from '@/navigations/stack/AuthStackNavigator';
+import axios, {AxiosError} from 'axios';
+import {authNavigations} from '@/constants/navigations';
+import {AuthStackParamList} from '@/navigations/stack/AuthStackNavigator';
+import SQLite from 'react-native-sqlite-storage';
 
 type SignupScreen2Props = StackScreenProps<
   AuthStackParamList,
@@ -54,8 +55,19 @@ function SignupScreen2({navigation}: SignupScreen2Props) {
     }).start();
   };
 
+  // db 만들기
+  const db = SQLite.openDatabase('userInfoDB.db');
+  const createUserInfoTable = () => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS userInfo (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, income REAL);',
+      );
+    });
+  };
+
   // handleInputChange 함수 정의
   const handleInputChange = (field: keyof typeof signupData, value: string) => {
+    createUserInfoTable();
     setSignupData({[field]: value});
   };
 
@@ -122,7 +134,8 @@ function SignupScreen2({navigation}: SignupScreen2Props) {
         params: {loginId: signupData.loginId},
       });
 
-      if (response.data === true) {  // 중복 된 경우
+      if (response.data === true) {
+        // 중복 된 경우
         Alert.alert('중복된 아이디', '중복되는 아이디가 존재합니다.');
       } else {
         Alert.alert(
@@ -149,10 +162,10 @@ function SignupScreen2({navigation}: SignupScreen2Props) {
         );
       }
     } catch (error) {
-        Alert.alert(
-          '중복체크 오류',
-          '아이디 중복체크 중 오류가 발생했습니다. 다시 시도해주세요.',
-        );
+      Alert.alert(
+        '중복체크 오류',
+        '아이디 중복체크 중 오류가 발생했습니다. 다시 시도해주세요.',
+      );
     }
   };
 
@@ -224,14 +237,17 @@ function SignupScreen2({navigation}: SignupScreen2Props) {
   };
 
   const handleSignup = async () => {
-    // 비밀번호 확인 에러가 있을 경우 회원가입 중단 
+    // 비밀번호 확인 에러가 있을 경우 회원가입 중단
     if (passwordError || passwordConfirmError) {
       Alert.alert('오류', '비밀번호를 올바르게 입력해주세요.');
       return;
     }
     try {
       await submitSignup();
-      Alert.alert('회원가입 완료', '회원가입이 완료되었습니다. 로그인 해주세요.');
+      Alert.alert(
+        '회원가입 완료',
+        '회원가입이 완료되었습니다. 로그인 해주세요.',
+      );
       // 여기에 로그인 화면으로 이동하는 네비게이션 로직을 추가할 수 있습니다.
       navigation.navigate(authNavigations.LOGIN); // 'Login' 스크린 이름을 사용하여 이동
     } catch (error) {
@@ -239,9 +255,15 @@ function SignupScreen2({navigation}: SignupScreen2Props) {
         if (error.response && error.response.status === 401) {
           Alert.alert('인증 오류', '인증에 실패했습니다. 다시 시도해주세요.');
         } else if (error.response && error.response.status === 409) {
-          Alert.alert('회원가입 오류', '이미 사용 중인 정보입니다. 다른 정보를 입력해주세요.');
+          Alert.alert(
+            '회원가입 오류',
+            '이미 사용 중인 정보입니다. 다른 정보를 입력해주세요.',
+          );
         } else {
-          Alert.alert('서버 오류', '서버와 통신 중 오류가 발생했습니다. 나중에 다시 시도해주세요.');
+          Alert.alert(
+            '서버 오류',
+            '서버와 통신 중 오류가 발생했습니다. 나중에 다시 시도해주세요.',
+          );
         }
       } else {
         Alert.alert('오류', '알 수 없는 오류가 발생했습니다.');

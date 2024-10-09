@@ -11,6 +11,7 @@ import axiosInstance from '@/api/axios';
 import {NavigationProp, useFocusEffect} from '@react-navigation/native';
 import {payNavigations, homeNavigations} from '@/constants/navigations';
 import {colors} from '@/constants';
+import SQLite from 'react-native-sqlite-storage';
 
 interface Message {
   id: string;
@@ -31,6 +32,78 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
   } | null>(null); // 사용자 정보
   const [messages, setMessages] = useState<Message[]>([]); // 메시지 목록
   const [inputText, setInputText] = useState(''); // 사용자의 입력값
+
+  // DB
+  const db = SQLite.openDatabase('userInfoDB.db');
+
+  const checkAndCreateTable = () => {
+    db.transaction(tx => {
+      // 테이블이 존재하지 않으면 생성
+      tx.executeSql(
+        `CREATE TABLE IF NOT EXISTS userInfo (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT,
+        income REAL
+      );`,
+        [],
+        () => console.log('Table created or already exists'),
+      );
+    });
+  };
+
+  const fetchIncome = () => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT income FROM userInfo WHERE id = 1',
+        [],
+        (_, result) => {
+          if (result.rows.length > 0) {
+            console.log('Income:', result.rows.item(0).income);
+          } else {
+            console.log('No income found');
+          }
+        },
+        error => console.log('Error fetching income:', error),
+      );
+    });
+  };
+
+  // 연 소득 DB에서 불러오기 함수
+  const fetchIncomeFromDB = async () => {
+    return new Promise((resolve, reject) => {
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT income, date FROM userInfo WHERE id = 1',
+          [],
+          (_, result) => {
+            if (result.rows.length > 0) {
+              const {income, date} = result.rows.item(0);
+              resolve({income, date});
+            } else {
+              resolve(null); // 소득 정보 없음
+            }
+          },
+          (_, error) => reject(error),
+        );
+      });
+    });
+  };
+
+  // 연 소득을 업데이트하는 함수
+  const updateIncomeInDB = (income: number) => {
+    const currentDate = new Date().toISOString();
+    db.transaction(tx => {
+      tx.executeSql(
+        'INSERT OR REPLACE INTO userInfo (id, income, date) VALUES (1, ?, ?)',
+        [income, currentDate],
+      );
+    });
+  };
+
+  useEffect(() => {
+    checkAndCreateTable();
+    fetchIncome();
+  }, []);
 
   // 페이지가 다시 포커스될 때 상태 초기화
   useFocusEffect(
@@ -85,8 +158,19 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
       addBotMessage('연 소득은 어느 정도 되십니까?');
       setStep(3);
     } else if (step === 3) {
-      setIncome(userResponse); // 연 소득 설정
       try {
+        const userIncomeData = await fetchIncomeFromDB();
+        const oneYearAgo = new Date();
+        oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+        // 연 소득이 없거나 1년 이상 지난 경우
+        if (!userIncomeData || new Date(userIncomeData.date) < oneYearAgo) {
+          setIncome(userResponse); // 새로운 연 소득 설정
+          updateIncomeInDB(Number(userResponse)); // DB에 연 소득 저장
+        } else {
+          setIncome(userIncomeData.income); // 기존 연 소득 사용
+        }
+
         // 회원 정보 조회
         const userInfoResponse = await axiosInstance.get('/user');
         const {name, age, gender} = userInfoResponse.data;
@@ -103,8 +187,8 @@ function AiRecommendScreen({navigation}: {navigation: NavigationProp<any>}) {
         addBotMessage(`추천 금액: ${recommendation}`);
         showOptions(); // 옵션 버튼 보여주기
       } catch (error) {
-        console.error('회원 정보를 가져오는 중 오류가 발생했습니다:', error);
-        addBotMessage('회원 정보를 가져오는 중 오류가 발생했습니다.');
+        console.error('연 소득 불러오는 중 오류 발생:', error);
+        addBotMessage('연 소득을 불러오는 중 오류가 발생했습니다.');
       }
     }
   };

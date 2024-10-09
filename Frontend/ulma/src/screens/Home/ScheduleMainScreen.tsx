@@ -1,24 +1,35 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, Alert, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { Calendar } from 'react-native-calendars';
+import React, {useState, useEffect, useCallback} from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+  Alert,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
+import {Calendar} from 'react-native-calendars';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axiosInstance from '@/api/axios';
-import { colors } from '@/constants';
-import { Swipeable } from 'react-native-gesture-handler';
-import { useFocusEffect } from '@react-navigation/native';
-import { friendsNavigations } from '@/constants/navigations';
+import {colors} from '@/constants';
+import {Swipeable} from 'react-native-gesture-handler';
+import {useFocusEffect} from '@react-navigation/native';
+import {friendsNavigations} from '@/constants/navigations';
 
-const ScheduleMainScreen = ({ navigation }) => {
+const ScheduleMainScreen = ({navigation}) => {
   const [selectedDate, setSelectedDate] = useState('');
   const [upcomingEvents, setUpcomingEvents] = useState([]);
-  const [currentMonth, setCurrentMonth] = useState({ year: 2024, month: 10 });
+  const [currentMonth, setCurrentMonth] = useState({year: 2024, month: 10});
   const [editingId, setEditingId] = useState(null); // 수정 중인 이벤트 ID
   const [editedAmount, setEditedAmount] = useState(''); // 수정된 금액
 
   const fetchEvents = async (year, month) => {
     try {
       const response = await axiosInstance.get(`/schedule`, {
-        params: { year, month },
+        params: {year, month},
       });
       setUpcomingEvents(response.data);
     } catch (error) {
@@ -33,12 +44,12 @@ const ScheduleMainScreen = ({ navigation }) => {
   useFocusEffect(
     useCallback(() => {
       fetchEvents(currentMonth.year, currentMonth.month);
-    }, [currentMonth])
+    }, [currentMonth]),
   );
 
   const markedDates = upcomingEvents.reduce((acc, event) => {
     const date = event.date.split('T')[0];
-    acc[date] = { marked: true, dotColor: colors.GREEN_700 };
+    acc[date] = {marked: true, dotColor: colors.GREEN_700};
     return acc;
   }, {});
 
@@ -46,10 +57,12 @@ const ScheduleMainScreen = ({ navigation }) => {
     ? upcomingEvents.filter(event => event.date.startsWith(selectedDate))
     : upcomingEvents;
 
-  const deleteEvent = async (scheduleId) => {
+  const deleteEvent = async scheduleId => {
     try {
       await axiosInstance.delete(`/schedule/${scheduleId}`);
-      setUpcomingEvents(prevEvents => prevEvents.filter(event => event.scheduleId !== scheduleId));
+      setUpcomingEvents(prevEvents =>
+        prevEvents.filter(event => event.scheduleId !== scheduleId),
+      );
       Alert.alert('삭제 완료', '경조사가 삭제되었습니다.');
     } catch (error) {
       console.error('스케줄 삭제에 실패했습니다:', error);
@@ -57,21 +70,21 @@ const ScheduleMainScreen = ({ navigation }) => {
     }
   };
 
-  const confirmDelete = (scheduleId) => {
+  const confirmDelete = scheduleId => {
     Alert.alert(
-      "삭제 확인",
-      "이 경조사를 삭제하시겠습니까?",
+      '삭제 확인',
+      '이 경조사를 삭제하시겠습니까?',
       [
         {
-          text: "아니오",
-          style: "cancel"
+          text: '아니오',
+          style: 'cancel',
         },
         {
-          text: "예",
-          onPress: () => deleteEvent(scheduleId)
-        }
+          text: '예',
+          onPress: () => deleteEvent(scheduleId),
+        },
       ],
-      { cancelable: true }
+      {cancelable: true},
     );
   };
 
@@ -80,7 +93,7 @@ const ScheduleMainScreen = ({ navigation }) => {
     setEditedAmount(Math.abs(paidAmount).toString()); // 음수 부호를 제거한 값으로 수정
   };
 
-  const saveEditedAmount = async (scheduleId) => {
+  const saveEditedAmount = async scheduleId => {
     if (editingId && editedAmount !== '') {
       try {
         const updatedAmount = -parseInt(editedAmount.replace(/,/g, ''), 10); // 음수로 변환하여 요청
@@ -88,12 +101,14 @@ const ScheduleMainScreen = ({ navigation }) => {
           scheduleId,
           paidAmount: updatedAmount,
         });
-        setUpcomingEvents(prevEvents => prevEvents.map(event => {
-          if (event.scheduleId === scheduleId) {
-            return { ...event, paidAmount: updatedAmount };
-          }
-          return event;
-        }));
+        setUpcomingEvents(prevEvents =>
+          prevEvents.map(event => {
+            if (event.scheduleId === scheduleId) {
+              return {...event, paidAmount: updatedAmount};
+            }
+            return event;
+          }),
+        );
         setEditingId(null); // 수정 완료 후 초기화
         setEditedAmount('');
         Alert.alert('수정 완료', '금액이 수정되었습니다.');
@@ -104,18 +119,17 @@ const ScheduleMainScreen = ({ navigation }) => {
     }
   };
 
-  const renderRightActions = (scheduleId) => {
+  const renderRightActions = scheduleId => {
     return (
       <TouchableOpacity
         style={styles.deleteButton}
-        onPress={() => confirmDelete(scheduleId)}
-      >
+        onPress={() => confirmDelete(scheduleId)}>
         <Icon name="trash-outline" size={28} color={colors.RED} />
       </TouchableOpacity>
     );
   };
 
-  const getCategoryColor = (category) => {
+  const getCategoryColor = category => {
     switch (category) {
       case '가족':
         return colors.PINK;
@@ -136,7 +150,7 @@ const ScheduleMainScreen = ({ navigation }) => {
     }
   };
 
-  const getCategoryTextColor = (category) => {
+  const getCategoryTextColor = category => {
     switch (category) {
       case '가족':
       case '친구':
@@ -148,21 +162,27 @@ const ScheduleMainScreen = ({ navigation }) => {
   };
 
   // 금액 세자리마다 쉼표 추가 함수
-  const formatAmount = (amount) => {
+  const formatAmount = amount => {
     return new Intl.NumberFormat().format(amount);
   };
 
-  const renderEventCard = ({ item }) => (
-    <Swipeable
-      renderRightActions={() => renderRightActions(item.scheduleId)}
-    >
+  const renderEventCard = ({item}) => (
+    <Swipeable renderRightActions={() => renderRightActions(item.scheduleId)}>
       <View style={styles.eventCard}>
         <View style={styles.eventCardInner}>
-          <Text style={styles.eventName} ellipsizeMode="tail"  numberOfLines={2}>{item.name}</Text>
+          <Text style={styles.eventName} ellipsizeMode="tail" numberOfLines={2}>
+            {item.name}
+          </Text>
           <TouchableOpacity
-            style={[styles.categoryButton, { backgroundColor: getCategoryColor(item.category) }]}
-          >
-            <Text style={[styles.categoryText, { color: getCategoryTextColor(item.category) }]}>
+            style={[
+              styles.categoryButton,
+              {backgroundColor: getCategoryColor(item.category)},
+            ]}>
+            <Text
+              style={[
+                styles.categoryText,
+                {color: getCategoryTextColor(item.category)},
+              ]}>
               {item.category}
             </Text>
           </TouchableOpacity>
@@ -179,43 +199,55 @@ const ScheduleMainScreen = ({ navigation }) => {
                 keyboardType="numeric"
                 style={styles.editAmountInput}
               />
-              <TouchableOpacity onPress={() => saveEditedAmount(item.scheduleId)}>
+              <TouchableOpacity
+                onPress={() => saveEditedAmount(item.scheduleId)}>
                 <Text style={styles.saveButton}>수정</Text>
               </TouchableOpacity>
             </>
           ) : (
             <>
-              <TouchableOpacity onPress={() => handleEditAmount(item.scheduleId, item.paidAmount)}>
-                <Text style={styles.eventExpense}>₩ {formatAmount(Math.abs(item.paidAmount))}</Text>
+              <TouchableOpacity
+                onPress={() =>
+                  handleEditAmount(item.scheduleId, item.paidAmount)
+                }>
+                <Text style={styles.eventExpense}>
+                  ₩ {formatAmount(Math.abs(item.paidAmount))}
+                </Text>
               </TouchableOpacity>
             </>
           )}
 
           <TouchableOpacity
             style={styles.transactionButton}
-            onPress={() => navigation.navigate(friendsNavigations.FREINDS_DETAIL, {
-              guestId: item.guestId,
-              name: item.guestName,
-              category: item.category,
-              phoneNumber: item.phoneNumber,
-            })}
-          >
+            onPress={() =>
+              navigation.navigate(friendsNavigations.FREINDS_DETAIL, {
+                guestId: item.guestId,
+                name: item.guestName,
+                category: item.category,
+                phoneNumber: item.phoneNumber,
+              })
+            }>
             <Text style={styles.transactionText}>거래내역 조회</Text>
-            <Icon style={styles.toright} name="chevron-forward-outline" size={16} color={colors.GRAY_700} />
+            <Icon
+              style={styles.toright}
+              name="chevron-forward-outline"
+              size={16}
+              color={colors.GRAY_700}
+            />
           </TouchableOpacity>
         </View>
       </View>
     </Swipeable>
   );
 
-  const formatDateToKorean = (dateString) => {
+  const formatDateToKorean = dateString => {
     const date = new Date(dateString);
     const month = date.getMonth() + 1;
     const day = date.getDate();
     return `${month}월 ${day}일`;
   };
 
-  const handleDayPress = (day) => {
+  const handleDayPress = day => {
     if (selectedDate === day.dateString) {
       setSelectedDate('');
     } else {
@@ -225,14 +257,15 @@ const ScheduleMainScreen = ({ navigation }) => {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : null}
-    >
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      style={{flex: 1}}
+      behavior={Platform.OS === 'ios' ? 'padding' : null}>
+      <ScrollView contentContainerStyle={{flexGrow: 1}}>
         <View style={styles.container}>
           <Calendar
             onDayPress={handleDayPress}
-            onMonthChange={month => setCurrentMonth({ year: month.year, month: month.month })}
+            onMonthChange={month =>
+              setCurrentMonth({year: month.year, month: month.month})
+            }
             markedDates={{
               ...markedDates,
               [selectedDate]: {
@@ -248,11 +281,11 @@ const ScheduleMainScreen = ({ navigation }) => {
               textDayFontSize: 16,
               textMonthFontSize: 16,
               textDayHeaderFontSize: 14,
-              textSaturday: { color: 'blue' },
-              textSunday: { color: 'red' },
+              textSaturday: {color: 'blue'},
+              textSunday: {color: 'red'},
               'stylesheet.calendar.header': {
-                dayTextAtIndex0: { color: colors.PINK },
-                dayTextAtIndex6: { color: colors.PASTEL_BLUE },
+                dayTextAtIndex0: {color: colors.PINK},
+                dayTextAtIndex6: {color: colors.PASTEL_BLUE},
               },
             }}
             locale={'ko'}
@@ -266,8 +299,12 @@ const ScheduleMainScreen = ({ navigation }) => {
             </Text>
             <FlatList
               data={eventsForSelectedDate}
-              keyExtractor={(item) => item.scheduleId.toString()}
-              ListEmptyComponent={<Text style={styles.noEventsText}>해당 날짜에 경조사가 없습니다.</Text>}
+              keyExtractor={item => item.scheduleId.toString()}
+              ListEmptyComponent={
+                <Text style={styles.noEventsText}>
+                  해당 날짜에 경조사가 없습니다.
+                </Text>
+              }
               renderItem={renderEventCard}
               style={styles.eventList}
               contentContainerStyle={styles.eventListContent}
@@ -337,7 +374,7 @@ const styles = StyleSheet.create({
   },
   eventCardInner: {
     flexDirection: 'row',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
   },
   categoryButton: {
     borderRadius: 16,

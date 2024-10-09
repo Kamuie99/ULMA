@@ -20,10 +20,7 @@ function AccountInfoScreen() {
   const [accountInfo, setAccountInfo] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState(null);
 
-  // 계좌 정보 가져오기
   useEffect(() => {
-    if (!accessToken) return;
-
     const fetchAccountInfo = async () => {
       try {
         const response = await axiosInstance.get('/users/account', {
@@ -79,16 +76,6 @@ function AccountInfoScreen() {
       console.error('작업 수행 중 에러가 발생했습니다:', error);
     }
   };
-
-  // 배경 opacity
-  const hexToRgba = (hex, opacity) => {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-  };
-
   return (
     <View style={styles.container}>
       {accountInfo.length > 0 ? (
@@ -136,7 +123,7 @@ function AccountInfoScreen() {
           {selectedAccount && (
             <CustomButton
               label="해당 계좌 Pay 연결하기"
-              size="maxSize"
+              size="full"
               onPress={handleAccountAction}
             />
           )}

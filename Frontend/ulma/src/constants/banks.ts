@@ -40,6 +40,6 @@ export const banks = [
   {name: '케이뱅크', code: '089'},
   {name: '카카오뱅크', code: '090'},
   {name: '토스뱅크', code: '092'},
-  {name: '얼마페이', code: '123'},
+  // {name: '얼마페이', code: '123'},
   // {name: 'TEST', code: '999'},
 ];

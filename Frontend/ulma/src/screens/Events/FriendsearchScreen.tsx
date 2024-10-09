@@ -3,7 +3,7 @@ import CustomButton from '@/components/common/CustomButton';
 import InputField from '@/components/common/InputField';
 import TitleTextField from '@/components/common/TitleTextField';
 import {colors} from '@/constants';
-import {payNavigations} from '@/constants/navigations';
+import {eventNavigations, payNavigations} from '@/constants/navigations';
 import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import useAuthStore from '@/store/useAuthStore';
 import useEventStore from '@/store/useEventStore'; // eventStore 임포트
@@ -30,14 +30,16 @@ type InputAmountScreenNavigationProp = StackNavigationProp<
 >;
 
 const FriendsearchScreen = () => {
-  const {selectedTransactions} = useEventStore(); // 선택된 거래 내역 가져오기
+  const {selectedTransactions, eventID} = useEventStore(); // 선택된 거래 내역 가져오기
   const navigation = useNavigation<InputAmountScreenNavigationProp>();
 
   // 선택된 거래 내역을 렌더링하는 함수
   const renderSelectedTransactionItem = ({item}: {item: any}) => (
     <View style={styles.transactionItem}>
       <Text style={styles.transactionDescription}>{item.name}</Text>
-      <Text style={styles.transactionAmount}>{item.amount} 원</Text>
+      <Text style={styles.transactionAmount}>
+        {Number(item.amount).toLocaleString()} 원
+      </Text>
     </View>
   );
 
@@ -60,7 +62,18 @@ const FriendsearchScreen = () => {
       <CustomButton
         label="확인"
         size="full"
-        onPress={() => console.log('확인 버튼 클릭')}
+        onPress={() => {
+          // zustand에서 저장된 이벤트 정보를 가져옴
+          const {eventID, category, name, eventTime} = useEventStore.getState();
+
+          // 이벤트 상세 화면으로 이동
+          navigation.navigate(eventNavigations.EVENT_DETAIL, {
+            event_id: eventID,
+            category: category,
+            name: name,
+            eventTime: eventTime,
+          });
+        }}
       />
     </View>
   );

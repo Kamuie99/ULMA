@@ -1,12 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert, Modal, FlatList, ScrollView, TouchableWithoutFeedback } from 'react-native';
-import { colors } from '@/constants';
-import { useNavigation } from '@react-navigation/native';
+import React, {useState, useEffect} from 'react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  Modal,
+  FlatList,
+  ScrollView,
+  TouchableWithoutFeedback,
+} from 'react-native';
+import {colors} from '@/constants';
+import {useNavigation} from '@react-navigation/native';
 import axiosInstance from '@/api/axios';
 import Contacts from 'react-native-contacts';
 import Icon from 'react-native-vector-icons/Ionicons';
 import CheckBox from '@react-native-community/checkbox';
-import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
+import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 
 const categories = ['가족', '친척', '친구', '직장', '지인', '학교', '기타'];
 
@@ -17,7 +28,7 @@ function phoneNumberCheck(number) {
 }
 
 // 전화번호에 하이픈을 넣어주는 함수
-const formatPhoneNumber = (number) => {
+const formatPhoneNumber = number => {
   const cleaned = ('' + number).replace(/\D/g, '');
   const match = cleaned.match(/^(\d{3})(\d{3,4})(\d{4})$/);
   if (match) {
@@ -27,12 +38,12 @@ const formatPhoneNumber = (number) => {
 };
 
 // 하이픈을 제거하고 번호를 반환하는 함수
-const cleanPhoneNumber = (number) => {
+const cleanPhoneNumber = number => {
   return number.replace(/-/g, '');
 };
 
 // 카테고리별 색상을 반환하는 함수
-const getCategoryColor = (category) => {
+const getCategoryColor = category => {
   switch (category) {
     case '가족':
       return colors.PINK;
@@ -48,12 +59,15 @@ const getCategoryColor = (category) => {
       return colors.GRAY_300;
     case '학교':
       return colors.PURPLE;
-    default: return '#e0e0e0';
+    default:
+      return '#e0e0e0';
   }
 };
 
 function AddFriendScreen() {
-  const [friends, setFriends] = useState([{ name: '', category: '', phoneNumber: '', withoutPhoneNumber: false }]);
+  const [friends, setFriends] = useState([
+    {name: '', category: '', phoneNumber: '', withoutPhoneNumber: false},
+  ]);
   const [modalVisible, setModalVisible] = useState(false);
   const [currentEditIndex, setCurrentEditIndex] = useState(0);
   const [contactsModalVisible, setContactsModalVisible] = useState(false);
@@ -65,7 +79,9 @@ function AddFriendScreen() {
 
   useEffect(() => {
     if (contacts.length > 0) {
-      const sortedContacts = contacts.sort((a, b) => a.givenName.localeCompare(b.givenName));
+      const sortedContacts = contacts.sort((a, b) =>
+        a.givenName.localeCompare(b.givenName),
+      );
       setFilteredContacts(sortedContacts);
     }
   }, [contacts]);
@@ -90,7 +106,10 @@ function AddFriendScreen() {
         return;
       }
       // 전화번호가 없는 경우는 검증하지 않고 넘어감
-      if (!friend.withoutPhoneNumber && !phoneNumberCheck(cleanPhoneNumber(friend.phoneNumber))) {
+      if (
+        !friend.withoutPhoneNumber &&
+        !phoneNumberCheck(cleanPhoneNumber(friend.phoneNumber))
+      ) {
         Alert.alert('오류', '휴대폰 번호를 다시 확인해주세요.');
         return;
       }
@@ -98,20 +117,25 @@ function AddFriendScreen() {
 
     // 전송할 친구 목록에서 전화번호가 없는 친구는 phoneNumber 필드를 제거
     const dataToSend = friends.map(friend => {
-      const { name, category, phoneNumber, withoutPhoneNumber } = friend;
-      return withoutPhoneNumber ? { name, category } : { name, category, phoneNumber: cleanPhoneNumber(phoneNumber) };
+      const {name, category, phoneNumber, withoutPhoneNumber} = friend;
+      return withoutPhoneNumber
+        ? {name, category}
+        : {name, category, phoneNumber: cleanPhoneNumber(phoneNumber)};
     });
 
     try {
       const response = await axiosInstance.post('/participant', dataToSend);
       if (response.status === 200) {
         Alert.alert('등록 성공', '지인 등록이 성공적으로 완료되었습니다.', [
-          { text: '확인', onPress: () => navigation.goBack() }
+          {text: '확인', onPress: () => navigation.goBack()},
         ]);
       }
     } catch (error) {
       console.error('지인 등록 실패:', error);
-      Alert.alert('등록 실패', '이미 등록된 지인이 포함되어 있습니다. \n다시 등록해주세요.');
+      Alert.alert(
+        '등록 실패',
+        '이미 등록된 지인이 포함되어 있습니다. \n다시 등록해주세요.',
+      );
     }
   };
 
@@ -119,18 +143,22 @@ function AddFriendScreen() {
     const hasPermission = await requestContactsPermission();
     if (!hasPermission) return;
 
-    Contacts.getAll().then(contacts => {
-      const sortedContacts = contacts.sort((a, b) => a.givenName.localeCompare(b.givenName));
-      setContacts(sortedContacts);
-      setFilteredContacts(sortedContacts);
-      setContactsModalVisible(true);
-    }).catch(error => {
-      console.error('연락처를 불러오는 데 실패했습니다:', error);
-      Alert.alert('오류', '연락처를 불러오는 데 실패했습니다.');
-    });
+    Contacts.getAll()
+      .then(contacts => {
+        const sortedContacts = contacts.sort((a, b) =>
+          a.givenName.localeCompare(b.givenName),
+        );
+        setContacts(sortedContacts);
+        setFilteredContacts(sortedContacts);
+        setContactsModalVisible(true);
+      })
+      .catch(error => {
+        console.error('연락처를 불러오는 데 실패했습니다:', error);
+        Alert.alert('오류', '연락처를 불러오는 데 실패했습니다.');
+      });
   };
 
-  const toggleContactSelection = (contact) => {
+  const toggleContactSelection = contact => {
     setSelectedContacts(prevSelected => {
       if (prevSelected.some(c => c.recordID === contact.recordID)) {
         return prevSelected.filter(c => c.recordID !== contact.recordID);
@@ -145,7 +173,7 @@ function AddFriendScreen() {
       name: contact.givenName,
       phoneNumber: formatPhoneNumber(contact.phoneNumbers[0]?.number || ''),
       category: '',
-      withoutPhoneNumber: false
+      withoutPhoneNumber: false,
     }));
 
     setFriends(prevFriends => {
@@ -162,35 +190,38 @@ function AddFriendScreen() {
     setSelectedContacts([]);
   };
 
-  const openCategoryModal = (index) => {
+  const openCategoryModal = index => {
     setCurrentEditIndex(index);
     setModalVisible(true);
   };
 
-  const selectCategory = (category) => {
+  const selectCategory = category => {
     const updatedFriends = [...friends];
     updatedFriends[currentEditIndex].category = category;
     setFriends(updatedFriends);
     setModalVisible(false);
   };
 
-  const handleSearch = (text) => {
+  const handleSearch = text => {
     setSearchTerm(text);
     if (text === '') {
       setFilteredContacts(contacts);
     } else {
-      const filtered = contacts.filter(contact => 
-        contact.givenName.toLowerCase().includes(text.toLowerCase())
+      const filtered = contacts.filter(contact =>
+        contact.givenName.toLowerCase().includes(text.toLowerCase()),
       );
       setFilteredContacts(filtered);
     }
   };
 
   const addFriendCard = () => {
-    setFriends([...friends, { name: '', category: '', phoneNumber: '', withoutPhoneNumber: false }]);
+    setFriends([
+      ...friends,
+      {name: '', category: '', phoneNumber: '', withoutPhoneNumber: false},
+    ]);
   };
 
-  const removeFriendCard = (index) => {
+  const removeFriendCard = index => {
     const updatedFriends = friends.filter((_, i) => i !== index);
     setFriends(updatedFriends);
   };
@@ -205,9 +236,10 @@ function AddFriendScreen() {
     setFriends(updatedFriends);
   };
 
-  const toggleWithoutPhoneNumber = (index) => {
+  const toggleWithoutPhoneNumber = index => {
     const updatedFriends = [...friends];
-    updatedFriends[index].withoutPhoneNumber = !updatedFriends[index].withoutPhoneNumber;
+    updatedFriends[index].withoutPhoneNumber =
+      !updatedFriends[index].withoutPhoneNumber;
     // 전화번호 입력 칸을 지우고 회색 배경으로 설정
     if (updatedFriends[index].withoutPhoneNumber) {
       updatedFriends[index].phoneNumber = '';
@@ -231,23 +263,23 @@ function AddFriendScreen() {
             <TextInput
               style={styles.input}
               value={friend.name}
-              onChangeText={(text) => updateFriendField(index, 'name', text)}
+              onChangeText={text => updateFriendField(index, 'name', text)}
               placeholder="이름"
               placeholderTextColor={colors.GRAY_300}
             />
             <TouchableOpacity
               style={[
                 styles.categoryButton,
-                { backgroundColor: getCategoryColor(friend.category) }
+                {backgroundColor: getCategoryColor(friend.category)},
               ]}
-              onPress={() => openCategoryModal(index)}
-            >
+              onPress={() => openCategoryModal(index)}>
               <Text
                 style={[
                   styles.categoryButtonText,
-                  friend.category ? styles.selectedCategoryText : styles.unselectedCategoryText
-                ]}
-              >
+                  friend.category
+                    ? styles.selectedCategoryText
+                    : styles.unselectedCategoryText,
+                ]}>
                 {friend.category || '카테고리 선택'}
               </Text>
             </TouchableOpacity>
@@ -256,10 +288,12 @@ function AddFriendScreen() {
             <TextInput
               style={[
                 styles.input,
-                friend.withoutPhoneNumber ? styles.disabledInput : null
+                friend.withoutPhoneNumber ? styles.disabledInput : null,
               ]}
               value={friend.phoneNumber}
-              onChangeText={(text) => updateFriendField(index, 'phoneNumber', text)}
+              onChangeText={text =>
+                updateFriendField(index, 'phoneNumber', text)
+              }
               placeholder="전화번호"
               placeholderTextColor={colors.GRAY_300}
               keyboardType="phone-pad"
@@ -270,13 +304,17 @@ function AddFriendScreen() {
               onValueChange={() => toggleWithoutPhoneNumber(index)}
             />
             <Text>전화번호 없이</Text>
-            <TouchableOpacity 
-              style={styles.removeButton} 
+            <TouchableOpacity
+              style={styles.removeButton}
               onPress={() => removeFriendCard(index)}
               disabled={friends.length === 1} // 카드가 1개일 때 비활성화
             >
               {friends.length > 1 && (
-                <Icon name="remove-circle-outline" size={24} color={colors.PINK} />
+                <Icon
+                  name="remove-circle-outline"
+                  size={24}
+                  color={colors.PINK}
+                />
               )}
             </TouchableOpacity>
           </View>
@@ -302,8 +340,7 @@ function AddFriendScreen() {
         animationType="fade"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
+        onRequestClose={() => setModalVisible(false)}>
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback>
@@ -311,14 +348,18 @@ function AddFriendScreen() {
                 <Text style={styles.modalTitle}>카테고리 선택</Text>
                 <FlatList
                   data={categories}
-                  keyExtractor={(item) => item}
-                  renderItem={({ item }) => (
-                    <TouchableOpacity onPress={() => selectCategory(item)} style={styles.modalItem}>
+                  keyExtractor={item => item}
+                  renderItem={({item}) => (
+                    <TouchableOpacity
+                      onPress={() => selectCategory(item)}
+                      style={styles.modalItem}>
                       <Text style={styles.modalItemText}>{item}</Text>
                     </TouchableOpacity>
                   )}
                 />
-                <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeModalButton}>
+                <TouchableOpacity
+                  onPress={() => setModalVisible(false)}
+                  style={styles.closeModalButton}>
                   <Text style={styles.closeModalText}>닫기</Text>
                 </TouchableOpacity>
               </View>
@@ -332,8 +373,7 @@ function AddFriendScreen() {
         animationType="slide"
         transparent={false}
         visible={contactsModalVisible}
-        onRequestClose={() => setContactsModalVisible(false)}
-      >
+        onRequestClose={() => setContactsModalVisible(false)}>
         <View style={styles.contactsContainer}>
           <TextInput
             style={styles.searchBar}
@@ -344,37 +384,53 @@ function AddFriendScreen() {
           />
           {/* 전체 선택 / 전체 해제 버튼 */}
           <View style={styles.selectButtonsContainer}>
-            <TouchableOpacity style={styles.selectButton} onPress={selectAllContacts}>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={selectAllContacts}>
               <Text style={styles.selectButtonText}>전체 선택</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.selectButton} onPress={deselectAllContacts}>
+            <TouchableOpacity
+              style={styles.selectButton}
+              onPress={deselectAllContacts}>
               <Text style={styles.selectButtonText}>전체 해제</Text>
             </TouchableOpacity>
           </View>
           <FlatList
             data={filteredContacts}
             keyExtractor={item => item.recordID}
-            renderItem={({ item }) => (
-              <TouchableOpacity 
-                onPress={() => toggleContactSelection(item)} 
+            renderItem={({item}) => (
+              <TouchableOpacity
+                onPress={() => toggleContactSelection(item)}
                 style={[
                   styles.contactItem,
-                  selectedContacts.some(c => c.recordID === item.recordID) && styles.selectedContactItem
-                ]}
-              >
-                <Text style={styles.contactItemText}>{item.givenName} - {item.phoneNumbers[0]?.number}</Text>
+                  selectedContacts.some(c => c.recordID === item.recordID) &&
+                    styles.selectedContactItem,
+                ]}>
+                <Text style={styles.contactItemText}>
+                  {item.givenName} - {item.phoneNumbers[0]?.number}
+                </Text>
                 {selectedContacts.some(c => c.recordID === item.recordID) && (
-                  <Icon name="checkmark-circle" size={24} color={colors.GREEN_700} />
+                  <Icon
+                    name="checkmark-circle"
+                    size={24}
+                    color={colors.GREEN_700}
+                  />
                 )}
               </TouchableOpacity>
             )}
           />
           <View style={styles.contactModalFooter}>
-            <TouchableOpacity onPress={() => setContactsModalVisible(false)} style={styles.cancelButton}>
+            <TouchableOpacity
+              onPress={() => setContactsModalVisible(false)}
+              style={styles.cancelButton}>
               <Text style={styles.cancelButtonText}>취소</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={confirmSelectedContacts} style={styles.confirmButton}>
-              <Text style={styles.confirmButtonText}>확인 ({selectedContacts.length})</Text>
+            <TouchableOpacity
+              onPress={confirmSelectedContacts}
+              style={styles.confirmButton}>
+              <Text style={styles.confirmButtonText}>
+                확인 ({selectedContacts.length})
+              </Text>
             </TouchableOpacity>
           </View>
         </View>

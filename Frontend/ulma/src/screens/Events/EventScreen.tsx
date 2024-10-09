@@ -180,7 +180,14 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
           <TouchableOpacity
             style={styles.eventBox}
             onPress={() => {
-              setEventID(item.id);
+              useEventStore
+                .getState()
+                .setEventInfo(
+                  item.id,
+                  item.category,
+                  item.name,
+                  item.eventTime,
+                );
               navigation.navigate(eventNavigations.EVENT_DETAIL, {
                 event_id: item.id,
                 category: item.category,

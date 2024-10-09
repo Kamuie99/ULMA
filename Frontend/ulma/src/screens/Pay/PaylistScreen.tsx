@@ -11,59 +11,57 @@ import DropDownPicker from 'react-native-dropdown-picker';
 import Icon from 'react-native-vector-icons/Entypo';
 import {colors} from '@/constants';
 import axiosInstance from '@/api/axios';
-import useAuthStore from '@/store/useAuthStore';
 
 interface Transaction {
   date: string;
   guest: string;
   amount: string;
   description: string;
-  type: 'send' | 'receive';
+  type: 'SEND' | 'RECEIVE' | 'CHARGE';
 }
 
 const PaylistScreen = () => {
   const [searchMode, setSearchMode] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [payHistory, setPayHistory] = useState<Transaction[]>([]);
-  const {accessToken} = useAuthStore();
+
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState('ALL');
+  const [items, setItems] = useState([
+    {label: '전체 보기', value: 'ALL'},
+    {label: '출금', value: 'SEND'},
+    {label: '입금', value: 'RECEIVE'},
+    {label: '충전', value: 'CHARGE'},
+  ]);
+
+  const fetchData = async () => {
+    try {
+      const response = await axiosInstance.get('/users/pay', {
+        params: {
+          ...(value !== 'ALL' && {payType: value}),
+        },
+      });
+      console.log(response.data.data);
+
+      const formattedData: Transaction[] = response.data.data.map(
+        (item: any) => ({
+          amount: item.amount,
+          date: item.transactionDate.slice(0, 10),
+          guest: item.counterpartyName,
+          description: item.description,
+          type: item.transactionType === 'SEND' ? 'SEND' : 'RECEIVE',
+        }),
+      );
+
+      setPayHistory(formattedData);
+    } catch (error) {
+      console.error('계좌 이력을 불러오는 중 에러가 발생했습니다:', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axiosInstance.get('/users/pay', {
-          headers: {Authorization: `Bearer ${accessToken}`},
-        });
-        console.log(response.data.data);
-
-        // 서버에서 받아온 데이터를 Transaction 형식으로 변환
-        const formattedData: Transaction[] = response.data.data.map(
-          (item: any) => ({
-            amount: item.amount,
-            date: item.transactionDate.slice(0, 10),
-            guest: item.counterpartyName,
-            description: item.description,
-            type: item.transactionType === 'SEND' ? 'send' : 'receive', // type 필드가 'send' 또는 'receive' 인지 확인
-          }),
-        );
-
-        setPayHistory(formattedData);
-      } catch (error) {
-        console.error('계좌 이력을 불러오는 중 에러가 발생했습니다:', error);
-      }
-    };
-
     fetchData();
-  }, []);
-
-  // 드롭다운
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState('전체 보기');
-  const [items, setItems] = useState([
-    {label: '전체 보기', value: '전체 보기'},
-    {label: '출금', value: '###'},
-    {label: '입금', value: '###'},
-    {label: '충전', value: '###'},
-  ]);
+  }, [value]);
 
   // 거래 내역
   const renderTransaction = ({item}: {item: Transaction}) => (
@@ -80,9 +78,11 @@ const PaylistScreen = () => {
       <Text
         style={[
           styles.amountText,
-          item.type === 'send' ? styles.negative : styles.positive,
+          item.type === 'SEND' ? styles.negative : styles.positive,
         ]}>
-        {item.type === 'send' ? `-${item.amount}` : item.amount}
+        {item.type === 'SEND'
+          ? `-${Number(item.amount).toLocaleString()}`
+          : Number(item.amount).toLocaleString()}
       </Text>
     </View>
   );
@@ -110,7 +110,22 @@ const PaylistScreen = () => {
                 setOpen={setOpen}
                 setValue={setValue}
                 setItems={setItems}
-                containerStyle={{width: '70%'}}
+                containerStyle={{
+                  width: '40%',
+                }}
+                style={{
+                  backgroundColor: colors.LIGHTGRAY,
+                  borderWidth: 0,
+                }}
+                dropDownContainerStyle={{
+                  backgroundColor: colors.WHITE,
+                  borderColor: colors.GRAY_100,
+                  shadowColor: colors.BLACK,
+                  shadowOffset: {width: 0, height: 2},
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 3,
+                }}
               />
               <TouchableOpacity onPress={() => setSearchMode(true)}>
                 <Icon

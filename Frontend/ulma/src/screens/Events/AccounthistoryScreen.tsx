@@ -21,7 +21,7 @@ interface Transaction {
 
 type AccounthistoryScreenProps = StackScreenProps<
   payStackParamList,
-  typeof payNavigations.ACCOUNT_HISTORY
+  typeof eventNavigations.ACCOUNT_HISTORY
 >;
 
 function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {

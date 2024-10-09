@@ -29,6 +29,7 @@
     "nanoid": "^5.0.7",
     "react": "^18.2.0",
     "react-native": "^0.72.6",
+    "react-native-awesome-alerts": "^2.0.0",
     "react-native-calendars": "^1.1306.0",
     "react-native-contacts": "^8.0.1",
     "react-native-date-picker": "^5.0.7",

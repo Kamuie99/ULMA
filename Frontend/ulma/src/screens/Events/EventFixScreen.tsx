@@ -11,6 +11,9 @@ import {StackScreenProps} from '@react-navigation/stack';
 import {eventStackParamList} from '@/navigations/stack/EventStackNavigator';
 import moment from 'moment';
 import axiosInstance from '@/api/axios';
+import Toast from 'react-native-toast-message';
+import CustomButton from '@/components/common/CustomButton';
+import {colors} from '@/constants';
 
 // 타입 정의: navigation과 route에 대한 타입
 type Props = StackScreenProps<eventStackParamList, 'EVENT_FIX'>;
@@ -63,11 +66,17 @@ const EventFixScreen = ({navigation, route}: Props) => {
         date: formattedDate, // ISO 형식으로 변환된 날짜/시간 전송
       });
 
-      Alert.alert('성공', '이벤트가 성공적으로 수정되었습니다.');
+      Toast.show({
+        text1: '수정되었습니다.',
+        type: 'success',
+      });
       navigation.goBack();
     } catch (error) {
       console.error('이벤트 수정 중 오류가 발생했습니다:', error);
-      Alert.alert('오류', '이벤트 수정 중 오류가 발생했습니다.');
+      Toast.show({
+        text1: '수정하는 중 오류가 발생하였습니다.',
+        type: 'error',
+      });
     }
   };
 
@@ -131,14 +140,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   button: {
-    backgroundColor: '#00C77F',
+    backgroundColor: colors.GREEN_700,
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
   },
   buttonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
   },
 });

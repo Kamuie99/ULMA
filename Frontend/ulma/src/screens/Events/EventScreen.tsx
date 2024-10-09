@@ -5,7 +5,6 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
-  Alert,
   Animated,
   PanResponder,
 } from 'react-native';
@@ -15,6 +14,9 @@ import {eventNavigations} from '@/constants/navigations';
 import Icon from 'react-native-vector-icons/Ionicons';
 import useEventStore from '@/store/useEventStore';
 import {colors} from '@/constants';
+import AwesomeAlert from 'react-native-awesome-alerts';
+import EventTag from '@/components/common/EventTag';
+import Toast from 'react-native-toast-message';
 
 interface Event {
   id: string;
@@ -26,7 +28,11 @@ interface Event {
 const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const {setEventID} = useEventStore();
+  const [showAlert, setShowAlert] = useState<boolean>(false);
+  const [alertTitle, setAlertTitle] = useState<string>('');
+  const [alertMessage, setAlertMessage] = useState<string>('');
+  const [eventIdToDelete, setEventIdToDelete] = useState<string | null>(null);
+  const {setEventInfo} = useEventStore();
 
   const fetchEvents = async () => {
     try {
@@ -35,33 +41,41 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
       setLoading(false);
     } catch (error) {
       console.error('이벤트 목록을 불러오는 중 오류 발생:', error);
-      Alert.alert('에러', '이벤트 목록을 불러오는 중 오류가 발생했습니다.');
-      setLoading(false);
+      Toast.show({
+        type: 'error',
+        text1: '목록 불러오기에 실패했어요.',
+      });
     }
   };
 
   const deleteEvent = async (eventId: string) => {
     try {
       await axiosInstance.delete(`/events/${eventId}`);
-      Alert.alert('완료', '이벤트가 삭제되었습니다.');
+      setAlertTitle('완료');
+      setAlertMessage('이벤트가 삭제되었습니다.');
+      setShowAlert(true);
       fetchEvents();
     } catch (error) {
       console.error('이벤트 삭제 중 오류 발생:', error);
-      Alert.alert('에러', '이벤트 삭제 중 오류가 발생했습니다.');
+      setAlertTitle('실패');
+      setAlertMessage('이벤트 삭제 중 오류가 발생했습니다.');
+      setShowAlert(true);
     }
   };
 
   const confirmDelete = (eventId: string) => {
-    Alert.alert('확인', '이벤트를 삭제하시겠습니까?', [
-      {
-        text: '취소',
-        style: 'cancel',
-      },
-      {
-        text: '확인',
-        onPress: () => deleteEvent(eventId),
-      },
-    ]);
+    setEventIdToDelete(eventId);
+    setAlertTitle('확인');
+    setAlertMessage('이벤트를 삭제하시겠습니까?');
+    setShowAlert(true);
+  };
+
+  const handleAlertConfirm = () => {
+    if (eventIdToDelete) {
+      deleteEvent(eventIdToDelete);
+      setEventIdToDelete(null);
+    }
+    setShowAlert(false);
   };
 
   useFocusEffect(
@@ -70,20 +84,6 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     }, []),
   );
 
-  const getEventTitleStyle = (eventTitle: string) => {
-    switch (eventTitle.trim().toLowerCase()) {
-      case '결혼':
-        return {backgroundColor: '#ffc0cb', color: '#fff'};
-      case '생일':
-        return {backgroundColor: '#97deb3', color: '#fff'};
-      case '돌잔치':
-        return {backgroundColor: '#87CEFA', color: '#fff'};
-      case '장례식':
-        return {backgroundColor: '#A9A9A9', color: '#fff'};
-      default:
-        return {backgroundColor: '#9aa160', color: '#fff'};
-    }
-  };
   const formatKoreanDate = (dateString: string) => {
     const date = new Date(dateString);
     return `${date.getFullYear()}년 ${
@@ -95,7 +95,6 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     const hours = date.getHours();
     const minutes = date.getMinutes();
     const seconds = date.getSeconds();
-    // Check if the time is 00:00:00, which indicates an all-day event
     if (hours === 3 && minutes === 33 && seconds === 33) {
       return '종일';
     }
@@ -145,7 +144,6 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
           ]}>
           <TouchableOpacity
             onPress={() => {
-              setEventID(item.id);
               navigation.navigate(eventNavigations.EVENT_FIX, {
                 event_id: item.id,
                 category: item.category,
@@ -196,16 +194,12 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
               });
             }}>
             <View style={styles.eventRow}>
-              {/* Here, category value is displayed without background */}
               <Text style={styles.eventName}>{item.category}</Text>
-              {/* Event name with background */}
-              <View style={[styles.eventTag, getEventTitleStyle(item.name)]}>
-                <Text style={styles.eventTagText}>{item.name}</Text>
-              </View>
+              <EventTag label={item.name} />
             </View>
             <Text style={styles.eventDate}>
               {`${formatKoreanTime(item.eventTime)} `}
-              <Text style={styles.separator}>|</Text> {/* Colored separator */}
+              <Text style={styles.separator}>|</Text>
               {` ${formatKoreanDate(item.eventTime)}`}
             </Text>
           </TouchableOpacity>
@@ -213,6 +207,7 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
       </View>
     );
   };
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -234,33 +229,33 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
           <Text>등록된 이벤트가 없습니다.</Text>
         </View>
       )}
-      {/* <TouchableOpacity
-        style={styles.addButton}
-        onPress={() => navigation.navigate(eventNavigations.EVENT_ADD)}>
-        <Icon name="add" size={28} color="#000" />
-      </TouchableOpacity> */}
+      <AwesomeAlert
+        show={showAlert}
+        showProgress={false}
+        title={alertTitle}
+        message={alertMessage}
+        closeOnTouchOutside={false}
+        closeOnHardwareBackPress={false}
+        showCancelButton={eventIdToDelete !== null}
+        showConfirmButton={true}
+        cancelText="취소"
+        confirmText="확인"
+        confirmButtonColor="#DD6B55"
+        onCancelPressed={() => setShowAlert(false)}
+        onConfirmPressed={handleAlertConfirm}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   separator: {
-    color: colors.GREEN_700,
+    color: colors.GREEN_300,
   },
   container: {
     flex: 1,
     padding: 16,
     backgroundColor: '#f9f9f9',
-  },
-  addButton: {
-    position: 'absolute',
-    top: 10,
-    right: 16,
-    zIndex: 1,
-  },
-  addButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
   },
   swipeContainer: {
     marginBottom: 16,
@@ -269,21 +264,12 @@ const styles = StyleSheet.create({
   eventContainer: {
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderBottomWidth: 0.1,
-    borderLeftWidth: 3, // 왼쪽 세로선 추가
-    borderRightWidth: 3, // 오른쪽 세로선 추가
-    borderLeftColor: '#d3d3d3', // 회색으로 설정
-    borderRightColor: '#d3d3d3', // 회색으로 설정
+    borderWidth: 1,
+    borderColor: colors.GRAY_300,
   },
   eventBox: {
     padding: 12,
   },
-
   eventRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -291,25 +277,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   eventName: {
-    fontSize: 19,
+    fontSize: 16,
     fontWeight: 'bold',
     flex: 1,
-    color: '#333',
-  },
-  eventTag: {
-    borderRadius: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  eventTagText: {
-    fontSize: 14,
-    color: '#fff',
+    color: colors.BLACK,
   },
   eventDate: {
     fontSize: 14,
-    color: '#444',
     marginTop: 4,
   },
   actionIconLeft: {

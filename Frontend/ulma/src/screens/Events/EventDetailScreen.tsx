@@ -189,7 +189,7 @@ const EventDetailScreen: React.FC<EventDetailScreenProps> = ({
           <TouchableOpacity
             onPress={() => setSearchExpanded(true)}
             style={styles.searchButton}>
-            <Icon name="search" size={20} color="#000" />
+            <Icon name="search" size={20} color={colors.GRAY_700} />
           </TouchableOpacity>
         )}
       </View>

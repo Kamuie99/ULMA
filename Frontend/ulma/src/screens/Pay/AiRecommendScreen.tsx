@@ -10,6 +10,7 @@ import {
 import axiosInstance from '@/api/axios';
 import {NavigationProp, useFocusEffect} from '@react-navigation/native';
 import {payNavigations, homeNavigations} from '@/constants/navigations';
+import {colors} from '@/constants';
 
 interface Message {
   id: string;
@@ -207,7 +208,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: colors.GRAY_100,
   },
   chatContainer: {
     flexGrow: 1,
@@ -218,18 +219,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
     borderTopWidth: 1,
-    borderTopColor: '#ccc',
+    borderTopColor: colors.GRAY_700,
   },
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: colors.GRAY_700,
     padding: 10,
     borderRadius: 20,
     marginRight: 10,
   },
   sendButton: {
-    backgroundColor: '#2196F3',
+    backgroundColor: colors.GREEN_700,
     padding: 10,
     borderRadius: 20,
   },
@@ -244,11 +245,11 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   userMessage: {
-    backgroundColor: '#dcf8c6',
+    backgroundColor: colors.GREEN_300,
     alignSelf: 'flex-end',
   },
   botMessage: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.WHITE,
     alignSelf: 'flex-start',
   },
   messageText: {
@@ -258,7 +259,7 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   optionBox: {
-    backgroundColor: '#e6e6e6',
+    backgroundColor: colors.LIGHTGRAY,
     padding: 15,
     borderRadius: 10,
     marginBottom: 10,

@@ -7,13 +7,18 @@ import {
   ScrollView,
   Alert, // 로그아웃 확인창을 띄우기 위한 Alert import
 } from 'react-native';
-import {eventNavigations, friendsNavigations, mypageNavigations} from '@/constants/navigations';
+import {
+  eventNavigations,
+  friendsNavigations,
+  mypageNavigations,
+} from '@/constants/navigations';
+import usePayStore from '@/store/usePayStore';
 import {payNavigations} from '@/constants/navigations';
 import Icon from 'react-native-vector-icons/Ionicons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
-import Icon3 from 'react-native-vector-icons/MaterialIcons'
+import Icon3 from 'react-native-vector-icons/MaterialIcons';
 import useAuthStore from '@/store/useAuthStore';
-import { colors } from '@/constants';
+import {colors} from '@/constants';
 
 interface MyPageHomeScreenProps {
   navigation: any; // 실제 프로젝트에서는 더 구체적인 타입을 사용해야 합니다
@@ -21,6 +26,7 @@ interface MyPageHomeScreenProps {
 
 function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
   const {logout, userInfo} = useAuthStore();
+  const {balance} = usePayStore();
   // fetchUserInfo
 
   // useEffect(() => {
@@ -30,7 +36,8 @@ function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.InfoBox}>
-        <TouchableOpacity onPress={() => navigation.navigate(mypageNavigations.USER_DETAIL)}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate(mypageNavigations.USER_DETAIL)}>
           <View style={styles.userInfoBox}>
             <View style={styles.userInfo_name_email}>
               <Text style={styles.userName}>{userInfo?.name || '사용자'}</Text>
@@ -38,7 +45,12 @@ function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
                 {userInfo?.email || '이메일 없음'}
               </Text>
             </View>
-            <Icon style={styles.useInfoBoxIcon} name="chevron-forward" size={20} color="#666" />
+            <Icon
+              style={styles.useInfoBoxIcon}
+              name="chevron-forward"
+              size={20}
+              color="#666"
+            />
           </View>
         </TouchableOpacity>
 
@@ -46,11 +58,17 @@ function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
         <View style={styles.separator} />
 
         <TouchableOpacity style={styles.payInfo}>
-          <Text style={styles.accountInfoTitle}><Text style={styles.titlecolor}>ULMA</Text> PAY</Text>
-          <Text style={styles.accountBalance}>0 원</Text>
+          <Text style={styles.accountInfoTitle}>
+            <Text style={styles.titlecolor}>ULMA</Text> PAY
+          </Text>
+          <Text style={styles.accountBalance}>
+            {balance === -1 ? '연결된 페이 없음' : `${balance} 원`}
+          </Text>
         </TouchableOpacity>
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate(payNavigations.PAY_RECHARGE)}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate(payNavigations.PAY_RECHARGE)}>
             <Text style={styles.buttonText}>충전</Text>
           </TouchableOpacity>
 
@@ -58,7 +76,9 @@ function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
             <Text style={styles.buttonText}>송금</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate(payNavigations.PAY_LIST)}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate(payNavigations.PAY_LIST)}>
             <Text style={styles.buttonText}>내역</Text>
           </TouchableOpacity>
         </View>
@@ -66,7 +86,7 @@ function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
 
       <View style={styles.InfoBox}>
         <Text>계좌 관리</Text>
-        
+
         <TouchableOpacity style={styles.InfoBoxInner}>
           <View style={styles.MenuBar}>
             <Icon2 name="account-plus" size={24} color="#000" />
@@ -102,8 +122,10 @@ function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
 
       <View style={styles.InfoBox}>
         <Text>지인 관리</Text>
-        
-        <TouchableOpacity style={styles.InfoBoxInner} onPress={() => navigation.navigate(friendsNavigations.FRIENDS_LIST)}>
+
+        <TouchableOpacity
+          style={styles.InfoBoxInner}
+          onPress={() => navigation.navigate(friendsNavigations.FRIENDS_LIST)}>
           <View style={styles.MenuBar}>
             <Icon2 name="account-search" size={24} color="#000" />
             <Text style={styles.InfoMenu}>지인 목록 조회</Text>
@@ -111,7 +133,9 @@ function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
           <Icon name="chevron-forward" size={15} color="#666" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.InfoBoxInner} onPress={() => navigation.navigate(friendsNavigations.FRIENDS_ADD)}>
+        <TouchableOpacity
+          style={styles.InfoBoxInner}
+          onPress={() => navigation.navigate(friendsNavigations.FRIENDS_ADD)}>
           <View style={styles.MenuBar}>
             <Icon2 name="account-plus" size={24} color="#000" />
             <Text style={styles.InfoMenu}>지인 신규 등록</Text>
@@ -136,16 +160,18 @@ function MyPageHomeScreen({navigation}: MyPageHomeScreenProps) {
         </TouchableOpacity>
       </View>
 
-
       <View style={styles.InfoBox}>
         <Text>
-          <Text style={styles.buttonText}>{userInfo?.name || '사용자'}</Text> 님을 위한 추천 서비스
+          <Text style={styles.buttonText}>{userInfo?.name || '사용자'}</Text>{' '}
+          님을 위한 추천 서비스
         </Text>
-        
+
         <TouchableOpacity style={styles.InfoBoxInner}>
           <View style={styles.MenuBar}>
             <Icon2 name="star-four-points-outline" size={24} color="#000" />
-            <Text style={styles.InfoMenu}><Text style={styles.titlecolor}>ULMA</Text> AI 금액 추천</Text>
+            <Text style={styles.InfoMenu}>
+              <Text style={styles.titlecolor}>ULMA</Text> AI 금액 추천
+            </Text>
           </View>
           <Icon name="chevron-forward" size={15} color="#666" />
         </TouchableOpacity>
@@ -241,7 +267,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   useInfoBoxIcon: {
-    marginTop: 13
+    marginTop: 13,
   },
   userInfo_name_email: {
     marginBottom: 20,

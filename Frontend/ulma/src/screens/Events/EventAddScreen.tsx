@@ -17,12 +17,13 @@ import {format} from 'date-fns';
 import {ko} from 'date-fns/locale';
 import InputField from '@/components/common/InputField';
 import {Calendar} from 'react-native-calendars';
+import EventTag from '@/components/common/EventTag';
+import Toast from 'react-native-toast-message';
+import {colors} from '@/constants';
 
 const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
   const [eventTitle, setEventTitle] = useState<string>(''); // 행사 제목
-  const [selectedEventType, setSelectedEventType] = useState<string | null>(
-    null,
-  ); // 행사 유형
+  const [selectedEventType, setSelectedEventType] = useState<string>('결혼'); // 행사 유형
   const [eventDate, setEventDate] = useState<string>(''); // 행사 날짜
   const [eventTime, setEventTime] = useState<{hour: string; minute: string}>({
     hour: '12',
@@ -36,8 +37,25 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
 
   // 이벤트 저장 처리 함수
   const handleSaveEvent = async () => {
-    if (!eventTitle || !selectedEventType || !eventDate) {
-      Alert.alert('경고', '이벤트 제목, 유형, 날짜를 모두 입력하세요.');
+    if (!eventTitle) {
+      Toast.show({
+        text1: '이벤트 제목을 입력하세요.',
+        type: 'error',
+      });
+      return;
+    }
+    if (!selectedEventType) {
+      Toast.show({
+        text1: '이벤트 유형을 입력하세요.',
+        type: 'error',
+      });
+      return;
+    }
+    if (!eventDate) {
+      Toast.show({
+        text1: '이벤트 날짜를 입력하세요.',
+        type: 'error',
+      });
       return;
     }
 
@@ -53,7 +71,10 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
       });
 
       console.log('성공:', response.data);
-      Alert.alert('성공', '이벤트가 저장되었습니다.');
+      Toast.show({
+        text1: '이벤트가 추가 되었습니다.',
+        type: 'success',
+      });
 
       // 이벤트 저장 후 이벤트 목록 화면으로 이동
       navigation.navigate(eventNavigations.EVENT);
@@ -70,8 +91,6 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
 
   return (
     <View style={styles.container}>
-      <TitleTextField frontLabel="어떤 경조사인가요?" />
-
       {/* 이벤트 제목 입력 */}
       <InputField
         placeholder="이벤트 제목을 입력하세요"
@@ -83,20 +102,11 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
       <View style={styles.buttonContainer}>
         {['결혼', '돌잔치', '장례식', '생일', '기타'].map(type => (
           <TouchableOpacity
-            key={type}
-            style={[
-              styles.button,
-              selectedEventType === type ? styles.selectedButton : null,
-            ]}
-            onPress={() => setSelectedEventType(type)}>
-            <Text
-              style={
-                selectedEventType === type
-                  ? styles.selectedButtonText
-                  : styles.buttonText
-              }>
-              {type}
-            </Text>
+            onPress={() => setSelectedEventType(type)}
+            style={{
+              opacity: selectedEventType === type ? 1.0 : 0.3, // 선택된 이벤트 유형이면 opacity를 1.0으로
+            }}>
+            <EventTag label={type} />
           </TouchableOpacity>
         ))}
       </View>
@@ -110,13 +120,13 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
         markedDates={{
           [eventDate]: {
             selected: true,
-            selectedColor: '#00C77F',
+            selectedColor: colors.GREEN_700,
           },
         }}
         monthFormat={'yyyy년 MM월'}
         theme={{
-          selectedDayBackgroundColor: '#00C77F',
-          arrowColor: '#00C77F',
+          selectedDayBackgroundColor: colors.GREEN_700,
+          arrowColor: colors.GREEN_700,
         }}
         locale={'ko'}
       />
@@ -169,7 +179,7 @@ const EventAddScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
       {isConfirmVisible && (
         <CustomButton
           label="저장"
-          variant="outlined"
+          // variant="outlined"
           onPress={handleSaveEvent}
         />
       )}
@@ -184,7 +194,8 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
+    gap: 10,
     marginBottom: 24,
   },
   button: {

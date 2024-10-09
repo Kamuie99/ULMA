@@ -54,7 +54,7 @@ const InputOptionModal: React.FC<InputOptionModalProps> = ({
   // 계좌 내역 불러오기
   const handleAccountHistory = () => {
     console.log('계좌 내역 불러오기 실행');
-    navigation.navigate('Accounthistory');
+    navigation.navigate(eventNavigations.ACCOUNT_HISTORY);
     onClose(); // 모달 닫기
   };
   const handleExcelRegister = () => {

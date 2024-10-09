@@ -23,6 +23,9 @@ const EventFixScreen = ({navigation, route}: Props) => {
     eventTime: string;
   };
 
+  // "종일"인지 확인
+  const isAllDay = moment(eventTime).format('HH:mm:ss') === '03:33:33';
+
   // 화면에 표시할 때는 category를 카테고리로, name을 이름으로 표시
   const [eventCategory, setEventCategory] = useState(category); // 카테고리에 category를 저장
   const [eventName, setEventName] = useState(name); // 이름에 name을 저장
@@ -30,19 +33,28 @@ const EventFixScreen = ({navigation, route}: Props) => {
     moment(eventTime).format('YYYY-MM-DD'),
   );
   const [eventTimeValue, setEventTimeValue] = useState(
-    moment(eventTime).format('HH:mm'),
+    isAllDay ? '종일' : moment(eventTime).format('HH:mm'),
   );
 
   // 저장할 때만 category와 name을 바꿔서 보냄
   const handleSave = async () => {
     try {
-      // 입력한 날짜와 시간으로 ISO 형식으로 변환 (초는 00초로 고정)
-      const formattedDate = moment(
-        `${eventDate} ${eventTimeValue}`,
-        'YYYY-MM-DD HH:mm',
-      )
-        .set({second: 0, millisecond: 0})
-        .toISOString();
+      let formattedDate;
+
+      if (eventTimeValue === '종일') {
+        // "종일"로 설정된 경우 시간을 03:33:33으로 고정
+        formattedDate = moment(`${eventDate} 03:33:33`, 'YYYY-MM-DD HH:mm:ss')
+          .set({second: 33, millisecond: 0})
+          .toISOString();
+      } else {
+        // 사용자가 입력한 시간으로 ISO 형식으로 변환 (초는 00초로 고정)
+        formattedDate = moment(
+          `${eventDate} ${eventTimeValue}`,
+          'YYYY-MM-DD HH:mm',
+        )
+          .set({second: 0, millisecond: 0})
+          .toISOString();
+      }
 
       // 저장할 때는 category와 name을 바꿔서 백엔드로 전송
       await axiosInstance.patch(`/events/${event_id}`, {

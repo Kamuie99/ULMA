@@ -10,17 +10,15 @@ import {
 import Icon from 'react-native-vector-icons/Entypo';
 import Modal from 'react-native-modal';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
-import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
-import {eventNavigations, payNavigations} from '@/constants/navigations';
-import usePayStore from '@/store/usePayStore';
-// import {payNavigations} from '@/constants/navigations';
-// import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import {colors} from '@/constants';
+import {eventNavigations} from '@/constants/navigations';
+import {eventStackParamList} from '@/navigations/stack/EventStackNavigator';
 
 interface InputOptionModalProps {
   isVisible: boolean;
   onClose: () => void;
   onDirectRegister: () => void;
+  eventId: string; // eventId prop 추가
 }
 
 // 옵션 정의
@@ -44,28 +42,24 @@ const options = [
     imageUrl: require('@/assets/Pay/modal/option3.png'),
   },
 ];
-
-function InputOptionModal({
+const InputOptionModal: React.FC<InputOptionModalProps> = ({
   isVisible,
   onClose,
   onDirectRegister,
-}: InputOptionModalProps) {
-  const navigation = useNavigation<NavigationProp<payStackParamList>>();
-  const {getAccountInfo} = usePayStore();
+  eventId, // eventId prop 받아오기
+}) => {
+  // useNavigation 훅에 eventStackParamList 타입을 명시
+  const navigation = useNavigation<NavigationProp<eventStackParamList>>();
 
   // 계좌 내역 불러오기
   const handleAccountHistory = () => {
     console.log('계좌 내역 불러오기 실행');
-    getAccountInfo();
-    navigation.navigate(eventNavigations.ACCOUNT_HISTORY);
     navigation.navigate('Accounthistory');
     onClose(); // 모달 닫기
   };
-
-  // 엑셀 화면으로 이동
   const handleExcelRegister = () => {
-    // ExcelScreen으로 파일 없이 이동
-    navigation.navigate('ExcelScreen', {});
+    // ExcelScreen으로 eventId를 포함하여 이동
+    navigation.navigate(eventNavigations.EVENT_EXCEL, {event_id: eventId});
     onClose(); // 모달 닫기
   };
 
@@ -114,8 +108,7 @@ function InputOptionModal({
       </View>
     </Modal>
   );
-}
-
+};
 const styles = StyleSheet.create({
   modalContainer: {
     justifyContent: 'flex-end',

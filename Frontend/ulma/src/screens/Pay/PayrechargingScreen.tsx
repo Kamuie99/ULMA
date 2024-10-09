@@ -75,7 +75,7 @@ function PayrechargingScreen() {
           <Text style={styles.infoText}>{totalAmount.toLocaleString()} 원</Text>
         </View>
       </View>
-      <CustomButton label="충전하기" onPress={handleRecharge} />
+      <CustomButton label="충전하기" onPress={handleRecharge} posY={20} />
     </KeyboardAvoidingView>
   );
 }
@@ -85,7 +85,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.WHITE,
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    padding: 20,
   },
   header: {
     marginTop: 50,

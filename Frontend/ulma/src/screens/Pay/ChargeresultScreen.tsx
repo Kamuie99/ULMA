@@ -8,20 +8,6 @@ import {payNavigations} from '@/constants/navigations';
 import usePayStore from '@/store/usePayStore';
 
 function ChangeresultScreen({navigation}) {
-  useEffect(() => {
-    // 페이지에 들어올 때 탭바 숨기기
-    navigation.getParent()?.setOptions({
-      tabBarStyle: {display: 'none'},
-    });
-
-    // 컴포넌트가 unmount 될 때 탭바를 다시 보이도록 설정
-    return () => {
-      navigation.getParent()?.setOptions({
-        tabBarStyle: {display: ''},
-      });
-    };
-  }, [navigation]);
-
   const route = useRoute();
   const {amount} = route.params as {amount: string};
   const {accountNumber, balance} = usePayStore();
@@ -53,6 +39,7 @@ function ChangeresultScreen({navigation}) {
       {/* Confirm Button */}
       <CustomButton
         label="확인"
+        posY={20}
         onPress={() => navigation.navigate(payNavigations.HOME)}
       />
     </View>

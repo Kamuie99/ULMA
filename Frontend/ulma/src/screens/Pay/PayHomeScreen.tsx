@@ -29,53 +29,58 @@ interface Transaction {
 }
 
 function PayHomeScreen() {
-  const {accessToken} = useAuthStore();
   const {makeAccount, getPayInfo, getAccountInfo, balance} = usePayStore();
   const [payHistory, setPayHistory] = useState<Transaction[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
 
+  // fetchData 함수를 컴포넌트 외부에서도 호출 가능하도록 분리
+  const fetchPayInfo = async () => {
+    try {
+      await getPayInfo();
+      await getAccountInfo();
+    } catch (error) {
+      console.error('데이터를 불러오는 중 에러가 발생했습니다.', error);
+    }
+  };
+
+  const fetchPayHistory = async () => {
+    try {
+      const response = await axiosInstance.get('/users/pay', {
+        params: {
+          page: 0, // 현재 페이지
+          size: 10, // 페이지당 항목 수
+        },
+      });
+      const formattedData: Transaction[] = response.data.data.map(
+        (item: any) => ({
+          id: item.transactionDate,
+          amount: item.amount,
+          date: item.transactionDate.slice(0, 10),
+          guest: item.counterpartyName,
+          description: item.description,
+          type: item.transactionType === 'SEND' ? 'send' : 'receive',
+        }),
+      );
+      setPayHistory(formattedData);
+    } catch (error) {
+      console.error('계좌 이력을 불러오는 중 에러가 발생했습니다:', error);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
-      const fetchData = async () => {
-        try {
-          console.log(accessToken);
-          await getPayInfo();
-          await getAccountInfo();
-        } catch (error) {
-          console.error('데이터를 불러오는 중 에러가 발생했습니다.', error);
-        }
-      };
-
-      fetchData();
+      fetchPayInfo();
     }, [getPayInfo, getAccountInfo]),
   );
 
   useFocusEffect(
     useCallback(() => {
-      const fetchData = async () => {
-        try {
-          const response = await axiosInstance.get('/users/pay');
-          const formattedData: Transaction[] = response.data.data.map(
-            (item: any) => ({
-              id: item.transactionDate,
-              amount: item.amount,
-              date: item.transactionDate.slice(0, 10),
-              guest: item.counterpartyName,
-              description: item.description,
-              type: item.transactionType === 'SEND' ? 'send' : 'receive',
-            }),
-          );
-
-          setPayHistory(formattedData);
-        } catch (error) {
-          console.error('계좌 이력을 불러오는 중 에러가 발생했습니다:', error);
-        }
-      };
-      fetchData();
+      fetchPayHistory();
     }, []),
   );
 
-  // 거래 내역
+  const navigation = useNavigation();
+
   const renderTransaction = ({item}: {item: Transaction}) => (
     <View style={styles.transactionItem}>
       <View style={styles.iconContainer}>
@@ -92,18 +97,18 @@ function PayHomeScreen() {
           styles.amountText,
           item.type === 'send' ? styles.negative : styles.positive,
         ]}>
-        {item.type === 'send' ? `-${item.amount}` : item.amount}
+        {item.type === 'send'
+          ? `-${Number(item.amount).toLocaleString()}`
+          : Number(item.amount).toLocaleString()}
       </Text>
     </View>
   );
 
-  const navigation = useNavigation();
-
   return (
     <View style={styles.container}>
       <View style={styles.boxContainer}>
-        <Text style={styles.title}>페이머니</Text>
-        {balance ? (
+        <Text style={styles.title}>Pay 머니</Text>
+        {balance >= 0 ? (
           <>
             <Text style={styles.balance}>{balance} 원</Text>
           </>
@@ -160,10 +165,7 @@ function PayHomeScreen() {
                 <View>
                   {/* 송금 내역 리스트 */}
                   <FlatList
-                    data={[
-                      ...payHistory.slice(0, 5),
-                      {id: 'loadMore', type: 'loadMore'},
-                    ]} // 데이터에 더보기 항목 추가
+                    data={[...payHistory, {id: 'loadMore', type: 'loadMore'}]} // 데이터에 더보기 항목 추가
                     renderItem={({item}) =>
                       item.type === 'loadMore' ? (
                         <TouchableOpacity
@@ -190,7 +192,7 @@ function PayHomeScreen() {
 
       {/* 모달창 */}
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}>
@@ -199,19 +201,22 @@ function PayHomeScreen() {
             <Text style={styles.modalText}>
               Ulma Pay 서비스를 시작하시겠습니까?
             </Text>
-            <View>
+            <View style={styles.buttonGroup}>
               <TouchableOpacity
-                style={styles.closeButton}
+                style={styles.actionButton}
                 onPress={async () => {
                   await makeAccount();
+                  await fetchPayInfo(); // makeAccount 후 정보 갱신
+                  await fetchPayHistory(); // makeAccount 후 이력 갱신
+                  setModalVisible(false); // 모달 닫기
                 }}>
-                <Text style={styles.closeButtonText}>시작하기</Text>
+                <Text style={styles.actionButtonText}>시작하기</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.closeButton}
+                style={[styles.actionButton, styles.cancelButton]}
                 onPress={() => setModalVisible(false)}>
-                <Text style={styles.closeButtonText}>닫기</Text>
+                <Text style={styles.actionButtonText}>닫기</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -238,14 +243,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: colors.BLACK,
     marginBottom: 10,
-  },
-  bankImage: {
-    resizeMode: 'contain',
-    height: 20,
-    width: 100,
-  },
-  accountText: {
-    fontSize: 16,
   },
   connectButton: {
     flexDirection: 'row',
@@ -289,7 +286,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
-  // modal
+  // modal 스타일
   modalContainer: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -305,16 +302,25 @@ const styles = StyleSheet.create({
   },
   modalText: {
     marginBottom: 20,
-  },
-  closeButton: {
-    backgroundColor: colors.GREEN_300,
-    borderRadius: 5,
-  },
-  closeButtonText: {
+    fontSize: 18,
     fontWeight: 'bold',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 10,
+  },
+  buttonGroup: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  actionButton: {
+    backgroundColor: colors.GREEN_700,
+    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  actionButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  cancelButton: {
+    backgroundColor: colors.GRAY_700,
   },
   transactionItem: {
     flexDirection: 'row',
@@ -356,11 +362,6 @@ const styles = StyleSheet.create({
   },
   negative: {
     color: colors.BLACK,
-  },
-  listContainer: {
-    backgroundColor: colors.LIGHTGRAY,
-    borderRadius: 8,
-    flex: 1,
   },
 });
 

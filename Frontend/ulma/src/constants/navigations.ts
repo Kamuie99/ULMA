@@ -4,6 +4,7 @@ const homeNavigations = {
   SCHEDULE_ADD: 'ScheduleAdd',
   SELECT_FRIEND: 'SelectFriend',
   FRIENDS_DETAIL: 'FriendsDetail',
+  IMAGE_OCR: 'ImageOCR',
 } as const;
 
 const authNavigations = {
@@ -23,12 +24,9 @@ const eventNavigations = {
   EVENT_DETAIL: 'EVENT_DETAIL',
   AI_RECOMMEND_MESSAGE: 'AIRecommendMessage',
   EVENT_FIX: 'EVENT_FIX',
-<<<<<<< HEAD
   ACCOUNT_HISTORY: 'AccountHistory',
   FRIEND_SEARCH: 'Friendsearch',
-=======
   EVENT_EXCEL: 'ExcelScreen',
->>>>>>> b527ec73bdb4dbf0ee1b73a19b0d5d6d6136e2b5
 } as const;
 
 const payNavigations = {

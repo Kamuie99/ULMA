@@ -35,13 +35,6 @@ function SendingScreen({route}: SendingScreenProps) {
   const {targetAccountNumber} = route.params;
 
   const {getPayInfo} = usePayStore();
-
-  useEffect(() => {
-    // 페이지에 들어올 때 탭바 숨기기
-    navigation.getParent()?.setOptions({
-      tabBarStyle: {display: 'none'},
-    });
-  }, [navigation]);
   const [amount, setAmount] = useState<string>('');
 
   const handleSendMoney = async () => {
@@ -59,7 +52,7 @@ function SendingScreen({route}: SendingScreenProps) {
       const response = await axiosInstance.post(
         '/users/pay/send',
         {
-          info: '결혼식',
+          info: '',
           targetAccountNumber: targetAccountNumber, // 수신 계좌 번호
           amount: parseInt(amount, 10), // 송금 금액 (정수로 변환)
         },

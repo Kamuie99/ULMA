@@ -7,13 +7,6 @@ import React, {useCallback, useEffect} from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 
 function SendresultScreen({navigation}) {
-  useEffect(() => {
-    // 페이지에 들어올 때 탭바 숨기기
-    navigation.getParent()?.setOptions({
-      tabBarStyle: {display: 'none'},
-    });
-  }, [navigation]);
-
   const route = useRoute();
   const {balance} = usePayStore();
   const {amount} = route.params as {amount: string};

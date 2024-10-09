@@ -1,6 +1,5 @@
 import {create} from 'zustand';
 import axiosInstance from '@/api/axios';
-import useAuthStore from './useAuthStore';
 
 interface AccountInfo {
   accountNumber: string | null;
@@ -8,21 +7,21 @@ interface AccountInfo {
 }
 
 interface PayInfo {
-  balance: number | null;
+  balance: number | -1;
 }
 
 interface PayStore extends AccountInfo, PayInfo {
   getAccountInfo: () => Promise<void>;
   makeAccount: () => Promise<void>;
   setAccountInfo: (data: Partial<AccountInfo>) => void;
-  setPayInfo: (data: Partial<PayInfo>) => void; // PayInfo 업데이트 메서드 추가
+  setPayInfo: (data: Partial<PayInfo>) => void;
   getPayInfo: () => Promise<void>;
 }
 
 const usePayStore = create<PayStore>(set => ({
   accountNumber: null,
   bankCode: null,
-  balance: null,
+  balance: -1,
 
   setAccountInfo: (data: Partial<AccountInfo>) =>
     set(state => ({
@@ -41,12 +40,8 @@ const usePayStore = create<PayStore>(set => ({
 
   getAccountInfo: async () => {
     try {
-      const {accessToken} = useAuthStore.getState();
       const response = await axiosInstance.get<AccountInfo>(
         '/users/account/info',
-        {
-          headers: {Authorization: `Bearer ${accessToken}`},
-        },
       );
       usePayStore.getState().setAccountInfo(response.data);
       console.log(response.data);
@@ -58,10 +53,7 @@ const usePayStore = create<PayStore>(set => ({
 
   makeAccount: async () => {
     try {
-      const {accessToken} = useAuthStore.getState();
-      const response = await axiosInstance.post<AccountInfo>('/users/pay', {
-        headers: {Authorization: `Bearer ${accessToken}`},
-      });
+      const response = await axiosInstance.post<AccountInfo>('/users/pay');
       usePayStore.getState().setAccountInfo(response.data);
     } catch (error) {
       console.error('계좌 생성을 하는 중 에러가 발생했습니다:', error);
@@ -70,16 +62,12 @@ const usePayStore = create<PayStore>(set => ({
   },
 
   getPayInfo: async () => {
-    const {accessToken} = useAuthStore.getState();
     try {
-      const response = await axiosInstance.get<PayInfo>('/users/pay/balance', {
-        headers: {Authorization: `Bearer ${accessToken}`},
-      });
+      const response = await axiosInstance.get<PayInfo>('/users/pay/balance');
       set(state => ({
         ...state,
         balance: response.data.balance,
       }));
-      console.log('PayInfo:', response.data);
     } catch (error) {
       console.error('pay 정보를 불러오는 중 에러가 발생했습니다:', error);
       throw error;

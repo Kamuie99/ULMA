@@ -22,7 +22,7 @@ function TitleTextField({frontLabel, emphMsg, backLabel}: TitleTextFieldProps) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    marginLeft: '5%',
+    // marginLeft: '5%',
   },
   text: {
     fontSize: 22,

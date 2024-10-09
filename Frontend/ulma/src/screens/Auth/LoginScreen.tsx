@@ -51,7 +51,12 @@ function LoginScreen() {
         placeholder="비밀번호를 입력해주세요"
         secureTextEntry
       />
-      <CustomButton size="maxSize" label="로그인" onPress={handleLogin} />
+      <CustomButton
+        size="maxSize"
+        label="로그인"
+        posY={30}
+        onPress={handleLogin}
+      />
     </View>
   );
 }

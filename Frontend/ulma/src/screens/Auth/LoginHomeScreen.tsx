@@ -58,8 +58,7 @@ function LoginHomeScreen({navigation}: LoginHomeScreenProps) {
           <CustomButton
             label="로그인"
             onPress={() => navigation.navigate(authNavigations.LOGIN)}
-            customStyle={{position: 'absolute'}}
-            posY={0}
+            posY={60}
           />
           <CustomButton
             label="회원 가입"

@@ -22,18 +22,19 @@ interface CustomButtonProps extends PressableProps {
 }
 
 const deviceHeight = Dimensions.get('screen').height;
+const deviceWidth = Dimensions.get('screen').width;
 
 function CustomButton({
   label,
   variant = 'filled',
-  size = 'large',
+  size = 'maxSize',
   inValid = false,
   customStyle,
-  posY = 30,
+  posY = 0,
   ...props
 }: CustomButtonProps) {
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, {bottom: posY}]}>
       <Pressable
         disabled={inValid}
         style={({pressed}) => [
@@ -41,7 +42,6 @@ function CustomButton({
           pressed ? styles[`${variant}Pressed`] : styles[variant],
           inValid && styles.inValid,
           customStyle ? customStyle : null, // customStyle이 있으면 추가
-          {bottom: posY},
         ]}
         {...props}>
         <View style={styles[size]}>
@@ -54,9 +54,11 @@ function CustomButton({
 
 const styles = StyleSheet.create({
   wrap: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'absolute',
+    width: deviceWidth,
+    paddingHorizontal: 10,
   },
   container: {
     borderRadius: 6,
@@ -64,7 +66,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     display: 'flex',
     alignItems: 'center',
-    position: 'absolute',
   },
   inValid: {
     opacity: 0.5,

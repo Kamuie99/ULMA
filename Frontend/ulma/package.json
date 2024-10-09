@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.25.6",
+    "@google-cloud/vision": "^4.3.2",
     "@react-native-async-storage/async-storage": "^2.0.0",
     "@react-native-community/checkbox": "^0.5.17",
     "@react-native-community/datetimepicker": "^8.2.0",
@@ -35,7 +36,9 @@
     "react-native-dropdown-picker": "^5.4.6",
     "react-native-encrypted-storage": "^4.0.3",
     "react-native-fast-image": "^8.6.3",
+    "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.19.0",
+    "react-native-image-picker": "^7.1.2",
     "react-native-keychain": "^8.2.0",
     "react-native-modal": "^13.0.1",
     "react-native-modal-datetime-picker": "^18.0.0",

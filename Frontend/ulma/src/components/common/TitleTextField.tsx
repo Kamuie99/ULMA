@@ -7,11 +7,17 @@ interface TitleTextFieldProps {
   frontLabel: string;
   emphMsg?: string;
   backLabel?: string;
+  left?: number;
 }
 
-function TitleTextField({frontLabel, emphMsg, backLabel}: TitleTextFieldProps) {
+function TitleTextField({
+  frontLabel,
+  emphMsg,
+  backLabel,
+  left,
+}: TitleTextFieldProps) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {marginLeft: left}]}>
       <Text style={styles.text}>{frontLabel}</Text>
       <Text style={styles.emphText}>{emphMsg}</Text>
       <Text style={styles.text}>{backLabel}</Text>

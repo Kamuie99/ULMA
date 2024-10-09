@@ -9,7 +9,14 @@ import useEventStore from '@/store/useEventStore'; // eventStore 추가
 import {useFocusEffect} from '@react-navigation/native';
 import {StackScreenProps} from '@react-navigation/stack';
 import React, {useCallback, useState} from 'react';
-import {View, Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native';
 
 interface Transaction {
   id: string;
@@ -52,7 +59,7 @@ function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
 
       if (newData.length > 0) {
         const mappedData = newData.map(item => ({
-          id: item.transactionDate, // transactionDate를 id로 사용
+          id: item.id, // transactionDate를 id로 사용
           name: item.counterpartyName,
           amount: item.amount,
           selected: false,
@@ -81,8 +88,8 @@ function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
 
   const toggleSelect = (id: string) => {
     setAccountHistory(prevData =>
-      prevData.map(
-        item => (item.id === id ? {...item, selected: !item.selected} : item), // 선택된 항목만 상태 변경
+      prevData.map(item =>
+        item.id === id ? {...item, selected: !item.selected} : item,
       ),
     );
   };
@@ -145,13 +152,17 @@ function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
             offset: 60 * index,
             index,
           })}
-          ListFooterComponent={loading && <Text>Loading...</Text>}
+          ListFooterComponent={
+            loading ? (
+              <ActivityIndicator size="large" color={colors.GREEN_700} />
+            ) : null
+          } // 로딩 중일 때 ActivityIndicator를 보여줌
           style={styles.list}
         />
       </View>
       <CustomButton
-        label="확인"
-        variant="outlined"
+        label="등록하기"
+        size="full"
         onPress={handleConfirm} // 선택된 항목을 eventStore에 저장하고 페이지 이동
         disabled={!accountHistory.some(item => item.selected)} // 선택된 항목이 없으면 버튼 비활성화
       />
@@ -162,7 +173,7 @@ function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.LIGHTGRAY,
+    backgroundColor: colors.WHITE,
     padding: 15,
   },
   accountInfoContainer: {
@@ -181,10 +192,11 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     borderColor: colors.GRAY_300,
     borderWidth: 1,
-    shadowColor: colors.BLACK,
-    shadowOpacity: 0.25,
-    shadowRadius: 20,
-    elevation: 4,
+    marginBottom: 80,
+    // shadowColor: colors.BLACK,
+    // shadowOpacity: 0.25,
+    // shadowRadius: 20,
+    // elevation: 4,
   },
   textContainer: {
     flexDirection: 'row',

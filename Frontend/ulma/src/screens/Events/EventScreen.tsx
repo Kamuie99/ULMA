@@ -6,13 +6,18 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
+  Animated,
+  PanResponder,
 } from 'react-native';
 import {NavigationProp, useFocusEffect} from '@react-navigation/native';
 import axiosInstance from '@/api/axios';
 import {eventNavigations} from '@/constants/navigations';
 import Icon from 'react-native-vector-icons/Ionicons';
 import useEventStore from '@/store/useEventStore';
+<<<<<<< HEAD
+=======
 import EventTag from '@/components/common/EventTag';
+>>>>>>> 9ee211a1d9684f449ff2faf32aef5e0fe2b11be9
 import {colors} from '@/constants';
 
 interface Event {
@@ -30,7 +35,6 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
   const fetchEvents = async () => {
     try {
       const response = await axiosInstance.get('/events');
-      console.log('응답 데이터:', response.data);
       setEvents(response.data.data);
       setLoading(false);
     } catch (error) {
@@ -44,7 +48,7 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     try {
       await axiosInstance.delete(`/events/${eventId}`);
       Alert.alert('완료', '이벤트가 삭제되었습니다.');
-      fetchEvents(); // 삭제 후 목록 새로고침
+      fetchEvents();
     } catch (error) {
       console.error('이벤트 삭제 중 오류 발생:', error);
       Alert.alert('에러', '이벤트 삭제 중 오류가 발생했습니다.');
@@ -70,7 +74,25 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     }, []),
   );
 
+<<<<<<< HEAD
+  const getEventTitleStyle = (eventTitle: string) => {
+    switch (eventTitle.trim().toLowerCase()) {
+      case '결혼':
+        return {backgroundColor: '#ffc0cb', color: '#fff'};
+      case '생일':
+        return {backgroundColor: '#97deb3', color: '#fff'};
+      case '돌잔치':
+        return {backgroundColor: '#87CEFA', color: '#fff'};
+      case '장례식':
+        return {backgroundColor: '#A9A9A9', color: '#fff'};
+      default:
+        return {backgroundColor: '#9aa160', color: '#fff'};
+    }
+  };
+
+=======
   // 날짜를 '2024년 8월 11일' 형식으로 변환
+>>>>>>> 9ee211a1d9684f449ff2faf32aef5e0fe2b11be9
   const formatKoreanDate = (dateString: string) => {
     const date = new Date(dateString);
     return `${date.getFullYear()}년 ${
@@ -78,22 +100,126 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
     }월 ${date.getDate()}일`;
   };
 
-  // 시간을 '14시 30분' 형식으로 변환
   const formatKoreanTime = (dateString: string) => {
     const date = new Date(dateString);
-    return `${date.getHours()}시 ${date.getMinutes()}분`;
-  };
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
 
-  // 시간이 03:33:33인 경우 "종일"로 표시
-  const isAllDayEvent = (eventTime: string | null) => {
-    if (!eventTime) {
-      return false;
+    // Check if the time is 00:00:00, which indicates an all-day event
+    if (hours === 3 && minutes === 33 && seconds === 33) {
+      return '종일';
     }
-    return eventTime.includes('03:33:33');
+
+    return `${hours}시 ${minutes}분`;
   };
 
   const renderItem = ({item}: {item: Event}) => {
+    const pan = new Animated.ValueXY();
+    const panResponder = PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderMove: (e, gestureState) => {
+        pan.setValue({x: gestureState.dx, y: 0});
+      },
+      onPanResponderRelease: (e, gestureState) => {
+        if (gestureState.dx > 100) {
+          Animated.spring(pan, {
+            toValue: {x: 100, y: 0},
+            useNativeDriver: false,
+          }).start();
+        } else if (gestureState.dx < -100) {
+          Animated.spring(pan, {
+            toValue: {x: -100, y: 0},
+            useNativeDriver: false,
+          }).start();
+        } else {
+          Animated.spring(pan, {
+            toValue: {x: 0, y: 0},
+            useNativeDriver: false,
+          }).start();
+        }
+      },
+    });
+  
     return (
+<<<<<<< HEAD
+      <View style={styles.swipeContainer}>
+        <Animated.View
+          style={[
+            styles.actionIconLeft,
+            {
+              opacity: pan.x.interpolate({
+                inputRange: [50, 100],
+                outputRange: [0, 1],
+                extrapolate: 'clamp',
+              }),
+              left: 10,
+            },
+          ]}>
+          <TouchableOpacity
+            onPress={() => {
+              setEventID(item.id);
+              navigation.navigate(eventNavigations.EVENT_FIX, {
+                event_id: item.id,
+                category: item.category,
+                name: item.name,
+                eventTime: item.eventTime,
+              });
+            }}>
+            <Icon name="pencil" size={24} color="#808080" />
+          </TouchableOpacity>
+        </Animated.View>
+  
+        <Animated.View
+          style={[
+            styles.actionIconRight,
+            {
+              opacity: pan.x.interpolate({
+                inputRange: [-100, -50],
+                outputRange: [1, 0],
+                extrapolate: 'clamp',
+              }),
+              right: 10,
+            },
+          ]}>
+          <TouchableOpacity onPress={() => confirmDelete(item.id)}>
+            <Icon name="trash" size={24} color="#808080" />
+          </TouchableOpacity>
+        </Animated.View>
+  
+        <Animated.View
+          style={[
+            styles.eventContainer,
+            {transform: [{translateX: pan.x}]},
+          ]}
+          {...panResponder.panHandlers}>
+          <TouchableOpacity
+            style={styles.eventBox}
+            onPress={() => {
+              setEventID(item.id);
+              navigation.navigate(eventNavigations.EVENT_DETAIL, {
+                event_id: item.id,
+                category: item.category,
+                name: item.name,
+                eventTime: item.eventTime,
+              });
+            }}>
+            <View style={styles.eventRow}>
+              {/* Here, category value is displayed without background */}
+              <Text style={styles.eventName}>{item.category}</Text>
+              {/* Event name with background */}
+              <View style={[styles.eventTag, getEventTitleStyle(item.name)]}>
+                <Text style={styles.eventTagText}>{item.name}</Text>
+              </View>
+            </View>
+            <Text style={styles.eventDate}>
+              {`${formatKoreanTime(item.eventTime)} `}
+              <Text style={styles.separator}>|</Text> {/* Colored separator */}
+              {` ${formatKoreanDate(item.eventTime)}`}
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
+=======
       <View style={styles.eventContainer}>
         {/* 박스를 클릭했을 때 EventDetailScreen으로 이동 */}
         <TouchableOpacity
@@ -145,10 +271,10 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
           onPress={() => confirmDelete(item.id)}>
           <Icon name="trash" size={20} color="#808080" />
         </TouchableOpacity>
+>>>>>>> 9ee211a1d9684f449ff2faf32aef5e0fe2b11be9
       </View>
     );
   };
-
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -164,30 +290,37 @@ const EventScreen = ({navigation}: {navigation: NavigationProp<any>}) => {
           data={events}
           keyExtractor={item => item.id}
           renderItem={renderItem}
-          numColumns={2}
-          columnWrapperStyle={styles.row}
         />
       ) : (
         <View style={styles.emptyContainer}>
           <Text>등록된 이벤트가 없습니다.</Text>
         </View>
       )}
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={styles.addButton}
         onPress={() => navigation.navigate(eventNavigations.EVENT_ADD)}>
-        <Text style={styles.addButtonText}>이벤트 추가하기</Text>
-      </TouchableOpacity>
+        <Icon name="add" size={28} color="#000" />
+      </TouchableOpacity> */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  separator: {
+    color: colors.GREEN_700,
+  },
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#f9f9f9',
   },
   addButton: {
+<<<<<<< HEAD
+    position: 'absolute',
+    top: 10,
+    right: 16,
+    zIndex: 1,
+=======
     backgroundColor: colors.GREEN_700,
     padding: 16,
     borderRadius: 8,
@@ -196,71 +329,74 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+>>>>>>> 9ee211a1d9684f449ff2faf32aef5e0fe2b11be9
   },
   addButtonText: {
     color: '#fff',
     fontWeight: 'bold',
   },
+  swipeContainer: {
+    marginBottom: 16,
+    overflow: 'hidden',
+  },
   eventContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderBottomWidth: 0.1,
+    borderLeftWidth: 3, // 왼쪽 세로선 추가
+    borderRightWidth: 3, // 오른쪽 세로선 추가
+    borderLeftColor: '#d3d3d3', // 회색으로 설정
+    borderRightColor: '#d3d3d3', // 회색으로 설정
   },
   eventBox: {
-    backgroundColor: '#f9f9f9',
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 16,
-    flex: 1,
-    marginHorizontal: 8,
+    padding: 12,
   },
-  row: {
-    justifyContent: 'space-between',
-  },
-  eventHeader: {
+  eventRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  eventCategoryContainer: {
-    borderRadius: 4,
-    padding: 4,
     marginBottom: 8,
   },
-  eventCategory: {
-    fontSize: 18,
+  eventName: {
+    fontSize: 19,
     fontWeight: 'bold',
-    color: '#000',
+    flex: 1,
+    color: '#333',
   },
-  eventTitleContainer: {
-    borderRadius: 4,
-    paddingVertical: 5,
-    paddingHorizontal: 16,
-    marginBottom: 8,
-    justifyContent: 'center',
+  eventTag: {
+    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  eventTitle: {
-    fontSize: 15,
-    fontWeight: 'bold',
+  eventTagText: {
+    fontSize: 14,
+    color: '#fff',
   },
   eventDate: {
-    fontSize: 15,
-    color: '#888',
-    fontWeight: 'bold',
+    fontSize: 14,
+    color: '#444',
     marginTop: 4,
   },
-  editButton: {
-    paddingHorizontal: 8,
+  actionIconLeft: {
     position: 'absolute',
-    right: 40,
-    top: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%',
+    width: 50,
   },
-  deleteButton: {
-    paddingHorizontal: 8,
+  actionIconRight: {
     position: 'absolute',
-    right: 10,
-    top: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%',
+    width: 50,
   },
   loadingContainer: {
     flex: 1,

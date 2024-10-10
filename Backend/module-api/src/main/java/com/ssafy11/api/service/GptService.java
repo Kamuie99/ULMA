@@ -47,7 +47,7 @@ public class GptService implements ChatService{
         headers.set("Content-Type", "application/json");
 
         JSONObject requestBody = new JSONObject();
-        requestBody.put("model", "gpt-3.5-turbo");
+        requestBody.put("model", "gpt-4o");
         requestBody.put("max_tokens", 500);
         requestBody.put("temperature", 1.0);
         requestBody.put("messages", new JSONArray()
@@ -89,8 +89,9 @@ public class GptService implements ChatService{
     }
 
     private String extractAmount(String content) { //00만원 형식으로 파싱
-        Pattern pattern = Pattern.compile("(\\d{1,3}(?:,\\d{3})*|\\d{1,3})\\s*(만원|원)", Pattern.CANON_EQ);
-        Matcher matcher = pattern.matcher(content);
+        String result = content.replaceAll("\\s+", "");
+        Pattern pattern = Pattern.compile("(\\d{1,3}(?:,\\d{3})*|\\d{1,6})\\s*(만원|원)", Pattern.CANON_EQ);
+        Matcher matcher = pattern.matcher(result);
 
         if (matcher.find()) {
             return matcher.group();

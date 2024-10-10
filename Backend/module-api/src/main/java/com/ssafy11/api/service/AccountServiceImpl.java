@@ -1,5 +1,6 @@
 package com.ssafy11.api.service;
 
+import com.ssafy11.api.dto.account.TargetAccount;
 import com.ssafy11.api.dto.account.VerifyNumber;
 import com.ssafy11.api.dto.pay.PayHistoryDTO;
 import com.ssafy11.api.exception.ErrorCode;
@@ -9,19 +10,22 @@ import com.ssafy11.domain.Account.AccountDao;
 import com.ssafy11.domain.Account.PaginatedHistory;
 import com.ssafy11.domain.Pay.PayHistory;
 import com.ssafy11.domain.Pay.PayType;
+import com.ssafy11.domain.users.UserDaoImpl;
+import com.ssafy11.domain.users.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AccountServiceImpl implements AccountService {
     private final AccountDao accountDao;
+    private final UserDaoImpl userDao;
 
     @Override
     @Transactional
@@ -176,11 +180,22 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account verifyTargetAccount(String bankCode, String accountNumber) {
+    public TargetAccount verifyTargetAccount(String bankCode, String accountNumber) {
         Account account = accountDao.verifyTargetAccount(bankCode, accountNumber);
         if (account == null) {
             throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND, "계좌를 다시 확인하여 주십시오.");
         }
-        return null;
+        Optional<UserInfoRequest> user = userDao.getUserInfo(account.userId());
+
+        if (user.isEmpty()) {
+            throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND, "계좌를 다시 확인하여 주십시오.");
+        }
+
+
+        return new TargetAccount(
+                user.get().name(),
+                bankCode,
+                accountNumber
+        );
     }
 }

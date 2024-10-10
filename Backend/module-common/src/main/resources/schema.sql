@@ -85,7 +85,12 @@ CREATE TABLE payHistory (
                             FOREIGN KEY (account_id) REFERENCES account(id)
 );
 
-CREATE TABLE `payment_analysis` (
+CREATE TABLE users_auth (
+                            id INT not null ,
+                            password varchar(255)
+);
+
+CREATE TABLE payment_analysis (
                                     `id` int NOT NULL AUTO_INCREMENT,
                                     `under_50k_ratio` decimal(5,1) NOT NULL,
                                     `between_50k_100k_ratio` decimal(5,1) NOT NULL,
@@ -97,4 +102,4 @@ CREATE TABLE `payment_analysis` (
                                     `category` varchar(45) NOT NULL,
                                     `create_at` varchar(45) NOT NULL,
                                     PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+);

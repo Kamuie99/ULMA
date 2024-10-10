@@ -323,6 +323,7 @@ public class AccountDaoImpl implements AccountDao {
                 .and(ACCOUNT.ACCOUNT_NUMBER.eq(accountNumber))
                 .fetchOneInto(Account.class);
 
+
         if (account == null) {
             return null;
         }

@@ -1,3 +1,8 @@
 package com.ssafy11.api.dto.account;
-public record BankCodeDTO(String bankCode) {
+
+import org.jetbrains.annotations.NotNull;
+
+public record BankCodeDTO(
+        @NotNull String bankCode
+) {
 }

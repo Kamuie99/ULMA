@@ -95,8 +95,8 @@ public class AccountController {
             @RequestParam(value = "start_date", required = false) LocalDate startDate,
             @RequestParam(value = "end_date", required = false) LocalDate endDate,
             @RequestParam(value = "pay_type", required = false) String payType,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size) {
         Assert.hasText(accountNumber, "AccountNumber must not be null");
         PaginatedHistory paginatedHistory = accountService.findPayHistory(accountNumber, startDate, endDate, payType, page, size);
         return ResponseEntity.ok(paginatedHistory);
@@ -104,7 +104,7 @@ public class AccountController {
 
     // 8. 1원 인증
     @PostMapping("/users/account/verify")
-    public ResponseEntity<VerifyNumber> VerifyAccount(
+    public ResponseEntity<VerifyNumber> verifyAccount(
             @AuthenticationPrincipal User user,
             @RequestBody AccountConnectRequest request
     ) {
@@ -112,5 +112,13 @@ public class AccountController {
         int authenticatedUserId = Integer.parseInt(user.getUsername());
         VerifyNumber verifyNumber = accountService.verifyMyAccount(authenticatedUserId, request.bankCode(), request.accountNumber());
         return ResponseEntity.ok(verifyNumber);
+    }
+
+    @PostMapping("/users/account/target-verify")
+    public ResponseEntity<TargetAccount> verifyTargetAccount(
+            @RequestBody AccountConnectRequest request
+    ) {
+        TargetAccount targetAccount = accountService.verifyTargetAccount(request.bankCode(), request.accountNumber());
+        return ResponseEntity.ok(targetAccount);
     }
 }

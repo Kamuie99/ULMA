@@ -1,5 +1,6 @@
 package com.ssafy11.api.service;
 
+import com.ssafy11.api.dto.account.TargetAccount;
 import com.ssafy11.api.dto.account.VerifyNumber;
 import com.ssafy11.api.dto.pay.PayHistoryDTO;
 import com.ssafy11.api.exception.ErrorCode;
@@ -9,19 +10,22 @@ import com.ssafy11.domain.Account.AccountDao;
 import com.ssafy11.domain.Account.PaginatedHistory;
 import com.ssafy11.domain.Pay.PayHistory;
 import com.ssafy11.domain.Pay.PayType;
+import com.ssafy11.domain.users.UserDaoImpl;
+import com.ssafy11.domain.users.dto.UserInfoRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AccountServiceImpl implements AccountService {
     private final AccountDao accountDao;
+    private final UserDaoImpl userDao;
 
     @Override
     @Transactional
@@ -112,7 +116,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public PaginatedHistory<PayHistoryDTO> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType, int page, int size) {
+    public PaginatedHistory<PayHistory> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType, Integer page, Integer size) {
 
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             throw new ErrorException(ErrorCode.INVALID_DATE_RANGE);
@@ -130,7 +134,6 @@ public class AccountServiceImpl implements AccountService {
             }
         }
 
-
         PaginatedHistory<PayHistory> paginatedHistory = accountDao.findPayHistory(accountNumber, startDate, endDate, payType, page, size);
 
         if (paginatedHistory == null) {
@@ -138,12 +141,12 @@ public class AccountServiceImpl implements AccountService {
         }
 
         // PayHistory 데이터를 PayHistoryDTO로 변환
-        List<PayHistoryDTO> payHistoryDTOList = paginatedHistory.data().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+//        List<PayHistoryDTO> payHistoryDTOList = paginatedHistory.data().stream()
+//                .map(this::convertToDTO)
+//                .collect(Collectors.toList());
 
         // PayHistoryDTO 타입의 PaginatedHistory 반환
-        return new PaginatedHistory<>(payHistoryDTOList, page, paginatedHistory.totalItemsCount(), paginatedHistory.totalPages());
+        return paginatedHistory;
     }
 
 
@@ -174,5 +177,25 @@ public class AccountServiceImpl implements AccountService {
         }
 
         return new VerifyNumber(result);
+    }
+
+    @Override
+    public TargetAccount verifyTargetAccount(String bankCode, String accountNumber) {
+        Account account = accountDao.verifyTargetAccount(bankCode, accountNumber);
+        if (account == null) {
+            throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND, "계좌를 다시 확인하여 주십시오.");
+        }
+        Optional<UserInfoRequest> user = userDao.getUserInfo(account.userId());
+
+        if (user.isEmpty()) {
+            throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND, "계좌를 다시 확인하여 주십시오.");
+        }
+
+
+        return new TargetAccount(
+                user.get().name(),
+                bankCode,
+                accountNumber
+        );
     }
 }

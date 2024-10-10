@@ -6,6 +6,7 @@ import com.ssafy11.api.dto.pay.PayHistoryDTO;
 import com.ssafy11.api.exception.ErrorCode;
 import com.ssafy11.api.exception.ErrorException;
 import com.ssafy11.domain.Account.Account;
+import com.ssafy11.domain.Account.PaginatedHistory;
 import com.ssafy11.domain.Pay.PayDao;
 import com.ssafy11.domain.Pay.PayHistory;
 import com.ssafy11.domain.Pay.PayType;
@@ -83,40 +84,36 @@ public class PayServiceImpl implements PayService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<PayHistoryDTO> viewPayHistory(Integer userId, LocalDate startDate, LocalDate endDate, String payType) {
+    public PaginatedHistory<PayHistoryDTO> viewPayHistory(Integer userId, LocalDate startDate, LocalDate endDate, String payType, Integer page, Integer size) {
 
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             throw new ErrorException(ErrorCode.INVALID_DATE_RANGE);
         }
 
-        if (payType != null) {
-            try {
-                PayType valid = PayType.valueOf(payType.toUpperCase());
-                if (valid.equals(PayType.CHARGE)) {
-                    throw new ErrorException(ErrorCode.BadRequest, "유효하지 않은 결제 유형입니다.");
-                }
-            } catch (IllegalArgumentException e) {
-                throw new ErrorException(ErrorCode.BadRequest, "유효하지 않은 결제 유형입니다.");
-            }
-        }
-
-        List<PayHistory> history = payDao.findPayHistory(userId, startDate, endDate, payType);
+        PaginatedHistory<PayHistory> history = payDao.findPayHistory(userId, startDate, endDate, payType, page, size);
 
         if (history == null) {
             throw new ErrorException(ErrorCode.ACCOUNT_NOT_FOUND);
         }
 
-        return history.stream()
-                .map(h -> new PayHistoryDTO(
-                        h.amount(),
-                        h.balanceAfterTransaction(),
-                        h.transactionType(),
-                        h.counterpartyName(),
-                        h.counterpartyAccountNumber(),
-                        h.description(),
-                        h.transactionDate()
-                ))
+        List<PayHistoryDTO> payHistories = history.data().stream()
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
+
+        return new PaginatedHistory<>(payHistories, page, history.totalItemsCount(), history.totalPages());
+    }
+
+    // PayHistory 엔티티를 PayHistoryDTO로 변환하는 메서드
+    private PayHistoryDTO convertToDTO(PayHistory payHistory) {
+        return new PayHistoryDTO(
+                payHistory.amount(),
+                payHistory.balanceAfterTransaction(),
+                payHistory.transactionType(),
+                payHistory.counterpartyName(),
+                payHistory.counterpartyAccountNumber(),
+                payHistory.description(),
+                payHistory.transactionDate()
+        );
     }
 
     @Override

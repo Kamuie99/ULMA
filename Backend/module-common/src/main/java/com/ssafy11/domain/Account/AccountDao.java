@@ -20,7 +20,9 @@ public interface AccountDao {
 
     PayHistory sendMoney(String senderAccountNumber, String info, String targetAccountNumber, Long amount);
     PayHistory chargeBalance(String accountNumber, Long amount);
-    PaginatedHistory findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType, int page, int size);
+    PaginatedHistory<PayHistory> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType, Integer page, Integer size);
 
     String verifyMyAccount(Integer userId, String bankCode, String accountNumber);
+
+    Account verifyTargetAccount(String bankCode, String accountNumber);
 }

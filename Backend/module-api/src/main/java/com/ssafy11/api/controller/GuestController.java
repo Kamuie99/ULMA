@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/guest")
@@ -23,5 +25,12 @@ public class GuestController {
         Assert.notNull(guest, "addGuestResponse must not be null");
         int returnId = guestService.updateGuest(guest, user.getUsername());
         return ResponseEntity.ok(returnId);
+    }
+
+    //지인 정보 조회
+    @GetMapping("/{guestId}")
+    public ResponseEntity<Optional<Guest>> getGuest(@AuthenticationPrincipal User user,
+                                                    @PathVariable("guestId") Integer guestId){
+        return ResponseEntity.ok(guestService.getGuest(guestId, user.getUsername()));
     }
 }

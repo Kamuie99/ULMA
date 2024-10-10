@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
-import { StyleSheet, TouchableOpacity, View, Modal, Text, TouchableWithoutFeedback } from 'react-native';
+import React, {useState} from 'react';
+import {createStackNavigator} from '@react-navigation/stack';
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  Modal,
+  Text,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { colors } from '@/constants';
-import { friendsNavigations } from '@/constants/navigations';
+import {colors} from '@/constants';
+import {friendsNavigations} from '@/constants/navigations';
 
 import FriendsListScreen from '@/screens/Freinds/FriendsListScreen';
 import FriendsHomeScreen from '@/screens/Freinds/FriendsHomeScreen';
@@ -14,7 +21,7 @@ export type freindsStackParamList = {
   [friendsNavigations.FRIENDS_HOME]: undefined;
   [friendsNavigations.FRIENDS_LIST]: undefined;
   [friendsNavigations.FRIENDS_ADD]: undefined;
-  [friendsNavigations.FREINDS_DETAIL]: { guestId: number; isEditing: boolean };
+  [friendsNavigations.FREINDS_DETAIL]: {guestId: number; isEditing: boolean};
 };
 
 const Stack = createStackNavigator<freindsStackParamList>();
@@ -32,7 +39,7 @@ function FriendsStackNavigator() {
 
   const handleEditPress = (navigation, route) => {
     const currentEditing = route.params?.isEditing || false;
-    navigation.setParams({ isEditing: !currentEditing });
+    navigation.setParams({isEditing: !currentEditing});
     setModalVisible(false);
   };
 
@@ -51,18 +58,18 @@ function FriendsStackNavigator() {
           fontWeight: 'bold',
         },
         headerTintColor: colors.BLACK,
-      }}
-    >
+      }}>
       <Stack.Screen
         name={friendsNavigations.FRIENDS_LIST}
         component={FriendsListScreen}
-        options={({ navigation }) => ({
+        options={({navigation}) => ({
           headerTitle: '지인 목록',
           headerRight: () => (
             <TouchableOpacity
-              onPress={() => navigation.navigate(friendsNavigations.FRIENDS_ADD)}
-              style={{ marginRight: 15 }}
-            >
+              onPress={() =>
+                navigation.navigate(friendsNavigations.FRIENDS_ADD)
+              }
+              style={{marginRight: 15}}>
               <Icon name="add" size={24} color={colors.BLACK} />
             </TouchableOpacity>
           ),
@@ -85,14 +92,13 @@ function FriendsStackNavigator() {
       <Stack.Screen
         name={friendsNavigations.FREINDS_DETAIL}
         component={FriendsDetailScreen}
-        options={({ route, navigation }) => ({
+        options={({route, navigation}) => ({
           headerTitle: '거래내역 조회',
           headerRight: () => (
             <View>
               <TouchableOpacity
-                style={{ marginRight: 15 }}
-                onPress={handleOptionsPress}
-              >
+                style={{marginRight: 15}}
+                onPress={handleOptionsPress}>
                 <Icon name="ellipsis-vertical" size={24} color={colors.BLACK} />
               </TouchableOpacity>
 
@@ -100,21 +106,19 @@ function FriendsStackNavigator() {
               <Modal
                 transparent={true}
                 visible={modalVisible}
-                onRequestClose={handleCloseModal}
-              >
+                onRequestClose={handleCloseModal}>
                 <TouchableWithoutFeedback onPress={handleCloseModal}>
                   <View style={styles.modalOverlay} />
                 </TouchableWithoutFeedback>
                 <View style={styles.modalContent}>
                   <TouchableOpacity
                     style={styles.optionButton}
-                    onPress={() => handleEditPress(navigation, route)}
-                  >
+                    onPress={() => handleEditPress(navigation, route)}>
                     <Text style={styles.optionText}>지인 수정</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity style={styles.optionButton}>
+                  {/* <TouchableOpacity style={styles.optionButton}>
                     <Text style={styles.optionText}>추후 개발 예정</Text>
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                 </View>
               </Modal>
             </View>

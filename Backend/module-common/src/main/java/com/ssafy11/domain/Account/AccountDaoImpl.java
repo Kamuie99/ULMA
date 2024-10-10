@@ -61,7 +61,7 @@ public class AccountDaoImpl implements AccountDao {
 
         dsl.update(USERS)
                 .set(USERS.ACCOUNT_NUMBER, accountNumber)
-                .where(USERS.USER_ID.eq(userId))
+                .where(USERS.ID.eq(userId))
                 .execute();
 
         return account;

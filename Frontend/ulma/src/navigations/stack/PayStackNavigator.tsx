@@ -152,10 +152,7 @@ function PayStackNavigator() {
         name={payNavigations.SENDING}
         component={SendingScreen}
         options={{
-          headerTitle: 'Pay 충전하기',
-          headerBackImage: () => {
-            return <Icon name="cross" size={24} color={colors.BLACK} />;
-          },
+          headerTitle: '송금하기',
         }}
       />
       <Stack.Screen

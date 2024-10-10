@@ -1,8 +1,12 @@
 package com.ssafy11.domain.guest;
 
 import static com.ssafy11.ulma.generated.Tables.*;
+
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.springframework.stereotype.Repository;
@@ -44,5 +48,16 @@ public class GuestDaoImpl implements GuestDao {
                 .where(GUEST.ID.eq(guestId))
                 .fetchOne(GUEST.PHONE_NUMBER);
     }
+
+    @Override
+    public Optional<Guest> getGuestById(Integer guestId) {
+        return Optional.ofNullable(
+                dsl.select(GUEST.ID, GUEST.NAME, GUEST.CATEGORY, GUEST.PHONE_NUMBER)
+                        .from(GUEST)
+                        .where(GUEST.ID.eq(guestId))
+                        .fetchOneInto(Guest.class)
+        );
+    }
+
 
 }

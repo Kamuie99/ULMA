@@ -47,6 +47,7 @@ const ScheduleAddScreen = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const [recommAmount, setRecommAmount] = useState('');
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -157,6 +158,53 @@ const ScheduleAddScreen = () => {
     }
   };
 
+  const handleFocus = async () => {
+    let category, history;
+
+    try {
+      // 참가자 카테고리 가져오기
+      const categoryResponse = await axiosInstance.get(
+        `/participant/${selectedUser.guestId}`,
+      );
+      console.log(categoryResponse.data);
+      console.log(selectedUser.guestId);
+      category = categoryResponse.guestCategory;
+    } catch (error) {
+      console.error('참가자 카테고리 데이터 받아오기 실패:', error);
+      return;
+    }
+
+    try {
+      const historyResponse = await axiosInstance.get(
+        `/participant/${selectedUser.guestId}`,
+      );
+      console.log(historyResponse.data.data);
+      history = historyResponse.data.data;
+    } catch (error) {
+      console.error('경조사비 내역 데이터 받아오기 실패:', error);
+      return;
+    }
+
+    try {
+      // AI 경조사비 추천 요청
+      const response = await axiosInstance.get('/events/ai/recommend/money', {
+        params: {
+          gptQuotes: `경조사비 추천해줘. 
+          ${name} 행사가 예정되어 있어.
+          그 사람과의 관계는 ${category}이고, 최근 주고 받은 경조사비 내역은 다음과 같아. ${history}`,
+        },
+      });
+
+      console.log(response);
+      setRecommAmount(response.data);
+    } catch (error) {
+      console.log(`경조사비 추천해줘. 
+          ${name} 행사가 예정되어 있어.
+          그 사람과의 관계는 ${category}이고, 최근 주고 받은 경조사비 내역은 다음과 같아. ${history}`);
+      console.error('AI 경조사비 추천 데이터 받아오기 실패:', error);
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -257,16 +305,22 @@ const ScheduleAddScreen = () => {
                 onChangeText={handlePaidAmountChange}
                 keyboardType="numeric"
                 editable={!isPaidUndefined}
+                onFocus={handleFocus}
               />
               <View style={styles.checkboxContainer}>
                 <CheckBox
                   value={isPaidUndefined}
                   onValueChange={setIsPaidUndefined}
-                  tintColors={{true: colors.GREEN_700, false: colors.GRAY_500}}
+                  tintColors={{true: colors.GREEN_700, false: colors.GRAY_300}}
                 />
                 <Text style={styles.checkboxLabel}>아직</Text>
               </View>
             </View>
+            {recommAmount && (
+              <Text style={styles.recomment}>
+                AI 생각에는 {recommAmount} 원이 적절해보여요!
+              </Text>
+            )}
           </View>
         </View>
 
@@ -370,6 +424,11 @@ const styles = StyleSheet.create({
   },
   disabledInput: {
     backgroundColor: colors.GRAY_100,
+  },
+  recomment: {
+    margin: 5,
+    color: colors.PINK,
+    fontWeight: 'bold',
   },
 });
 

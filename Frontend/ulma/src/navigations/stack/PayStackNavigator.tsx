@@ -26,19 +26,15 @@ import AccountVerifyScreen from '@/screens/Pay/AccountVerifyScreen';
 import AccountDetailScreen from '@/screens/Pay/AccountDetailScreen';
 import ExcelScreen from '@/screens/Events/ExcelScreen';
 import {DocumentPickerResponse} from 'react-native-document-picker';
-// import AccounthistoryScreen from '@/screens/Pay/AccounthistoryScreen';
-// import InputAmountScreen from '@/screens/Pay/InputAmountScreen';
-// import FriendsearchScreen from '@/screens/Pay/FriendsearchScreen';
 import SendingScreen from '@/screens/Pay/SendingScreen';
 import {StackScreenProps} from '@react-navigation/stack';
+import TFAScreen from '@/screens/Pay/TFAScreen';
 
 export type payStackParamList = {
   [payNavigations.HOME]: undefined;
-  // [payNavigations.ACCOUNT_HISTORY]: undefined;
   [payNavigations.ACCOUNT_INPUT]: undefined;
   [payNavigations.ADD_HISTORY]: undefined;
   [payNavigations.CHARGER_RESULT]: undefined;
-  // [payNavigations.FRIEND_SEARCH]: undefined;
   [payNavigations.FRIENDHSHIP_SECLECT]: undefined;
   [payNavigations.PAY_LIST]: undefined;
   [payNavigations.PAY_RECHARGE]: undefined;
@@ -52,6 +48,7 @@ export type payStackParamList = {
   [payNavigations.ACCOUNT_VERIFY]: {verifyNumber: number};
   [payNavigations.ACCOUNT_DETAIL]: {accountNumber: string; bankCode: string};
   [payNavigations.EXCEL_SCREEN]: {file?: DocumentPickerResponse};
+  [payNavigations.TFA]: undefined;
 };
 
 const Stack = createStackNavigator<payStackParamList>();
@@ -209,6 +206,13 @@ function PayStackNavigator() {
         options={{
           headerTitle: '엑셀 파일 등록',
           headerStyle: {backgroundColor: colors.LIGHTGRAY},
+        }}
+      />
+      <Stack.Screen
+        name={payNavigations.TFA}
+        component={TFAScreen}
+        options={{
+          headerTitle: '2차 비밀번호 입력',
         }}
       />
     </Stack.Navigator>

@@ -19,12 +19,16 @@ import Toast from 'react-native-toast-message';
 import {banks} from '@/constants/banks';
 import Icon from 'react-native-vector-icons/Entypo';
 import axiosInstance from '@/api/axios';
+import AwesomeAlert from 'react-native-awesome-alerts';
 
 function SendAccountScreen() {
   const navigation = useNavigation();
   const [targetAccountNumber, setTargetAccountNumber] = useState('');
   const [selectedBank, setSelectedBank] = useState(''); // 선택된 은행
   const [isModalVisible, setModalVisible] = useState(false); // 모달 가시성
+  const [showAlert, setShowAlert] = useState(false); // 상태 초기화
+  const [alertTitle, setAlertTitle] = useState(''); // 알림 제목 상태
+  const [alertMessage, setAlertMessage] = useState(''); // 알림 메시지 상태
 
   // 은행 선택 핸들러
   const selectBank = bankName => {
@@ -55,25 +59,35 @@ function SendAccountScreen() {
       const response = await axiosInstance.post(
         '/users/account/target-verify',
         {
-          bank: selectedBank,
+          bankCode: selectedBank,
           accountNumber: targetAccountNumber,
         },
       );
 
       if (response.status === 200) {
         // 성공적으로 요청이 완료되면 화면 이동
-        navigation.navigate(payNavigations.SENDING, {
-          targetAccountNumber: targetAccountNumber,
-          selectedBank: selectedBank,
-        });
+        setAlertTitle('성공');
+        setAlertMessage(`${response.data.userName} 님께 송금하시겠습니까?`);
+        setShowAlert(true);
       }
     } catch (error) {
       console.error('에러 발생:', error);
+      console.log(selectedBank);
+      console.log(targetAccountNumber);
       Toast.show({
         text1: '계좌번호를 확인해주세요.',
         type: 'error',
       });
     }
+  };
+
+  const handleAlertConfirm = () => {
+    setShowAlert(false); // 모달 숨기기
+    // 확인 버튼을 누르면 이동
+    navigation.navigate(payNavigations.SENDING, {
+      targetAccountNumber: targetAccountNumber,
+      selectedBank: selectedBank,
+    });
   };
 
   return (
@@ -115,8 +129,7 @@ function SendAccountScreen() {
         label="확인"
         variant="outlined"
         onPress={handlePress}
-        size="large"
-        posY={30}
+        size="full"
       />
 
       {/* 은행 선택 모달 */}
@@ -146,6 +159,24 @@ function SendAccountScreen() {
           </View>
         </TouchableOpacity>
       </Modal>
+      <AwesomeAlert
+        show={showAlert}
+        showProgress={false}
+        title={alertTitle}
+        message={alertMessage}
+        closeOnTouchOutside={false}
+        closeOnHardwareBackPress={false}
+        showConfirmButton={true}
+        showCancelButton={true}
+        confirmText="확인"
+        cancelText="취소"
+        confirmButtonColor={colors.LIGHTPINK}
+        confirmButtonTextStyle={{color: colors.BLACK}}
+        cancelButtonColor={colors.WHITE}
+        cancelButtonTextStyle={{color: colors.GRAY_700}}
+        onConfirmPressed={handleAlertConfirm}
+        onCancelPressed={() => setShowAlert(false)}
+      />
     </KeyboardAvoidingView>
   );
 }
@@ -154,16 +185,23 @@ function SendAccountScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.WHITE,
+    backgroundColor: colors.LIGHTGRAY,
     paddingHorizontal: 20,
     justifyContent: 'space-between',
   },
   contentContainer: {
-    backgroundColor: colors.LIGHTGRAY,
+    backgroundColor: colors.WHITE,
     borderRadius: 10,
     paddingTop: 50,
-    flex: 1,
+    paddingBottom: 60,
+    // flex: 1,
     marginVertical: 10,
+    // 그림자
+    shadowColor: colors.BLACK,
+    shadowOffset: {width: 0, height: 0},
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
   },
   bankSelectButton: {
     paddingVertical: 15,

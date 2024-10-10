@@ -33,6 +33,7 @@ function SendresultScreen({navigation}) {
       <CustomButton
         variant="outlined"
         label="확인"
+        posY={30}
         onPress={() => navigation.navigate(payNavigations.HOME)}
       />
     </View>

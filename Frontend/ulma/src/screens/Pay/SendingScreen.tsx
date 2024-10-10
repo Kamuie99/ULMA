@@ -1,4 +1,3 @@
-//송금금액 입력 페이지
 import React, {useEffect, useState} from 'react';
 import {
   View,
@@ -73,6 +72,11 @@ function SendingScreen({route}: SendingScreenProps) {
     }
   };
 
+  const handleAmountIncrement = (increment: number) => {
+    const currentAmount = parseInt(amount || '0', 10);
+    setAmount((currentAmount + increment).toString());
+  };
+
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       {/* 금액 입력 및 추천 버튼 */}
@@ -93,6 +97,24 @@ function SendingScreen({route}: SendingScreenProps) {
           <Text style={styles.currencyText}>원</Text>
         </View>
 
+        {/* +10,000, +50,000, +100,000 버튼 */}
+        <View style={styles.amountButtonsContainer}>
+          <TouchableOpacity
+            style={styles.amountButton}
+            onPress={() => handleAmountIncrement(10000)}>
+            <Text style={styles.amountButtonText}>+ 10,000 원</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.amountButton}
+            onPress={() => handleAmountIncrement(50000)}>
+            <Text style={styles.amountButtonText}>+ 50,000 원</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.amountButton}
+            onPress={() => handleAmountIncrement(100000)}>
+            <Text style={styles.amountButtonText}>+ 100,000 원</Text>
+          </TouchableOpacity>
+        </View>
         {/* 추천 액수 받기 섹션 */}
         <TouchableOpacity
           style={styles.recommendationBox}
@@ -147,6 +169,24 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: colors.GRAY_700,
     marginLeft: 10,
+  },
+  amountButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 20,
+    marginHorizontal: 20,
+  },
+  amountButton: {
+    backgroundColor: colors.WHITE,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: colors.GRAY_300,
+  },
+  amountButtonText: {
+    fontSize: 14,
+    color: colors.GRAY_700,
   },
   recommendationBox: {
     backgroundColor: 'white',

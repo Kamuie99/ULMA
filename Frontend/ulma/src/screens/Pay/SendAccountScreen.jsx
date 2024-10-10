@@ -55,7 +55,7 @@ function SendAccountScreen() {
       const response = await axiosInstance.post(
         '/users/account/target-verify',
         {
-          bank: selectedBank,
+          bankCode: selectedBank,
           accountNumber: targetAccountNumber,
         },
       );
@@ -69,6 +69,8 @@ function SendAccountScreen() {
       }
     } catch (error) {
       console.error('에러 발생:', error);
+      console.log(selectedBank);
+      console.log(targetAccountNumber);
       Toast.show({
         text1: '계좌번호를 확인해주세요.',
         type: 'error',
@@ -115,8 +117,7 @@ function SendAccountScreen() {
         label="확인"
         variant="outlined"
         onPress={handlePress}
-        size="large"
-        posY={30}
+        size="full"
       />
 
       {/* 은행 선택 모달 */}
@@ -154,16 +155,23 @@ function SendAccountScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.WHITE,
+    backgroundColor: colors.LIGHTGRAY,
     paddingHorizontal: 20,
     justifyContent: 'space-between',
   },
   contentContainer: {
-    backgroundColor: colors.LIGHTGRAY,
+    backgroundColor: colors.WHITE,
     borderRadius: 10,
     paddingTop: 50,
-    flex: 1,
+    paddingBottom: 60,
+    // flex: 1,
     marginVertical: 10,
+    // 그림자
+    shadowColor: colors.BLACK,
+    shadowOffset: {width: 0, height: 0},
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
   },
   bankSelectButton: {
     paddingVertical: 15,

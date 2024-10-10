@@ -77,7 +77,9 @@ function SendingScreen({route}: SendingScreenProps) {
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       {/* 금액 입력 및 추천 버튼 */}
       <View style={styles.contentContainer}>
-        <TitleTextField frontLabel="금액을 입력해주세요" />
+        <View style={{marginLeft: 20}}>
+          <TitleTextField frontLabel="금액을 입력해주세요" />
+        </View>
 
         {/* 금액 입력 박스 */}
         <View style={styles.amountContainer}>
@@ -97,9 +99,8 @@ function SendingScreen({route}: SendingScreenProps) {
           onPress={() => navigation.navigate(payNavigations.RECOMMEND_OPTION)}>
           <Image source={require('@/assets/Pay/RecommBtn.png')} />
         </TouchableOpacity>
-
-        <CustomButton label="송금하기" onPress={handleSendMoney} />
       </View>
+      <CustomButton label="송금하기" onPress={handleSendMoney} size="full" />
     </KeyboardAvoidingView>
   );
 }
@@ -108,16 +109,22 @@ function SendingScreen({route}: SendingScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.WHITE,
+    backgroundColor: colors.LIGHTGRAY,
     paddingHorizontal: 20,
     justifyContent: 'space-between',
   },
   contentContainer: {
-    backgroundColor: colors.LIGHTGRAY,
+    backgroundColor: colors.WHITE,
     borderRadius: 10,
-    paddingTop: 50,
-    flex: 1,
+    paddingVertical: 50,
+    // flex: 1,
     marginVertical: 10,
+    // 그림자
+    shadowColor: colors.BLACK,
+    shadowOffset: {width: 0, height: 0},
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
   },
   amountContainer: {
     flexDirection: 'row',
@@ -144,7 +151,7 @@ const styles = StyleSheet.create({
   recommendationBox: {
     backgroundColor: 'white',
     borderRadius: 8,
-    marginTop: 15,
+    marginTop: 20,
     shadowColor: colors.BLACK,
     shadowOpacity: 0.1,
     elevation: 3,

@@ -45,7 +45,7 @@ function AccountInfoScreen() {
           text1: '지문 인증에 실패했습니다.',
           type: 'error',
         });
-        navigation.navigate(payNavigations.TFA); // 인증 실패 시 화면 나가기
+        navigation.navigate(payNavigations.TFA);
       });
   }, []);
 
@@ -105,11 +105,7 @@ function AccountInfoScreen() {
   };
 
   if (!isAuthenticated) {
-    return (
-      <View style={styles.container}>
-        <Text>인증 중...</Text>
-      </View>
-    ); // 인증 중일 때 표시할 화면
+    return <View style={styles.container}></View>; // 인증 중일 때 표시할 화면
   }
 
   return (

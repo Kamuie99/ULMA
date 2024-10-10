@@ -50,9 +50,16 @@ function HomeStackNavigator() {
       <Stack.Screen
         name={homeNavigations.SCHEDULE_ADD}
         component={ScheduleAddScreen}
-        options={{
+        options={({navigation}) => ({
           headerTitle: '경조사 일정 추가',
-        }}
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => navigation.navigate(homeNavigations.IMAGE_OCR)}
+              style={{marginRight: 15}}>
+              <Icon name="camera" size={24} color={colors.BLACK} />
+            </TouchableOpacity>
+          ),
+        })}
       />
       <Stack.Screen
         name={homeNavigations.SELECT_FRIEND}

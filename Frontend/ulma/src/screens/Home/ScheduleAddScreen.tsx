@@ -13,21 +13,35 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CheckBox from '@react-native-community/checkbox';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import axiosInstance from '@/api/axios';
 import {homeNavigations} from '@/constants/navigations';
 import {colors} from '@/constants';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomButton from '@/components/common/CustomButton';
 import Toast from 'react-native-toast-message';
+import useEventStore from '@/store/useEventStore';
 
 const ScheduleAddScreen = () => {
   const navigation = useNavigation();
+  const {newEventInfo, setNewEventInfo} = useEventStore();
   const route = useRoute();
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(
+    newEventInfo && newEventInfo.guestId && newEventInfo.name
+      ? {guestId: newEventInfo.guestId, name: newEventInfo.name}
+      : null,
+  );
   const [name, setName] = useState('');
-  const [date, setDate] = useState(new Date());
-  const [time, setTime] = useState(new Date());
+  const [date, setDate] = useState(
+    newEventInfo?.date ? new Date(newEventInfo.date) : new Date(),
+  );
+  const [time, setTime] = useState(
+    newEventInfo?.time ? new Date(newEventInfo.time) : new Date(),
+  );
   const [paidAmount, setPaidAmount] = useState('');
   const [isPaidUndefined, setIsPaidUndefined] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -55,14 +69,34 @@ const ScheduleAddScreen = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (
-      route.params?.selectedUser &&
-      selectedUser !== route.params.selectedUser
-    ) {
-      setSelectedUser(route.params.selectedUser);
-    }
-  }, [route.params, selectedUser]);
+  useFocusEffect(
+    React.useCallback(() => {
+      // newEventInfo에 있는 정보를 이용하여 컴포넌트 상태를 업데이트
+      if (newEventInfo && newEventInfo.guestId && newEventInfo.name) {
+        setSelectedUser({id: newEventInfo.guestId, name: newEventInfo.name});
+      }
+
+      if (newEventInfo?.date) {
+        setDate(new Date(newEventInfo.date));
+      }
+
+      if (newEventInfo?.time) {
+        setTime(new Date(newEventInfo.time));
+      }
+
+      // 경로 파라미터에서 선택된 사용자 정보 업데이트
+      if (
+        route.params?.selectedUser &&
+        selectedUser !== route.params.selectedUser
+      ) {
+        setSelectedUser(route.params.selectedUser);
+      }
+
+      return () => {
+        // 필요에 따라 클린업 로직을 추가할 수 있습니다.
+      };
+    }, [route.params, selectedUser, newEventInfo]), // newEventInfo를 의존성 배열에 추가
+  );
 
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -112,6 +146,7 @@ const ScheduleAddScreen = () => {
           : -Math.abs(parseInt(paidAmount.replace(/,/g, ''))),
         name,
       });
+      setNewEventInfo(null, null, null, null);
       navigation.goBack();
     } catch (error) {
       console.error('경조사 추가 실패:', error);
@@ -237,13 +272,7 @@ const ScheduleAddScreen = () => {
 
         {!isKeyboardVisible && (
           <>
-            <CustomButton label="추가하기" onPress={addSchedule} posY={100} />
-            <CustomButton
-              label="이미지 입력하기"
-              variant="outlined"
-              posY={40}
-              onPress={() => navigation.navigate(homeNavigations.IMAGE_OCR)}
-            />
+            <CustomButton label="추가하기" onPress={addSchedule} posY={30} />
           </>
         )}
       </ScrollView>
@@ -264,7 +293,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 20,
     margin: 16,
-    shadowColor: '#000',
+    shadowColor: colors.BLACK,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,

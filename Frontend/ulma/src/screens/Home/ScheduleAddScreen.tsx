@@ -164,11 +164,10 @@ const ScheduleAddScreen = () => {
     try {
       // 참가자 카테고리 가져오기
       const categoryResponse = await axiosInstance.get(
-        `/participant/${selectedUser.guestId}`,
+        `/guest/${selectedUser.guestId}`,
       );
-      console.log(categoryResponse.data);
-      console.log(selectedUser.guestId);
-      category = categoryResponse.guestCategory;
+      // console.log(categoryResponse.data.guestCategory);
+      category = categoryResponse.data.guestCategory;
     } catch (error) {
       console.error('참가자 카테고리 데이터 받아오기 실패:', error);
       return;
@@ -176,10 +175,11 @@ const ScheduleAddScreen = () => {
 
     try {
       const historyResponse = await axiosInstance.get(
-        `/participant/${selectedUser.guestId}`,
+        `/participant/summary/${selectedUser.guestId}`,
       );
-      console.log(historyResponse.data.data);
-      history = historyResponse.data.data;
+      // console.log('히스토리: ', historyResponse.data);
+      history = historyResponse.data;
+      console.log(history);
     } catch (error) {
       console.error('경조사비 내역 데이터 받아오기 실패:', error);
       return;
@@ -187,20 +187,18 @@ const ScheduleAddScreen = () => {
 
     try {
       // AI 경조사비 추천 요청
-      const response = await axiosInstance.get('/events/ai/recommend/money', {
+      const response = await axiosInstance.post('/events/ai/recommend/money', {
         params: {
           gptQuotes: `경조사비 추천해줘. 
           ${name} 행사가 예정되어 있어.
-          그 사람과의 관계는 ${category}이고, 최근 주고 받은 경조사비 내역은 다음과 같아. ${history}`,
+          주최자와의 관계는 ${category}이고, 최근 주고 받은 경조사비 내역은 다음과 같아. 
+          내가 주최자에게 준 돈은 ${history.totalGiven}이고 받은 돈은 ${history.totalReceived}이야.`,
         },
       });
 
       console.log(response);
       setRecommAmount(response.data);
     } catch (error) {
-      console.log(`경조사비 추천해줘. 
-          ${name} 행사가 예정되어 있어.
-          그 사람과의 관계는 ${category}이고, 최근 주고 받은 경조사비 내역은 다음과 같아. ${history}`);
       console.error('AI 경조사비 추천 데이터 받아오기 실패:', error);
     }
   };

@@ -84,3 +84,22 @@ CREATE TABLE payHistory (
                             transaction_date TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                             FOREIGN KEY (account_id) REFERENCES account(id)
 );
+
+CREATE TABLE users_auth (
+                            id INT not null ,
+                            password varchar(255)
+);
+
+CREATE TABLE payment_analysis (
+                                  `id` int NOT NULL AUTO_INCREMENT,
+                                  `under_50k_ratio` decimal(5,1) NOT NULL,
+                                  `between_50k_100k_ratio` decimal(5,1) NOT NULL,
+                                  `between_100k_150k_ratio` decimal(5,1) NOT NULL,
+                                  `above_150k_ratio` decimal(5,1) NOT NULL,
+                                  `min_amount` decimal(10,1) NOT NULL,
+                                  `max_amount` decimal(10,1) NOT NULL,
+                                  `top_amount` decimal(10,1) NOT NULL,
+                                  `category` varchar(45) NOT NULL,
+                                  `create_at` varchar(45) NOT NULL,
+                                  PRIMARY KEY (`id`)
+);

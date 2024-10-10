@@ -89,7 +89,7 @@ public class GptService implements ChatService{
     }
 
     private String extractAmount(String content) { //00만원 형식으로 파싱
-        Pattern pattern = Pattern.compile("(\\d+)\\s*만원", Pattern.CANON_EQ);
+        Pattern pattern = Pattern.compile("(\\d{1,3}(?:,\\d{3})*|\\d{1,3})\\s*(만원|원)", Pattern.CANON_EQ);
         Matcher matcher = pattern.matcher(content);
 
         if (matcher.find()) {

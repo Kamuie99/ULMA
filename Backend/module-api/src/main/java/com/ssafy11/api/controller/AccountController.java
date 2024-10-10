@@ -115,10 +115,10 @@ public class AccountController {
     }
 
     @PostMapping("/users/account/target-verify")
-    public ResponseEntity<Account> verifyTargetAccount(
+    public ResponseEntity<TargetAccount> verifyTargetAccount(
             @RequestBody AccountConnectRequest request
     ) {
-        Account account = accountService.verifyTargetAccount(request.bankCode(), request.accountNumber());
-        return ResponseEntity.ok(account);
+        TargetAccount targetAccount = accountService.verifyTargetAccount(request.bankCode(), request.accountNumber());
+        return ResponseEntity.ok(targetAccount);
     }
 }

@@ -1,5 +1,6 @@
 package com.ssafy11.api.service;
 
+import com.ssafy11.api.dto.account.TargetAccount;
 import com.ssafy11.api.dto.account.VerifyNumber;
 import com.ssafy11.api.dto.pay.PayHistoryDTO;
 import com.ssafy11.domain.Account.Account;
@@ -20,5 +21,5 @@ public interface AccountService {
     PayHistoryDTO sendMoney(String senderAccountNumber, String info, String targetAccountNumber, Long amount);
     PaginatedHistory<PayHistory> findPayHistory(String accountNumber, LocalDate startDate, LocalDate endDate, String payType, Integer page, Integer size);
     VerifyNumber verifyMyAccount(Integer userId, String bankCode, String accountNumber);
-    Account verifyTargetAccount(String bankCode, String accountNumber);
+    TargetAccount verifyTargetAccount(String bankCode, String accountNumber);
 }

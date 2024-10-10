@@ -13,26 +13,41 @@ import {
 } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CheckBox from '@react-native-community/checkbox';
-import {useNavigation, useRoute} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import axiosInstance from '@/api/axios';
 import {homeNavigations} from '@/constants/navigations';
 import {colors} from '@/constants';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import CustomButton from '@/components/common/CustomButton';
 import Toast from 'react-native-toast-message';
+import useEventStore from '@/store/useEventStore';
 
 const ScheduleAddScreen = () => {
   const navigation = useNavigation();
+  const {newEventInfo, setNewEventInfo} = useEventStore();
   const route = useRoute();
-  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(
+    newEventInfo && newEventInfo.guestId && newEventInfo.name
+      ? {guestId: newEventInfo.guestId, name: newEventInfo.name}
+      : null,
+  );
   const [name, setName] = useState('');
-  const [date, setDate] = useState(new Date());
-  const [time, setTime] = useState(new Date());
+  const [date, setDate] = useState(
+    newEventInfo?.date ? new Date(newEventInfo.date) : new Date(),
+  );
+  const [time, setTime] = useState(
+    newEventInfo?.time ? new Date(newEventInfo.time) : new Date(),
+  );
   const [paidAmount, setPaidAmount] = useState('');
   const [isPaidUndefined, setIsPaidUndefined] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  const [recommAmount, setRecommAmount] = useState('');
 
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
@@ -55,14 +70,34 @@ const ScheduleAddScreen = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (
-      route.params?.selectedUser &&
-      selectedUser !== route.params.selectedUser
-    ) {
-      setSelectedUser(route.params.selectedUser);
-    }
-  }, [route.params, selectedUser]);
+  useFocusEffect(
+    React.useCallback(() => {
+      // newEventInfo에 있는 정보를 이용하여 컴포넌트 상태를 업데이트
+      if (newEventInfo && newEventInfo.guestId && newEventInfo.name) {
+        setSelectedUser({id: newEventInfo.guestId, name: newEventInfo.name});
+      }
+
+      if (newEventInfo?.date) {
+        setDate(new Date(newEventInfo.date));
+      }
+
+      if (newEventInfo?.time) {
+        setTime(new Date(newEventInfo.time));
+      }
+
+      // 경로 파라미터에서 선택된 사용자 정보 업데이트
+      if (
+        route.params?.selectedUser &&
+        selectedUser !== route.params.selectedUser
+      ) {
+        setSelectedUser(route.params.selectedUser);
+      }
+
+      return () => {
+        // 필요에 따라 클린업 로직을 추가할 수 있습니다.
+      };
+    }, [route.params, selectedUser, newEventInfo]), // newEventInfo를 의존성 배열에 추가
+  );
 
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -112,6 +147,7 @@ const ScheduleAddScreen = () => {
           : -Math.abs(parseInt(paidAmount.replace(/,/g, ''))),
         name,
       });
+      setNewEventInfo(null, null, null, null);
       navigation.goBack();
     } catch (error) {
       console.error('경조사 추가 실패:', error);
@@ -119,6 +155,53 @@ const ScheduleAddScreen = () => {
         text1: '추가에 실패하였습니다.',
         type: 'error',
       });
+    }
+  };
+
+  const handleFocus = async () => {
+    let category, history;
+
+    try {
+      // 참가자 카테고리 가져오기
+      const categoryResponse = await axiosInstance.get(
+        `/participant/${selectedUser.guestId}`,
+      );
+      console.log(categoryResponse.data);
+      console.log(selectedUser.guestId);
+      category = categoryResponse.guestCategory;
+    } catch (error) {
+      console.error('참가자 카테고리 데이터 받아오기 실패:', error);
+      return;
+    }
+
+    try {
+      const historyResponse = await axiosInstance.get(
+        `/participant/${selectedUser.guestId}`,
+      );
+      console.log(historyResponse.data.data);
+      history = historyResponse.data.data;
+    } catch (error) {
+      console.error('경조사비 내역 데이터 받아오기 실패:', error);
+      return;
+    }
+
+    try {
+      // AI 경조사비 추천 요청
+      const response = await axiosInstance.get('/events/ai/recommend/money', {
+        params: {
+          gptQuotes: `경조사비 추천해줘. 
+          ${name} 행사가 예정되어 있어.
+          그 사람과의 관계는 ${category}이고, 최근 주고 받은 경조사비 내역은 다음과 같아. ${history}`,
+        },
+      });
+
+      console.log(response);
+      setRecommAmount(response.data);
+    } catch (error) {
+      console.log(`경조사비 추천해줘. 
+          ${name} 행사가 예정되어 있어.
+          그 사람과의 관계는 ${category}이고, 최근 주고 받은 경조사비 내역은 다음과 같아. ${history}`);
+      console.error('AI 경조사비 추천 데이터 받아오기 실패:', error);
     }
   };
 
@@ -222,28 +305,28 @@ const ScheduleAddScreen = () => {
                 onChangeText={handlePaidAmountChange}
                 keyboardType="numeric"
                 editable={!isPaidUndefined}
+                onFocus={handleFocus}
               />
               <View style={styles.checkboxContainer}>
                 <CheckBox
                   value={isPaidUndefined}
                   onValueChange={setIsPaidUndefined}
-                  tintColors={{true: colors.GREEN_700, false: colors.GRAY_500}}
+                  tintColors={{true: colors.GREEN_700, false: colors.GRAY_300}}
                 />
                 <Text style={styles.checkboxLabel}>아직</Text>
               </View>
             </View>
+            {recommAmount && (
+              <Text style={styles.recomment}>
+                AI 생각에는 {recommAmount} 원이 적절해보여요!
+              </Text>
+            )}
           </View>
         </View>
 
         {!isKeyboardVisible && (
           <>
-            <CustomButton label="추가하기" onPress={addSchedule} posY={100} />
-            <CustomButton
-              label="이미지 입력하기"
-              variant="outlined"
-              posY={40}
-              onPress={() => navigation.navigate(homeNavigations.IMAGE_OCR)}
-            />
+            <CustomButton label="추가하기" onPress={addSchedule} posY={30} />
           </>
         )}
       </ScrollView>
@@ -264,7 +347,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     padding: 20,
     margin: 16,
-    shadowColor: '#000',
+    shadowColor: colors.BLACK,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -341,6 +424,11 @@ const styles = StyleSheet.create({
   },
   disabledInput: {
     backgroundColor: colors.GRAY_100,
+  },
+  recomment: {
+    margin: 5,
+    color: colors.PINK,
+    fontWeight: 'bold',
   },
 });
 

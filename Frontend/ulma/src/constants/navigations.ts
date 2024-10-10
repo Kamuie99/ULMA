@@ -31,13 +31,11 @@ const eventNavigations = {
 
 const payNavigations = {
   HOME: 'PayHome',
-  // ACCOUNT_HISTORY: 'Accounthistory',
   ACCOUNT_INPUT: 'Accountinput',
   ADD_HISTORY: 'Addhistory',
   CHARGER_RESULT: 'Chargerresult',
   PAY_LIST: 'Paylist',
   PAY_RECHARGE: 'Payrecharge',
-  // FRIEND_SEARCH: 'Friendsearch',
   FRIENDHSHIP_SECLECT: 'Friendshipselect',
   RECOMMEND_OPTION: 'RecommendOption',
   SENDING: 'Sending',
@@ -49,6 +47,7 @@ const payNavigations = {
   ACCOUNT_VERIFY: 'AccountVerify',
   ACCOUNT_DETAIL: 'AccountDetail',
   EXCEL_SCREEN: 'ExcelScreen',
+  TFA: 'TFA',
 } as const;
 
 const mypageNavigations = {

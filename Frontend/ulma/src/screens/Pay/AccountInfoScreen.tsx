@@ -9,9 +9,10 @@ import {useNavigation} from '@react-navigation/native';
 import {ScrollView} from 'react-native-gesture-handler';
 import usePayStore from '@/store/usePayStore';
 import Toast from 'react-native-toast-message';
-import {payNavigations} from '@/constants/navigations'; // payNavigations import 추가
+import {payNavigations} from '@/constants/navigations';
 import {payStackParamList} from '@/navigations/stack/PayStackNavigator';
 import {bankColors} from '@/constants/bankColors';
+import TouchID from 'react-native-touch-id'; // Touch ID 라이브러리 추가
 
 function AccountInfoScreen() {
   const navigation = useNavigation();
@@ -19,15 +20,39 @@ function AccountInfoScreen() {
   const {accessToken} = useAuthStore();
   const [accountInfo, setAccountInfo] = useState([]);
   const [selectedAccount, setSelectedAccount] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // 지문 인증 상태
+
+  // Touch ID 설정
+  const optionalConfigObject = {
+    title: '인증 필요', // 다이얼로그 제목
+    color: colors.BLACK, // Android에서 지문 아이콘 색상
+    fallbackLabel: '비밀번호 입력', // 인증 실패 시 대체 텍스트
+  };
+
+  // 지문 인증 로직
+  useEffect(() => {
+    TouchID.authenticate(
+      '계좌 정보를 확인하기 위해 인증이 필요합니다.',
+      optionalConfigObject,
+    )
+      .then(success => {
+        setIsAuthenticated(true); // 인증 성공 시
+        navigation.navigate(payNavigations.ACCOUNT_INFO);
+      })
+      .catch(error => {
+        console.log('지문 인증 실패:', error);
+        Toast.show({
+          text1: '지문 인증에 실패했습니다.',
+          type: 'error',
+        });
+        navigation.navigate(payNavigations.TFA); // 인증 실패 시 화면 나가기
+      });
+  }, []);
 
   useEffect(() => {
     const fetchAccountInfo = async () => {
       try {
-        const response = await axiosInstance.get('/users/account', {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
+        const response = await axiosInstance.get('/users/account');
         setAccountInfo(response.data);
 
         // Zustand에서 가져온 accountNumber와 일치하는 계좌를 selectedAccount로 설정
@@ -43,8 +68,10 @@ function AccountInfoScreen() {
       }
     };
 
-    fetchAccountInfo();
-  }, [accessToken, accountNumber]); // accountNumber가 바뀌면 다시 실행
+    if (isAuthenticated) {
+      fetchAccountInfo(); // 인증 후 계좌 정보 불러오기
+    }
+  }, [accessToken, accountNumber, isAuthenticated]); // accountNumber가 바뀌면 다시 실행
 
   const handleSelectAccount = account => {
     setSelectedAccount({
@@ -76,6 +103,15 @@ function AccountInfoScreen() {
       console.error('작업 수행 중 에러가 발생했습니다:', error);
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <View style={styles.container}>
+        <Text>인증 중...</Text>
+      </View>
+    ); // 인증 중일 때 표시할 화면
+  }
+
   return (
     <View style={styles.container}>
       {accountInfo.length > 0 ? (
@@ -88,10 +124,6 @@ function AccountInfoScreen() {
                   styles.accountItemContainer,
                   selectedAccount?.accountNumber === account.accountNumber
                     ? {
-                        // backgroundColor: hexToRgba(
-                        //   bankColors[account.bankCode],
-                        //   1,
-                        // ),
                         backgroundColor: colors.YELLOW,
                       }
                     : {},
@@ -183,7 +215,6 @@ const styles = StyleSheet.create({
   },
   balance: {
     fontSize: 16,
-    // textAlign: 'right',
   },
 });
 

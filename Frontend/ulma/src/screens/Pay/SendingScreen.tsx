@@ -1,4 +1,3 @@
-//송금금액 입력 페이지
 import React, {useEffect, useState} from 'react';
 import {
   View,
@@ -73,11 +72,18 @@ function SendingScreen({route}: SendingScreenProps) {
     }
   };
 
+  const handleAmountIncrement = (increment: number) => {
+    const currentAmount = parseInt(amount || '0', 10);
+    setAmount((currentAmount + increment).toString());
+  };
+
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
       {/* 금액 입력 및 추천 버튼 */}
       <View style={styles.contentContainer}>
-        <TitleTextField frontLabel="금액을 입력해주세요" />
+        <View style={{marginLeft: 20}}>
+          <TitleTextField frontLabel="금액을 입력해주세요" />
+        </View>
 
         {/* 금액 입력 박스 */}
         <View style={styles.amountContainer}>
@@ -91,15 +97,32 @@ function SendingScreen({route}: SendingScreenProps) {
           <Text style={styles.currencyText}>원</Text>
         </View>
 
+        {/* +10,000, +50,000, +100,000 버튼 */}
+        <View style={styles.amountButtonsContainer}>
+          <TouchableOpacity
+            style={styles.amountButton}
+            onPress={() => handleAmountIncrement(10000)}>
+            <Text style={styles.amountButtonText}>+ 10,000 원</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.amountButton}
+            onPress={() => handleAmountIncrement(50000)}>
+            <Text style={styles.amountButtonText}>+ 50,000 원</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.amountButton}
+            onPress={() => handleAmountIncrement(100000)}>
+            <Text style={styles.amountButtonText}>+ 100,000 원</Text>
+          </TouchableOpacity>
+        </View>
         {/* 추천 액수 받기 섹션 */}
         <TouchableOpacity
           style={styles.recommendationBox}
           onPress={() => navigation.navigate(payNavigations.RECOMMEND_OPTION)}>
           <Image source={require('@/assets/Pay/RecommBtn.png')} />
         </TouchableOpacity>
-
-        <CustomButton label="송금하기" onPress={handleSendMoney} />
       </View>
+      <CustomButton label="송금하기" onPress={handleSendMoney} size="full" />
     </KeyboardAvoidingView>
   );
 }
@@ -108,16 +131,22 @@ function SendingScreen({route}: SendingScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.WHITE,
+    backgroundColor: colors.LIGHTGRAY,
     paddingHorizontal: 20,
     justifyContent: 'space-between',
   },
   contentContainer: {
-    backgroundColor: colors.LIGHTGRAY,
+    backgroundColor: colors.WHITE,
     borderRadius: 10,
-    paddingTop: 50,
-    flex: 1,
+    paddingVertical: 50,
+    // flex: 1,
     marginVertical: 10,
+    // 그림자
+    shadowColor: colors.BLACK,
+    shadowOffset: {width: 0, height: 0},
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
   },
   amountContainer: {
     flexDirection: 'row',
@@ -141,10 +170,28 @@ const styles = StyleSheet.create({
     color: colors.GRAY_700,
     marginLeft: 10,
   },
+  amountButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginTop: 20,
+    marginHorizontal: 20,
+  },
+  amountButton: {
+    backgroundColor: colors.WHITE,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: colors.GRAY_300,
+  },
+  amountButtonText: {
+    fontSize: 14,
+    color: colors.GRAY_700,
+  },
   recommendationBox: {
     backgroundColor: 'white',
     borderRadius: 8,
-    marginTop: 15,
+    marginTop: 20,
     shadowColor: colors.BLACK,
     shadowOpacity: 0.1,
     elevation: 3,

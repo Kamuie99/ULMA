@@ -14,6 +14,11 @@ import {colors} from '@/constants';
 import {eventNavigations} from '@/constants/navigations';
 import {eventStackParamList} from '@/navigations/stack/EventStackNavigator';
 
+// 이미지 import
+import option1Image from '@/assets/Pay/modal/option1.png';
+import option2Image from '@/assets/Pay/modal/option2.png';
+import option3Image from '@/assets/Pay/modal/option3.png';
+
 interface InputOptionModalProps {
   isVisible: boolean;
   onClose: () => void;
@@ -27,21 +32,22 @@ const options = [
     key: '1',
     label: '계좌 내역 불러오기',
     description: '계좌 내역에서 선택 후 바로 등록해보세요.',
-    imageUrl: require('@/assets/Pay/modal/option1.png'),
+    imageUrl: option1Image, // 수정된 부분
   },
   {
     key: '2',
     label: '엑셀 등록하기',
     description: '적어 놓은 내역을 등록해보세요.',
-    imageUrl: require('@/assets/Pay/modal/option2.png'),
+    imageUrl: option2Image, // 수정된 부분
   },
   {
     key: '3',
     label: '직접 등록하기',
     description: '직접 받은 경조사비를 등록해보세요.',
-    imageUrl: require('@/assets/Pay/modal/option3.png'),
+    imageUrl: option3Image, // 수정된 부분
   },
 ];
+
 const InputOptionModal: React.FC<InputOptionModalProps> = ({
   isVisible,
   onClose,

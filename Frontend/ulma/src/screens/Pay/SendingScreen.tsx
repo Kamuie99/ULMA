@@ -23,6 +23,9 @@ import axiosInstance from '@/api/axios';
 import useAuthStore from '@/store/useAuthStore';
 import usePayStore from '@/store/usePayStore';
 
+// 이미지 import 추가
+import recommBtnImage from '@/assets/Pay/RecommBtn.png';
+
 interface SendingScreenProps {
   route: RouteProp<payStackParamList, typeof payNavigations.SENDING>;
 }
@@ -119,7 +122,7 @@ function SendingScreen({route}: SendingScreenProps) {
         <TouchableOpacity
           style={styles.recommendationBox}
           onPress={() => navigation.navigate(payNavigations.RECOMMEND_OPTION)}>
-          <Image source={require('@/assets/Pay/RecommBtn.png')} />
+          <Image source={recommBtnImage} /> {/* 이미지 경로 수정됨 */}
         </TouchableOpacity>
       </View>
       <CustomButton label="송금하기" onPress={handleSendMoney} size="full" />

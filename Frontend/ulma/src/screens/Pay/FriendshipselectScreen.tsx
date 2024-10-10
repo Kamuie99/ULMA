@@ -1,10 +1,14 @@
-//친밀도 이모지 선택 페이지
+import React, {useEffect, useState} from 'react';
+import {View, Text, StyleSheet} from 'react-native';
 import CustomButton from '@/components/common/CustomButton';
 import TitleTextField from '@/components/common/TitleTextField';
 import {colors} from '@/constants';
 import Slider from '@react-native-community/slider';
-import React, {useEffect, useState} from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+
+// 이모지 이미지 import
+import relationship1 from '@/assets/Pay/relationship1.png';
+import relationship2 from '@/assets/Pay/relationship2.png';
+import relationship3 from '@/assets/Pay/relationship3.png';
 
 function FriendshipselectScreen({navigation}) {
   useEffect(() => {
@@ -13,6 +17,7 @@ function FriendshipselectScreen({navigation}) {
       tabBarStyle: {display: 'none'},
     });
   }, [navigation]);
+
   const [sliderValue, setSliderValue] = useState<number>(0); // 슬라이드 값 상태 관리
 
   // 이모지 데이터
@@ -20,17 +25,17 @@ function FriendshipselectScreen({navigation}) {
   const emojis = [
     {
       id: 1,
-      src: require('@/assets/Pay/relationship1.png'),
+      src: relationship1,
       label: '가까운 사이는 아니에요',
     },
     {
       id: 2,
-      src: require('@/assets/Pay/relationship2.png'),
+      src: relationship2,
       label: '그냥 그래요.',
     },
     {
       id: 3,
-      src: require('@/assets/Pay/relationship3.png'),
+      src: relationship3,
       label: '매우 가까워요',
     },
   ];

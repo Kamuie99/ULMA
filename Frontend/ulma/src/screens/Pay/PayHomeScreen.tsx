@@ -19,6 +19,11 @@ import Toast from 'react-native-toast-message';
 import usePayStore from '@/store/usePayStore';
 import CustomButton from '@/components/common/CustomButton';
 
+// 이미지 import 구문 추가
+import accountInfoImage from '@/assets/Pay/menu/accountInfo.png';
+import sendMoneyImage from '@/assets/Pay/menu/sendMoney.png';
+import chargePayImage from '@/assets/Pay/menu/chargePay.png';
+
 interface Transaction {
   id: string;
   date: string;
@@ -133,7 +138,7 @@ function PayHomeScreen() {
             style={styles.button}
             onPress={() => navigation.navigate(payNavigations.ACCOUNT_INFO)}>
             <Image
-              source={require('@/assets/Pay/menu/accountInfo.png')}
+              source={accountInfoImage} // 수정된 부분
               style={styles.buttonImage}
             />
             <Text>내 계좌 보기</Text>
@@ -142,7 +147,7 @@ function PayHomeScreen() {
             style={styles.button}
             onPress={() => navigation.navigate(payNavigations.SEND_ACCOUNT)}>
             <Image
-              source={require('@/assets/Pay/menu/sendMoney.png')}
+              source={sendMoneyImage} // 수정된 부분
               style={styles.buttonImage}
             />
             <Text>송금하기</Text>
@@ -151,7 +156,7 @@ function PayHomeScreen() {
             style={styles.button}
             onPress={() => navigation.navigate(payNavigations.PAY_RECHARGE)}>
             <Image
-              source={require('@/assets/Pay/menu/chargePay.png')}
+              source={chargePayImage} // 수정된 부분
               style={styles.buttonImage}
             />
             <Text>Pay 충전</Text>

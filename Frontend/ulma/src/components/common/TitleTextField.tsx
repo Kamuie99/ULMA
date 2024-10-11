@@ -7,11 +7,17 @@ interface TitleTextFieldProps {
   frontLabel: string;
   emphMsg?: string;
   backLabel?: string;
+  left?: number;
 }
 
-function TitleTextField({frontLabel, emphMsg, backLabel}: TitleTextFieldProps) {
+function TitleTextField({
+  frontLabel,
+  emphMsg,
+  backLabel,
+  left,
+}: TitleTextFieldProps) {
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, {marginLeft: left}]}>
       <Text style={styles.text}>{frontLabel}</Text>
       <Text style={styles.emphText}>{emphMsg}</Text>
       <Text style={styles.text}>{backLabel}</Text>
@@ -22,7 +28,7 @@ function TitleTextField({frontLabel, emphMsg, backLabel}: TitleTextFieldProps) {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    marginLeft: '5%',
+    // marginLeft: '5%',
   },
   text: {
     fontSize: 22,

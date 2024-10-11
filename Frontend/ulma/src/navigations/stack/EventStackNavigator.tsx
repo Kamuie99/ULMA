@@ -1,19 +1,30 @@
 import {eventNavigations} from '@/constants/navigations';
 import {createStackNavigator} from '@react-navigation/stack';
 import React from 'react';
-import {StyleSheet, View} from 'react-native';
-
 import {colors} from '@/constants';
 import Icon from 'react-native-vector-icons/Entypo';
 import EventAddScreen from '@/screens/Events/EventAddScreen';
-import EventDateScreen from '@/screens/Events/EventDateScreen';
 import EventScreen from '@/screens/Events/EventScreen';
-
+import EventDetailScreen from '@/screens/Events/EventDetailScreen';
+import AIRecommendMessage from '@/screens/Events/AIRecommendMessage';
+import EventFixScreen from '@/screens/Events/EventFixScreen';
+import AccounthistoryScreen from '@/screens/Events/AccounthistoryScreen';
+import FriendsearchScreen from '@/screens/Events/FriendsearchScreen';
+import ExcelScreen from '@/screens/Events/ExcelScreen';
+import {TouchableOpacity} from 'react-native-gesture-handler';
 export type eventStackParamList = {
   [eventNavigations.EVENT_ADD]: undefined;
-  [eventNavigations.EVENT_DATE]: undefined;
   [eventNavigations.EVENT]: undefined;
+  [eventNavigations.EVENT_COMMENT]: undefined;
+  [eventNavigations.EVENT_COMMENT_RESULT]: undefined;
+  [eventNavigations.EVENT_DETAIL]: {event_id: string; refresh?: boolean}; // 이벤트 상세 내역에 대한 타입
+  [eventNavigations.EVENT_FIX]: {event_id: string}; // event_id를 사용한 타입 정의
+  [eventNavigations.AI_RECOMMEND_MESSAGE]: undefined; // AI 추천 메시지
+  [eventNavigations.ACCOUNT_HISTORY]: undefined;
+  [eventNavigations.FRIEND_SEARCH]: undefined;
+  [eventNavigations.EVENT_EXCEL]: {event_id: string; excelData?: any};
 };
+//
 
 const Stack = createStackNavigator<eventStackParamList>();
 
@@ -27,22 +38,26 @@ function EventStackNavigator() {
         headerStyle: {
           backgroundColor: colors.WHITE,
         },
-        headerTitleAlign: 'center',
+        headerTitleAlign: 'left',
         headerTitleStyle: {
-          fontSize: 15,
+          fontSize: 18,
+          fontWeight: 'bold',
         },
         headerTintColor: colors.BLACK,
-        headerBackImage: () => {
-          return <Icon name="chevron-left" size={24} color={colors.BLACK} />;
-        },
       }}>
       <Stack.Screen
         name={eventNavigations.EVENT}
         component={EventScreen}
-        options={{
-          headerTitle: ' ',
-          headerShown: false,
-        }}
+        options={({navigation}) => ({
+          headerTitle: '내 경조사 관리',
+          headerRight: () => (
+            <TouchableOpacity
+              style={{marginRight: 16}} // 버튼을 우측으로 적당히 여백을 줌
+              onPress={() => navigation.navigate(eventNavigations.EVENT_ADD)}>
+              <Icon name="plus" size={28} color="#000" />
+            </TouchableOpacity>
+          ),
+        })}
       />
       <Stack.Screen
         name={eventNavigations.EVENT_ADD}
@@ -55,16 +70,50 @@ function EventStackNavigator() {
         }}
       />
       <Stack.Screen
-        name={eventNavigations.EVENT_DATE}
-        component={EventDateScreen}
+        name={eventNavigations.EVENT_DETAIL}
+        component={EventDetailScreen}
         options={{
-          headerTitle: '이벤트 추가하기',
+          headerTitle: '이벤트 상세 내역',
+        }}
+      />
+      <Stack.Screen
+        name={eventNavigations.AI_RECOMMEND_MESSAGE}
+        component={AIRecommendMessage}
+        options={{
+          headerTitle: 'AI 추천 메세지',
+        }}
+      />
+      {/* EventFixScreen 추가 */}
+      <Stack.Screen
+        name={eventNavigations.EVENT_FIX}
+        component={EventFixScreen}
+        options={{
+          headerTitle: '이벤트 수정하기',
+        }}
+      />
+      <Stack.Screen
+        name={eventNavigations.ACCOUNT_HISTORY}
+        component={AccounthistoryScreen}
+        options={{
+          headerTitle: '계좌 이력 불러오기',
+        }}
+      />
+      <Stack.Screen
+        name={eventNavigations.FRIEND_SEARCH}
+        component={FriendsearchScreen}
+        options={{
+          headerTitle: '송금 내역 등록하기',
+        }}
+      />
+      <Stack.Screen
+        name={eventNavigations.EVENT_EXCEL}
+        component={ExcelScreen}
+        options={{
+          headerTitle: '엑셀 추가하기',
         }}
       />
     </Stack.Navigator>
   );
 }
-
-const styles = StyleSheet.create({});
 
 export default EventStackNavigator;

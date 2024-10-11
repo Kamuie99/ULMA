@@ -1,4 +1,3 @@
-//일단 캘린더에서 달력 화면, 연도.월 모달로 선택기능, + 여기서 달력 디자인 커스텀 할 수 있게(디자인은 바꾸면 될 듯)
 import React, {useState} from 'react';
 import {
   View,
@@ -7,7 +6,9 @@ import {
   Modal,
   FlatList,
   Button,
+  TextInput,
   StyleSheet,
+  Alert,
 } from 'react-native';
 import {Calendar} from 'react-native-calendars';
 import {format} from 'date-fns';
@@ -20,16 +21,65 @@ interface DayPressEvent {
   year: number;
 }
 
-const CalendarComponent: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+interface CalendarComponentProps {
+  selectedDate: string | null;
+  onDateSelected: (date: string) => void;
+}
+
+const CalendarComponent: React.FC<CalendarComponentProps> = ({
+  selectedDate,
+  onDateSelected,
+}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [isYearSelection, setIsYearSelection] = useState(true);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [localSelectedDate, setLocalSelectedDate] = useState<string | null>(
+    selectedDate,
+  );
+  const [timeInput, setTimeInput] = useState(''); // 시간 입력 필드 상태
 
-  const formattedDate = selectedDate
-    ? format(new Date(selectedDate), 'PPP', {locale: ko})
+  // 사용자에게 보여줄 형식
+  const formattedDate = localSelectedDate
+    ? format(new Date(localSelectedDate), 'yyyy년 M월 d일', {
+        locale: ko,
+      })
     : '';
+
+  // 시간 입력 시 "시", "분" 자동 추가
+  const handleTimeChange = (text: string) => {
+    const cleaned = text.replace(/\D/g, ''); // 숫자만 남김
+    let formatted = cleaned;
+
+    if (cleaned.length >= 3) {
+      formatted = cleaned.slice(0, 2) + '시 ' + cleaned.slice(2, 4) + '분';
+    } else if (cleaned.length > 0) {
+      formatted = cleaned.slice(0, 2) + '시';
+    }
+
+    setTimeInput(formatted);
+  };
+
+  // 저장 시 ISO 형식으로 변환
+  const handleSave = () => {
+    if (!localSelectedDate || timeInput.length < 7) {
+      Alert.alert('경고', '날짜와 정확한 시간을 입력하세요.');
+      return;
+    }
+
+    // 날짜와 시간을 합쳐서 ISO 형식으로 변환
+    const selectedDateTime = new Date(localSelectedDate);
+    const hours = parseInt(timeInput.slice(0, 2), 10); // 시 정보 추출
+    const minutes = parseInt(timeInput.slice(4, 6), 10); // 분 정보 추출
+
+    // 시간과 분을 설정
+    selectedDateTime.setHours(hours);
+    selectedDateTime.setMinutes(minutes);
+    selectedDateTime.setSeconds(0); // 초는 항상 00초로 설정
+
+    // 최종 ISO 형식으로 변환하여 상위 컴포넌트에 전달
+    onDateSelected(selectedDateTime.toISOString());
+  };
 
   const openModal = (yearSelection: boolean) => {
     setIsYearSelection(yearSelection);
@@ -48,6 +98,7 @@ const CalendarComponent: React.FC = () => {
 
   return (
     <View>
+      {/* 연도 및 월 선택 버튼 */}
       <View style={styles.rowContainer}>
         <TouchableOpacity onPress={() => openModal(true)}>
           <Text style={styles.textStyle}>{selectedYear}년</Text>
@@ -59,12 +110,13 @@ const CalendarComponent: React.FC = () => {
         </TouchableOpacity>
       </View>
 
+      {/* 달력 */}
       <Calendar
         onDayPress={(day: DayPressEvent) => {
-          setSelectedDate(day.dateString);
+          setLocalSelectedDate(day.dateString); // 선택한 날짜 설정
         }}
         markedDates={{
-          [selectedDate || '']: {
+          [localSelectedDate || '']: {
             selected: true,
             marked: true,
             selectedColor: 'green',
@@ -84,6 +136,19 @@ const CalendarComponent: React.FC = () => {
       />
       <Text>선택된 날짜: {formattedDate}</Text>
 
+      {/* 시간 입력 필드 */}
+      <TextInput
+        style={styles.timeInput}
+        placeholder="예) 14시 30분"
+        value={timeInput}
+        onChangeText={handleTimeChange}
+        keyboardType="numeric"
+      />
+
+      {/* 저장 버튼 */}
+      <Button title="저장" onPress={handleSave} />
+
+      {/* 연도/월 선택 모달 */}
       <Modal visible={modalVisible} transparent={true}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
@@ -145,6 +210,13 @@ const styles = StyleSheet.create({
   },
   listText: {
     fontSize: 18,
+  },
+  timeInput: {
+    borderColor: '#ccc',
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
   },
 });
 

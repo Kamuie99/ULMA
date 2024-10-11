@@ -1,5 +1,10 @@
 const homeNavigations = {
   LANDING: 'Landing',
+  SCHEDULE_MAIN: 'ScheduleMain',
+  SCHEDULE_ADD: 'ScheduleAdd',
+  SELECT_FRIEND: 'SelectFriend',
+  FRIENDS_DETAIL: 'FriendsDetail',
+  IMAGE_OCR: 'ImageOCR',
 } as const;
 
 const authNavigations = {
@@ -14,24 +19,47 @@ const eventNavigations = {
   EVENT_ADD: 'EventAdd',
   EVENT_DATE: 'EventDate',
   EVENT: 'Event',
+  EVENT_COMMENT: 'EventComment',
+  EVENT_COMMENT_RESULT: 'EventCommentResult',
+  EVENT_DETAIL: 'EVENT_DETAIL',
+  AI_RECOMMEND_MESSAGE: 'AIRecommendMessage',
+  EVENT_FIX: 'EVENT_FIX',
+  ACCOUNT_HISTORY: 'AccountHistory',
+  FRIEND_SEARCH: 'Friendsearch',
+  EVENT_EXCEL: 'ExcelScreen',
 } as const;
 
 const payNavigations = {
-  ACCOUNT_HISTORY: 'Accounthistory',
+  HOME: 'PayHome',
   ACCOUNT_INPUT: 'Accountinput',
   ADD_HISTORY: 'Addhistory',
-  CHANGE_RESULT: 'Changeresult',
+  CHARGER_RESULT: 'Chargerresult',
   PAY_LIST: 'Paylist',
   PAY_RECHARGE: 'Payrecharge',
   FRIENDHSHIP_SECLECT: 'Friendshipselect',
   RECOMMEND_OPTION: 'RecommendOption',
   SENDING: 'Sending',
+  SEND_ACCOUNT: 'SendAccount',
   SEND_RESULT: 'Sendresult',
+  INPUT_AMOUNT: 'InputAmount',
+  ACCOUNT_INFO: 'AccountInfo',
+  ADD_ACCOUNT: 'AddAccount',
+  ACCOUNT_VERIFY: 'AccountVerify',
+  ACCOUNT_DETAIL: 'AccountDetail',
+  EXCEL_SCREEN: 'ExcelScreen',
+  TFA: 'TFA',
 } as const;
 
-const settingNavigations = {
-  SETTING_HOME: 'SettingHome',
+const mypageNavigations = {
+  MYPAGE_HOME: 'MyPageHome',
   USER_DETAIL: 'UserDetail',
+} as const;
+
+const friendsNavigations = {
+  FRIENDS_LIST: 'FriendsList',
+  FRIENDS_HOME: 'FriendsHome',
+  FRIENDS_ADD: 'FriendsAdd',
+  FREINDS_DETAIL: 'FriendsDetail',
 } as const;
 
 export {
@@ -39,5 +67,6 @@ export {
   authNavigations,
   eventNavigations,
   payNavigations,
-  settingNavigations,
+  mypageNavigations,
+  friendsNavigations,
 };

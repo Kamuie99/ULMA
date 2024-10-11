@@ -1,0 +1,270 @@
+[33mcommit 7e482f961bf24cfa38134ac14790a160d15b2a33[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mFE-develop-event[m[33m, [m[1;31morigin/FE-develop-event[m[33m)[m
+Author: sapa114605 <sapa114605@naver.com>
+Date:   Mon Sep 30 11:09:58 2024 +0900
+
+    [Feat]금액 추천 챗봇추가
+
+[33mcommit 96a33cd5f3375346d3bdf55f799a3738327974a9[m
+Author: sapa114605 <sapa114605@naver.com>
+Date:   Fri Sep 27 17:50:55 2024 +0900
+
+    [Feat]AI금액 추천(구현중)
+
+[33mcommit 13549e21b176c4590f9e7721125c1988c47d651c[m
+Author: sapa114605 <sapa114605@naver.com>
+Date:   Fri Sep 27 15:35:42 2024 +0900
+
+    [Feat] 내역 수정 추가기능 구현(지인검색)
+
+[33mcommit e06355f87f66fd70c0e8db04e9713b553743a071[m
+Author: sapa114605 <sapa114605@naver.com>
+Date:   Fri Sep 27 14:41:41 2024 +0900
+
+    [Fix]이벤트 페이지 편의성 향상
+
+[33mcommit 5f6f0ef6f252bc9ca205e53143b4f32700ed2b99[m
+Merge: 84384de bdc1a3c
+Author: dakgoo02 <dakgoo02@naver.com>
+Date:   Fri Sep 27 09:30:44 2024 +0900
+
+    Merge branch 'FE-21-AUTH' into FE-develop
+
+[33mcommit bdc1a3c1ef1a82b1ad4116d7bf062f6edda9dc3e[m
+Author: dakgoo02 <dakgoo02@naver.com>
+Date:   Fri Sep 27 09:30:13 2024 +0900
+
+    [feat] 마이페이지 구현
+
+[33mcommit 84384de7df238d3f9f1d7ead6ee7624e1a408410[m
+Merge: c304c9b da55c04
+Author: 윤예리 <yoonr72@naver.com>
+Date:   Fri Sep 27 09:11:19 2024 +0900
+
+    Merge branch 'FE-develop-event' into 'FE-develop'
+    
+    Fe develop event
+    
+    See merge request s11-fintech-finance-sub1/S11P21E204!35
+
+[33mcommit c304c9bdf0578bf87fc5ab6b0eef2fefc5d96b0d[m
+Merge: fb3bdc8 d7949b7
+Author: 이유찬 <dakgoo02@naver.com>
+Date:   Fri Sep 27 09:11:00 2024 +0900
+
+    Merge branch 'FE-fix-Auth' into 'FE-develop'
+    
+    Fe fix auth
+    
+    See merge request s11-fintech-finance-sub1/S11P21E204!36
+
+[33mcommit d7949b7a1942ffa5fb9328b94015bc68955b18aa[m
+Merge: a0a36cd fb3bdc8
+Author: 윤예리 <yoonr72@naver.com>
+Date:   Fri Sep 27 09:09:04 2024 +0900
+
+    Merge branch 'FE-develop' into 'FE-fix-Auth'
+    
+    # Conflicts:
+    #   Frontend/ulma/src/store/useAuthStore.ts
+
+[33mcommit a0a36cd5549fab72ae1cd1818b46c6ad01feaeed[m
+Author: 윤예리 <yoonr721@gmail.com>
+Date:   Fri Sep 27 09:07:03 2024 +0900
+
+    Feat: 멘트 추천 페이지 추가
+
+[33mcommit da4ebbb5beac0625c95c18dfe7d47d5f6efa8d80[m
+Author: 윤예리 <yoonr721@gmail.com>
+Date:   Thu Sep 26 18:00:06 2024 +0900
+
+    Feat: 멘트 추천 페이지 만드는 중
+
+[33mcommit a374c639c1c3f108796aef106ac8281b2c08a842[m
+Author: dakgoo02 <dakgoo02@naver.com>
+Date:   Thu Sep 26 17:57:36 2024 +0900
+
+    [feat] 회원정보 페이지 구현
+
+[33mcommit da55c0484670343280f9d513e49839e61e91a100[m
+Author: sapa114605 <sapa114605@naver.com>
+Date:   Thu Sep 26 17:46:05 2024 +0900
+
+    [Feat]신규 Event API 연동
+
+[33mcommit f2c048ae27e8a8a7457c7bd94ad44b70ee3ccbde[m
+Author: 윤예리 <yoonr721@gmail.com>
+Date:   Thu Sep 26 17:21:58 2024 +0900
+
+    Fix: 모달 수정 중
+
+[33mcommit 6b6859d2a7718d17eb61a5229cc199f00e58b9c4[m
+Merge: c89e130 fb3bdc8
+Author: sapa114605 <sapa114605@naver.com>
+Date:   Thu Sep 26 15:03:28 2024 +0900
+
+    Merge branch 'FE-develop' of https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21E204 into FE-develop-event
+
+[33mcommit c89e1308a49f4cf32df64afe579524716c2371d1[m
+Author: sapa114605 <sapa114605@naver.com>
+Date:   Thu Sep 26 15:01:48 2024 +0900
+
+    [Fix] 병합용
+
+[33mcommit fb3bdc8bbdd950b65d300f68fb33907faf6a65a1[m
+Merge: 293ba71 7704081
+Author: 윤예리 <yoonr72@naver.com>
+Date:   Thu Sep 26 14:48:24 2024 +0900
+
+    Merge branch 'FE-21-AUTH' into 'FE-develop'
+    
+    Fe 21 auth
+    
+    See merge request s11-fintech-finance-sub1/S11P21E204!33
+
+[33mcommit 7704081b1361171773b32b34a450c1d11831d725[m
+Merge: 4af09ed 293ba71
+Author: dakgoo02 <dakgoo02@naver.com>
+Date:   Thu Sep 26 14:47:14 2024 +0900
+
+    Merge branch 'FE-develop' into FE-21-AUTH
+
+[33mcommit 4af09edc638571103e24f7e88847e8578114ea54[m
+Author: dakgoo02 <dakgoo02@naver.com>
+Date:   Thu Sep 26 14:46:34 2024 +0900
+
+    [fix] 로그인 화면 개선
+
+[33mcommit 293ba711eaecf731cc31f940090e5a49a82421d0[m
+Merge: 730e8a8 a0db8e3
+Author: 윤예리 <yoonr721@gmail.com>
+Date:   Thu Sep 26 14:43:38 2024 +0900
+
+    Merge branch 'FE-develop' of https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21E204 into FE-develop
+
+[33mcommit 730e8a825d2808212fc3cfb417d57f9470c3cb28[m
+Author: 윤예리 <yoonr721@gmail.com>
+Date:   Thu Sep 26 14:41:23 2024 +0900
+
+    HOTFIX: 마이페이지 수정
+    
+    - stack 이름 : setting > mypage
+    - 경로 추가
+
+[33mcommit 3482f59b3bb3342282904f24a622fc1ff9b213c3[m
+Merge: 131cc16 a0db8e3
+Author: dakgoo02 <dakgoo02@naver.com>
+Date:   Thu Sep 26 14:34:27 2024 +0900
+
+    [fix] 깃 충돌 해결
+
+[33mcommit 131cc164189e7f3ac910554232117990b3b7c976[m
+Author: dakgoo02 <dakgoo02@naver.com>
+Date:   Thu Sep 26 14:32:20 2024 +0900
+
+    [fix] 디버깅 관련 부분 주석 처리
+
+[33mcommit a0db8e36c06d607539d9fb546a4bd86eea1bfedd[m
+Merge: cb17f44 b523c79
+Author: 이유찬 <dakgoo02@naver.com>
+Date:   Thu Sep 26 14:30:48 2024 +0900
+
+    Merge branch 'FE-fix-Auth' into 'FE-develop'
+    
+    Fix: 로그인 페이지 수정
+    
+    See merge request s11-fintech-finance-sub1/S11P21E204!32
+
+[33mcommit b523c796ec5931dc98e1bacfe2d5c87bce083ec6[m
+Author: 윤예리 <yoonr721@gmail.com>
+Date:   Thu Sep 26 14:29:06 2024 +0900
+
+    Fix: 로그인 페이지 스타일 수정
+    
+    - toast 추가
+
+[33mcommit 4eeed9cac31fd0cec8c2dce024e08772c90058a8[m
+Merge: b4a7a5a cb17f44
+Author: sapa114605 <sapa114605@naver.com>
+Date:   Thu Sep 26 14:25:31 2024 +0900
+
+    Merge branch 'FE-develop' of https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21E204 into FE-develop-event
+
+[33mcommit b4a7a5a3922159f666e25bd72459a9f121d46469[m
+Author: sapa114605 <sapa114605@naver.com>
+Date:   Thu Sep 26 14:22:36 2024 +0900
+
+    [Fix]이벤트 추가 페이지 수정
+
+[33mcommit 09555ba93a09a91c3dee7c4ef991cb1bf69ddc07[m
+Author: 윤예리 <yoonr721@gmail.com>
+Date:   Thu Sep 26 12:45:49 2024 +0900
+
+    Fix: Login Home 수정
+
+[33mcommit e5dd7ccef7782c8ac5487ce1cbbeae2aa0178fa5[m
+Author: sapa114605 <sapa114605@naver.com>
+Date:   Thu Sep 26 12:37:05 2024 +0900
+
+    [Feat]이벤트 추가 API 연결
+
+[33mcommit 4ff2ade8185f4e3de5bc81fc7d4c50d03066ebd0[m
+Author: 윤예리 <yoonr721@gmail.com>
+Date:   Thu Sep 26 11:50:06 2024 +0900
+
+    Fix: Auth Home 수정
+
+[33mcommit df5119e7e8a8a84a5a0a37ffbb2a99d8792ef51c[m
+Merge: 52aa178 cb17f44
+Author: 윤예리 <yoonr721@gmail.com>
+Date:   Thu Sep 26 11:31:05 2024 +0900
+
+    Merge branch 'FE-develop' of https://lab.ssafy.com/s11-fintech-finance-sub1/S11P21E204 into FE-fix-Auth
+
+[33mcommit 52aa17805f975ae89f1c07170cf227a1a03d76be[m
+Author: 윤예리 <yoonr721@gmail.com>
+Date:   Thu Sep 26 11:30:56 2024 +0900
+
+    수정중
+
+[33mcommit cb17f443bc1b084990ac6960316b0aeedd506cb9[m[33m ([m[1;32mFE-develop[m[33m)[m
+Merge: 523136d 73d9a78
+Author: 윤예리 <yoonr72@naver.com>
+Date:   Thu Sep 26 11:30:23 2024 +0900
+
+    Merge branch 'FE-21-AUTH' into 'FE-develop'
+    
+    Fe 21 auth
+    
+    See merge request s11-fintech-finance-sub1/S11P21E204!31
+
+[33mcommit 73d9a784d505205baeefec91183364149dafbe9d[m[33m ([m[1;31morigin/FE-21-AUTH[m[33m)[m
+Author: dakgoo02 <dakgoo02@naver.com>
+Date:   Thu Sep 26 11:16:55 2024 +0900
+
+    [fix] gif 파일 움직이게 수정
+
+[33mcommit c9ffb463cc792c1f9f91153818adb1d696acc278[m
+Author: dakgoo02 <dakgoo02@naver.com>
+Date:   Thu Sep 26 11:03:22 2024 +0900
+
+    [fix] forwardRef 에러 해결
+
+[33mcommit 523136dd96d72a09e10d8460e79d63941c33744a[m
+Merge: 487c185 c7cf9ac
+Author: 윤예리 <yoonr72@naver.com>
+Date:   Thu Sep 26 10:54:59 2024 +0900
+
+    Merge branch 'FE-21-AUTH' into 'FE-develop'
+    
+    [feat] 로그인 후 회원 정보 저장 성공
+    
+    See merge request s11-fintech-finance-sub1/S11P21E204!30
+
+[33mcommit c7cf9ac86878ef602e7139193300e98f680ba63b[m
+Author: dakgoo02 <dakgoo02@naver.com>
+Date:   Thu Sep 26 10:52:54 2024 +0900
+
+    [feat] 로그인 후 회원 정보 저장 성공
+
+[33mcommit 487c185f3fe5e107dc0ae026f9bcfa7ea7a66e9a[m[33m ([m[1;31morigin/FE-fix-Auth[m[33m)[m
+Author: dakg

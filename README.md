@@ -83,7 +83,7 @@
 ## 📘 [PageLayout](https://www.figma.com/design/Vxu9ayRQKiPkow5oTfO1Ya/Untitled?node-id=0-1&t=0QXs0n48RMa0l2DJ-1)
 ![Figma Image](asset/mockup.png)
 ## 📘 [API 명세서](https://www.notion.so/API-a12b3a13513844108f1d2ff5ebcc1d9f?pvs=4)
-## 📘 [기능 명세서](https://www.notion.so/API-a12b3a13513844108f1d2ff5ebcc1d9f?pvs=4)
+## 📘 [기능 명세서](https://www.notion.so/28bb81a245f44fb4891a5e2caa88a9cd?pvs=4)
 ## 📘 [FE 매뉴얼](https://www.notion.so/FE-b4279394b6594440b3d9cb11db540511?pvs=4)
 <br>
 

@@ -130,9 +130,9 @@ public class AuthService {
 			throw new ErrorException(ErrorCode.Duplicated);
 		}
 
-//		checkEmail(request);
-//
-//		checkPhoneNumber(request);
+		checkEmail(request);
+
+		checkPhoneNumber(request);
 
 		if(!request.password().equals(request.passwordConfirm())) {
 			throw new ErrorException(ErrorCode.PasswordMismatch);

@@ -122,7 +122,7 @@ function SendingScreen({route}: SendingScreenProps) {
         <TouchableOpacity
           style={styles.recommendationBox}
           onPress={() => navigation.navigate(payNavigations.RECOMMEND_OPTION)}>
-          <Image source={recommBtnImage} /> {/* 이미지 경로 수정됨 */}
+          <Image source={recommBtnImage} />
         </TouchableOpacity>
       </View>
       <CustomButton label="송금하기" onPress={handleSendMoney} size="full" />

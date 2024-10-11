@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -7,25 +7,52 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
 } from 'react-native';
+import CustomButton from '@/components/common/CustomButton';
+import {payNavigations} from '@/constants/navigations';
+import {colors} from '@/constants';
+import Toast from 'react-native-toast-message';
+import axiosInstance from '@/api/axios';
+import useAuthStore from '@/store/useAuthStore';
+import usePayStore from '@/store/usePayStore';
 import {useNavigation} from '@react-navigation/native';
 
-const PayrechargingScreen = () => {
-  const [amount, setAmount] = useState<string>('300000'); // 초기값 300,000원 (사용자가 입력 가능)
+function PayrechargingScreen() {
+  const [amount, setAmount] = useState<number>(0);
+  const {getPayInfo} = usePayStore();
+  const navigation = useNavigation();
 
-  // <any>를 사용하여 navigate의 파라미터 문제를 해결
-  const navigation = useNavigation<any>();
+  const handleRecharge = async () => {
+    if (amount === 0) {
+      Toast.show({text1: '금액이 입력되지 않았어요.', type: 'error'});
+      return;
+    }
+    const accessToken = useAuthStore.getState().accessToken;
 
-  const handleRecharge = () => {
-    // amount를 파라미터로 전달
-    navigation.navigate('RechargeResult', {amount});
+    try {
+      const response = await axiosInstance.post(
+        '/users/pay/balance',
+        {
+          balance: amount,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+      console.log(response.data);
+      getPayInfo();
+      navigation.navigate(payNavigations.CHARGER_RESULT, {amount});
+    } catch (error) {
+      console.error('계정 정보를 불러오는 중 에러가 발생했습니다:', error);
+    }
   };
+
+  const {balance, accountNumber} = usePayStore();
+  const totalAmount = (Number(balance) || 0) + (Number(amount) || 0);
 
   return (
     <KeyboardAvoidingView style={styles.container} behavior="padding">
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Pay 충전하기</Text>
-      </View>
-
       <View style={styles.content}>
         <Text style={styles.label}>충전 금액</Text>
         <View style={styles.amountContainer}>
@@ -41,29 +68,24 @@ const PayrechargingScreen = () => {
         </View>
         <View style={styles.infoContainer}>
           <Text style={styles.infoText}>충전 계좌</Text>
-          <Text style={styles.infoText}>000-1111-00-1111</Text>
+          <Text style={styles.infoText}>{accountNumber}</Text>
         </View>
         <View style={styles.infoContainer}>
           <Text style={styles.infoText}>충전 후 잔액</Text>
-          <Text style={styles.infoText}>
-            {Number(amount).toLocaleString()} 원
-          </Text>
+          <Text style={styles.infoText}>{totalAmount.toLocaleString()} 원</Text>
         </View>
       </View>
-
-      <TouchableOpacity style={styles.button} onPress={handleRecharge}>
-        <Text style={styles.buttonText}>충전하기</Text>
-      </TouchableOpacity>
+      <CustomButton label="충전하기" onPress={handleRecharge} posY={20} />
     </KeyboardAvoidingView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.WHITE,
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    padding: 20,
   },
   header: {
     marginTop: 50,
@@ -75,26 +97,26 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 20,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.LIGHTGRAY,
     borderRadius: 10,
   },
   label: {
     fontSize: 16,
-    color: '#666',
+    color: colors.GRAY_700,
     marginBottom: 10,
   },
   amountContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#00C77F',
+    borderBottomColor: colors.GREEN_700,
     marginBottom: 20,
   },
   input: {
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: 'bold',
-    textAlign: 'center',
+    textAlign: 'right',
     flex: 1,
   },
   currencyText: {
@@ -108,17 +130,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 16,
-    color: '#666',
-  },
-  button: {
-    backgroundColor: '#00C77F',
-    paddingVertical: 15,
-    alignItems: 'center',
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
+    color: colors.GRAY_700,
   },
 });
 

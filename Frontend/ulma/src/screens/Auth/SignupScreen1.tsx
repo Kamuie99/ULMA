@@ -1,13 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TextInput, Text, TouchableOpacity, ScrollView, Animated, Alert } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import { authNavigations } from '@/constants/navigations';
-import useAuthStore from '@/store/useAuthStore'; // Zustand store import
+import React, {useState, useEffect} from 'react';
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Animated,
+  Alert,
+} from 'react-native';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import {useNavigation} from '@react-navigation/native';
+import {authNavigations} from '@/constants/navigations';
+import useSignupStore from '@/store/useSignupStore';
 import axiosInstance from '@/api/axios'; // axiosInstance import
-import { AuthStackParamList } from '@/navigations/stack/AuthStackNavigator';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { AxiosError } from 'axios';
+import {AuthStackParamList} from '@/navigations/stack/AuthStackNavigator';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {AxiosError} from 'axios';
+import {colors} from '@/constants';
+import Toast from 'react-native-toast-message';
 
 interface SignupScreenProps {}
 
@@ -21,19 +32,25 @@ interface ErrorState {
 
 function SignupScreen1({}: SignupScreenProps) {
   const navigation = useNavigation<StackNavigationProp<AuthStackParamList>>();
-  
-  const { setSignupData } = useAuthStore(); // Zustand action for storing data
-  
-  const [name, setName] = useState(''); // Input fields
-  const [birthDate, setBirthDate] = useState('');
-  const [idLastDigit, setIdLastDigit] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
+
+  const {setSignupData, setPhoneVerified, isPhoneVerified} = useSignupStore(); // useSignupStore에서 필요한 상태 가져오기
+
+  const [name, setName] = useState(''); // 이름 입력 상태
+  const [birthDate, setBirthDate] = useState(''); // 생년월일 앞자리 입력 상태
+  const [idLastDigit, setIdLastDigit] = useState(''); // 뒷자리 한자리 입력 상태
+  const [phoneNumber, setPhoneNumber] = useState(''); // 휴대폰 번호 입력 상태
+  const [verificationCode, setVerificationCode] = useState(''); // 인증번호 입력 받는 곳
   const [showVerificationCode, setShowVerificationCode] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
   const [verificationError, setVerificationError] = useState('');
   const [resendText, setResendText] = useState('인증번호 전송');
-  const [errors, setErrors] = useState<ErrorState>({ name: '', birthDate: '', idLastDigit: '', phoneNumber: '', verificationCode: '' });
+  const [errors, setErrors] = useState<ErrorState>({
+    name: '',
+    birthDate: '',
+    idLastDigit: '',
+    phoneNumber: '',
+    verificationCode: '',
+  });
 
   const [countdown, setCountdown] = useState(180);
   const [timerExpired, setTimerExpired] = useState(false);
@@ -69,7 +86,7 @@ function SignupScreen1({}: SignupScreenProps) {
     setTimerExpired(false);
     setCountdown(180);
     const timerInterval = setInterval(() => {
-      setCountdown((prev) => {
+      setCountdown(prev => {
         if (prev <= 1) {
           clearInterval(timerInterval);
           setTimerExpired(true);
@@ -84,7 +101,9 @@ function SignupScreen1({}: SignupScreenProps) {
     const cleaned = text.replace(/\D/g, '');
     const match = cleaned.match(/^(\d{3})(\d{0,4})(\d{0,4})$/);
     if (match) {
-      return !match[2] ? match[1] : `${match[1]}-${match[2]}${match[3] ? `-${match[3]}` : ''}`;
+      return !match[2]
+        ? match[1]
+        : `${match[1]}-${match[2]}${match[3] ? `-${match[3]}` : ''}`;
     }
     return text;
   };
@@ -93,14 +112,18 @@ function SignupScreen1({}: SignupScreenProps) {
     const formattedPhoneNumber = formatPhoneNumber(text);
     if (formattedPhoneNumber.replace(/[^0-9]/g, '').length <= 11) {
       setPhoneNumber(formattedPhoneNumber);
-      setErrors(prev => ({ ...prev, phoneNumber: '' }));
+      setErrors(prev => ({...prev, phoneNumber: ''}));
     }
   };
 
-  const handleNumberInput = (text: string, setter: React.Dispatch<React.SetStateAction<string>>, field: keyof ErrorState) => {
+  const handleNumberInput = (
+    text: string,
+    setter: React.Dispatch<React.SetStateAction<string>>,
+    field: keyof ErrorState,
+  ) => {
     const numberOnly = text.replace(/[^0-9]/g, '');
     setter(numberOnly);
-    setErrors(prev => ({ ...prev, [field]: '' }));
+    setErrors(prev => ({...prev, [field]: ''}));
   };
 
   const validateName = (name: string) => {
@@ -113,7 +136,14 @@ function SignupScreen1({}: SignupScreenProps) {
     const year = parseInt(birthDate.slice(0, 2));
     const month = parseInt(birthDate.slice(2, 4));
     const day = parseInt(birthDate.slice(4, 6));
-    return (year >= 0 && year <= 99) && (month >= 1 && month <= 12) && (day >= 1 && day <= 31);
+    return (
+      year >= 0 &&
+      year <= 99 &&
+      month >= 1 &&
+      month <= 12 &&
+      day >= 1 &&
+      day <= 31
+    );
   };
 
   const validateIdLastDigit = (digit: string) => {
@@ -121,11 +151,18 @@ function SignupScreen1({}: SignupScreenProps) {
   };
 
   const validateInputs = () => {
-    let newErrors: ErrorState = { name: '', birthDate: '', idLastDigit: '', phoneNumber: '', verificationCode: '' };
+    let newErrors: ErrorState = {
+      name: '',
+      birthDate: '',
+      idLastDigit: '',
+      phoneNumber: '',
+      verificationCode: '',
+    };
     let isValid = true;
 
     if (!validateName(name)) {
-      newErrors.name = '이름을 올바르게 입력해주세요. (2-15자, 한글, 영어만 가능)';
+      newErrors.name =
+        '이름을 올바르게 입력해주세요. (2-15자, 한글, 영어만 가능)';
       isValid = false;
     }
 
@@ -149,15 +186,16 @@ function SignupScreen1({}: SignupScreenProps) {
   };
 
   const handleSendVerification = async () => {
+    // TODO
+    // 409 에러 발생시 이미 가입된 휴대폰 번호라는 에러 메시지 출력해야 함
     if (validateInputs()) {
       try {
         // 인증 요청 부분을 주석 처리
-        // const response = await axiosInstance.post('/auth/phone', {
-        //   phoneNumber: phoneNumber.replace(/-/g, ''),
-        // });
-        // if (response.status === 200) {
-        // 여기 까지 주석 처리 할 것
-
+        const response = await axiosInstance.post('/auth/phone', {
+          phoneNumber: phoneNumber.replace(/-/g, ''),
+        });
+        if (response.status === 200) {
+          // 여기 까지 주석 처리 할 것
           setShowVerificationCode(true);
           setResendText('재전송');
           fadeIn(fadeAnim.verificationCode);
@@ -165,11 +203,19 @@ function SignupScreen1({}: SignupScreenProps) {
           startTimer();
           setIsVerified(false);
           setVerificationError('');
-        // 이것도 주석 처리 할 것
-          // }
+          // 이것도 주석 처리 할 것
+        }
       } catch (error) {
-        console.error('인증번호 전송 오류:', error);
-        Alert.alert('인증번호 전송에 실패했습니다. 다시 시도해주세요.');
+        const err = error as AxiosError;
+        if (err.response && err.response.status === 409) {
+          Alert.alert('이미 가입된 휴대폰 번호입니다.');
+        } else {
+          console.error('인증번호 전송 오류:', err);
+          Toast.show({
+            text1: '인증번호 전송에 실패했습니다. 다시 시도해주세요.',
+            type: 'error',
+          });
+        }
       }
     } else {
       Alert.alert('올바른 값을 입력하세요.');
@@ -177,58 +223,62 @@ function SignupScreen1({}: SignupScreenProps) {
   };
 
   const handleVerifyCode = async () => {
-
     // 시간 초과시 인증 안해줄거임
     if (timerExpired) {
       Alert.alert('인증 실패', '요청 시간이 초과되었습니다.');
       return;
     }
 
-    // 개발 테스트 환경에서는 인증번호를 000000으로 설정
-    if (verificationCode === '000000') {
-      setIsVerified(true);
-      setVerificationError('');
-      setShowVerificationCode(false);
-    } else {
-      setIsVerified(false);
-      setVerificationError('인증번호가 일치하지 않습니다.');
-    }
+    // 개발 테스트 환경에서는 인증번호를 999999으로 설정
+    // if (verificationCode === '999999') {
+    //   setIsVerified(true);
+    //   setVerificationError('');
+    //   setShowVerificationCode(false);
+    // } else {
+    //   setIsVerified(false);
+    //   setVerificationError('인증번호가 일치하지 않습니다.');
+    // }
 
     // 실제 서버 환경
-    // try {
-    //   const response = await axiosInstance.put('/auth/phone', {
-    //     phoneNumber: phoneNumber.replace(/-/g, ''), // 하이픈 제거한 휴대폰 번호
-    //     verificationCode: verificationCode, // 입력된 인증번호
-    //   });
-    
-    //   if (response.status === 200) {
-    //     setIsVerified(true); // 인증 성공
-    //     setVerificationError('');
-    //     setShowVerificationCode(false);
-    //     Alert.alert('인증 성공', '휴대폰 인증이 완료되었습니다.');
-    //   }
-    // } catch (err) {
-    //   const error = err as AxiosError;
-    //   console.log('에러 메시지:', error.response?.data);
-    //   if (error.response?.status === 400) {
-    //     setVerificationError('인증번호가 일치하지 않습니다.');
-    //   } else if (error.response?.status === 404) {
-    //     setVerificationError('존재하지 않는 인증번호입니다.');
-    //   } else {
-    //     Alert.alert('인증 실패', `서버 상태를 확인해주세요. (${error.response?.status})`);
-    //   }
-    // }
+    try {
+      const response = await axiosInstance.put('/auth/phone', {
+        phoneNumber: phoneNumber.replace(/-/g, ''), // 하이픈 제거한 휴대폰 번호
+        verificationCode: verificationCode, // 입력된 인증번호
+      });
+
+      if (response.status === 200) {
+        setIsVerified(true); // 인증 성공
+        setVerificationError('');
+        setShowVerificationCode(false);
+        Alert.alert('인증 성공', '휴대폰 인증이 완료되었습니다.');
+      }
+    } catch (err) {
+      const error = err as AxiosError;
+      console.log('에러 메시지:', error.response?.data);
+      if (error.response?.status === 400) {
+        setVerificationError('인증번호가 일치하지 않습니다.');
+      } else if (error.response?.status === 404) {
+        setVerificationError('존재하지 않는 인증번호입니다.');
+      } else {
+        Alert.alert(
+          '인증 실패',
+          `서버 상태를 확인해주세요. (${error.response?.status})`,
+        );
+      }
+    }
   };
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+    return `${String(minutes).padStart(2, '0')}:${String(
+      remainingSeconds,
+    ).padStart(2, '0')}`;
   };
 
   const getInputStyle = (field: keyof ErrorState) => [
     styles.input,
-    errors[field] ? styles.inputError : {}
+    errors[field] ? styles.inputError : {},
   ];
 
   const handleNext = () => {
@@ -251,29 +301,33 @@ function SignupScreen1({}: SignupScreenProps) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>회원가입 (1/2)</Text>
         <View style={styles.inputContainer}>
           <Text style={styles.label}>이름</Text>
           <TextInput
             placeholder="홍길동"
             value={name}
-            onChangeText={(text) => {
+            onChangeText={text => {
               setName(text);
-              setErrors(prev => ({ ...prev, name: '' }));
+              setErrors(prev => ({...prev, name: ''}));
             }}
             style={getInputStyle('name')}
             editable={!isVerified} // 인증 성공 시 수정 불가
           />
-          {errors.name ? <Text style={styles.errorText}>{errors.name}</Text> : null}
+          {errors.name ? (
+            <Text style={styles.errorText}>{errors.name}</Text>
+          ) : null}
         </View>
 
-        <Animated.View style={[styles.inputContainer, { opacity: fadeAnim.birthDate }]}>
+        <Animated.View
+          style={[styles.inputContainer, {opacity: fadeAnim.birthDate}]}>
           <Text style={styles.label}>주민등록번호</Text>
           <View style={styles.row}>
             <TextInput
               placeholder="생년월일 (6자리)"
               value={birthDate}
-              onChangeText={(text) => handleNumberInput(text, setBirthDate, 'birthDate')}
+              onChangeText={text =>
+                handleNumberInput(text, setBirthDate, 'birthDate')
+              }
               style={[getInputStyle('birthDate'), styles.birthInput]}
               keyboardType="numeric"
               maxLength={6}
@@ -281,55 +335,78 @@ function SignupScreen1({}: SignupScreenProps) {
             />
             <Text style={styles.dash}>-</Text>
             <TextInput
-              placeholder="뒷자리"
+              placeholder="●"
               value={idLastDigit}
-              onChangeText={(text) => handleNumberInput(text, setIdLastDigit, 'idLastDigit')}
+              onChangeText={text =>
+                handleNumberInput(text, setIdLastDigit, 'idLastDigit')
+              }
               style={[getInputStyle('idLastDigit'), styles.idInput]}
               keyboardType="numeric"
               maxLength={1}
               editable={!isVerified} // 인증 성공 시 수정 불가
             />
-            <Text>*******</Text>
+            <Text style={{marginHorizontal: 10}}>● ● ● ● ● ●</Text>
           </View>
-          {errors.birthDate ? <Text style={styles.errorText}>{errors.birthDate}</Text> : null}
-          {errors.idLastDigit ? <Text style={styles.errorText}>{errors.idLastDigit}</Text> : null}
+          {errors.birthDate ? (
+            <Text style={styles.errorText}>{errors.birthDate}</Text>
+          ) : null}
+          {errors.idLastDigit ? (
+            <Text style={styles.errorText}>{errors.idLastDigit}</Text>
+          ) : null}
         </Animated.View>
 
-        <Animated.View style={[styles.inputContainer, { opacity: fadeAnim.phoneNumber }]}>
+        <Animated.View
+          style={[styles.inputContainer, {opacity: fadeAnim.phoneNumber}]}>
           <Text style={styles.label}>휴대폰번호</Text>
           <View style={styles.row}>
-          <TextInput
-            placeholder="010-0000-0000"
-            value={phoneNumber}
-            onChangeText={handlePhoneNumberChange}
-            style={[getInputStyle('phoneNumber'), styles.phoneInput]}
-            keyboardType="phone-pad"
-            editable={!isVerified} // 인증 완료 시 수정 불가
-            maxLength={13} // 하이픈 포함 최대 13자
-          />
+            <TextInput
+              placeholder="010-0000-0000"
+              value={phoneNumber}
+              onChangeText={handlePhoneNumberChange}
+              style={[getInputStyle('phoneNumber'), styles.phoneInput]}
+              keyboardType="phone-pad"
+              editable={!isVerified} // 인증 완료 시 수정 불가
+              maxLength={13} // 하이픈 포함 최대 13자
+            />
             {!isVerified && (
-              <TouchableOpacity style={styles.button} onPress={handleSendVerification}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleSendVerification}>
                 <Text style={styles.buttonText}>{resendText}</Text>
               </TouchableOpacity>
             )}
           </View>
-          {errors.phoneNumber ? <Text style={styles.errorText}>{errors.phoneNumber}</Text> : null}
+          {errors.phoneNumber ? (
+            <Text style={styles.errorText}>{errors.phoneNumber}</Text>
+          ) : null}
           {isVerified && <Text style={styles.successText}>인증 성공</Text>}
         </Animated.View>
 
         {showVerificationCode && !isVerified && (
-          <Animated.View style={[styles.inputContainer, { opacity: fadeAnim.verificationCode }]}>
+          <Animated.View
+            style={[
+              styles.inputContainer,
+              {opacity: fadeAnim.verificationCode},
+            ]}>
             <Text style={styles.label}>인증번호</Text>
             <View style={styles.row}>
               <TextInput
                 placeholder="인증번호 6자리 입력"
                 value={verificationCode}
-                onChangeText={(text) => handleNumberInput(text, setVerificationCode, 'verificationCode')}
+                onChangeText={text =>
+                  handleNumberInput(
+                    text,
+                    setVerificationCode,
+                    'verificationCode',
+                  )
+                }
                 style={[styles.input, styles.codeInput]}
                 keyboardType="numeric"
                 maxLength={6}
               />
-              <TouchableOpacity style={styles.button} onPress={handleVerifyCode}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={handleVerifyCode}>
                 <Text style={styles.buttonText}>확인</Text>
               </TouchableOpacity>
             </View>
@@ -337,17 +414,16 @@ function SignupScreen1({}: SignupScreenProps) {
               {!timerExpired && (
                 <Text style={styles.timerText}>{formatTime(countdown)}</Text>
               )}
-              {verificationError && <Text style={styles.errorText}>{verificationError}</Text>}
+              {verificationError && (
+                <Text style={styles.errorText}>{verificationError}</Text>
+              )}
             </View>
           </Animated.View>
         )}
 
         {isVerified && (
-          <Animated.View style={{ opacity: fadeAnim.signup }}>
-            <TouchableOpacity 
-              style={styles.signupButton} 
-              onPress={handleNext}
-            >
+          <Animated.View style={{opacity: fadeAnim.signup}}>
+            <TouchableOpacity style={styles.signupButton} onPress={handleNext}>
               <Text style={styles.signupButtonText}>다음</Text>
             </TouchableOpacity>
           </Animated.View>
@@ -360,7 +436,7 @@ function SignupScreen1({}: SignupScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.LIGHTGRAY,
   },
   scrollContent: {
     padding: 20,
@@ -396,8 +472,11 @@ const styles = StyleSheet.create({
     flex: 3,
   },
   idInput: {
-    flex: 1,
-    marginLeft: 10,
+    // flex: 0.5,
+    width: 40,
+    fontSize: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   phoneInput: {
     flex: 1,
@@ -413,8 +492,9 @@ const styles = StyleSheet.create({
     color: '#555',
   },
   button: {
-    backgroundColor: '#007AFF',
-    padding: 15,
+    backgroundColor: colors.GREEN_700,
+    paddingHorizontal: 15,
+    paddingVertical: 13,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
@@ -425,7 +505,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   signupButton: {
-    backgroundColor: '#34C759',
+    backgroundColor: colors.GREEN_300,
     padding: 18,
     borderRadius: 8,
     alignItems: 'center',

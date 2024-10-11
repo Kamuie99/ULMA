@@ -3,9 +3,11 @@ import {
   Dimensions,
   Pressable,
   PressableProps,
+  StyleProp,
   StyleSheet,
   Text,
   View,
+  ViewStyle,
 } from 'react-native';
 
 import {colors} from '@/constants';
@@ -13,27 +15,34 @@ import {colors} from '@/constants';
 interface CustomButtonProps extends PressableProps {
   label: string;
   variant?: 'filled' | 'outlined';
-  size?: 'large' | 'medium';
+  size?: 'large' | 'full' | 'maxSize';
   inValid?: boolean;
+  customStyle?: StyleProp<ViewStyle>;
+  posY?: number;
 }
 
 const deviceHeight = Dimensions.get('screen').height;
+const deviceWidth = Dimensions.get('screen').width;
 
 function CustomButton({
   label,
   variant = 'filled',
-  size = 'large',
+  size = 'maxSize',
   inValid = false,
+  customStyle,
+  posY = 0,
   ...props
 }: CustomButtonProps) {
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, {bottom: posY}]}>
       <Pressable
         disabled={inValid}
         style={({pressed}) => [
           styles.container,
           pressed ? styles[`${variant}Pressed`] : styles[variant],
           inValid && styles.inValid,
+          customStyle ? customStyle : null,
+          size === 'full' && {borderRadius: 0}, // full일 때 borderRadius 없애기
         ]}
         {...props}>
         <View style={styles[size]}>
@@ -46,9 +55,11 @@ function CustomButton({
 
 const styles = StyleSheet.create({
   wrap: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'absolute',
+    width: deviceWidth,
+    paddingHorizontal: 10,
   },
   container: {
     borderRadius: 6,
@@ -56,8 +67,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     display: 'flex',
     alignItems: 'center',
-    position: 'absolute',
-    bottom: 30,
   },
   inValid: {
     opacity: 0.5,
@@ -75,6 +84,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors.GREEN_300,
     opacity: 0.5,
   },
+  maxSize: {
+    width: '100%',
+    paddingVertical: deviceHeight > 700 ? 16 : 10,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
   large: {
     width: '90%',
     paddingVertical: deviceHeight > 700 ? 16 : 10,
@@ -82,12 +98,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
   },
-  medium: {
-    width: '45%',
+  full: {
+    width: deviceWidth + 20,
     paddingVertical: deviceHeight > 700 ? 16 : 10,
     alignItems: 'center',
-    flexDirection: 'row',
     justifyContent: 'center',
+    textAlign: 'center',
+    paddingLeft: 20,
   },
   text: {
     fontSize: 16,

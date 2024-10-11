@@ -1,135 +1,149 @@
-//페이 이력보기 페이지
-
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
-  Text,
   TextInput,
-  TouchableOpacity,
   FlatList,
   StyleSheet,
+  TouchableOpacity,
+  Text,
 } from 'react-native';
-import BottomBar from '../../components/common/BottomBar'; // 하단 바 컴포넌트 import
+import DropDownPicker from 'react-native-dropdown-picker';
+import Icon from 'react-native-vector-icons/Entypo';
+import {colors} from '@/constants';
+import axiosInstance from '@/api/axios';
 
 interface Transaction {
-  id: string;
   date: string;
-  from: string;
-  to: string;
+  guest: string;
   amount: string;
-  type: 'send' | 'receive';
+  description: string;
+  type: 'SEND' | 'RECEIVE' | 'CHARGE';
 }
 
 const PaylistScreen = () => {
   const [searchMode, setSearchMode] = useState(false);
   const [searchText, setSearchText] = useState('');
-  const [transactions] = useState<Transaction[]>([
-    {
-      id: '1',
-      date: '08.27',
-      from: 'ULMA페이머니',
-      to: '홍길동',
-      amount: '-200,000원',
-      type: 'send',
-    },
-    {
-      id: '2',
-      date: '08.20',
-      from: '김사비',
-      to: 'ULMA페이머니',
-      amount: '+400,000원',
-      type: 'receive',
-    },
-    {
-      id: '3',
-      date: '08.20',
-      from: '홍길동',
-      to: 'ULMA페이머니',
-      amount: '+500,000원',
-      type: 'receive',
-    },
-    {
-      id: '4',
-      date: '08.20',
-      from: '가나다',
-      to: 'ULMA페이머니',
-      amount: '+600,000원',
-      type: 'receive',
-    },
-    {
-      id: '5',
-      date: '08.15',
-      from: 'ULMA페이머니',
-      to: '윤예리',
-      amount: '-100,000원',
-      type: 'send',
-    },
+  const [payHistory, setPayHistory] = useState<Transaction[]>([]);
+
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState('ALL');
+  const [items, setItems] = useState([
+    {label: '전체 보기', value: 'ALL'},
+    {label: '출금', value: 'SEND'},
+    {label: '입금', value: 'RECEIVE'},
+    {label: '충전', value: 'CHARGE'},
   ]);
 
+  const fetchData = async () => {
+    try {
+      const response = await axiosInstance.get('/users/pay', {
+        params: {
+          ...(value !== 'ALL' && {payType: value}),
+        },
+      });
+      console.log(response.data.data);
+
+      const formattedData: Transaction[] = response.data.data.map(
+        (item: any) => ({
+          amount: item.amount,
+          date: item.transactionDate.slice(0, 10),
+          guest: item.counterpartyName,
+          description: item.description,
+          type: item.transactionType === 'SEND' ? 'SEND' : 'RECEIVE',
+        }),
+      );
+
+      setPayHistory(formattedData);
+    } catch (error) {
+      console.error('계좌 이력을 불러오는 중 에러가 발생했습니다:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [value]);
+
+  // 거래 내역
   const renderTransaction = ({item}: {item: Transaction}) => (
     <View style={styles.transactionItem}>
       <View style={styles.iconContainer}>
         <Text style={styles.iconText}>PAY</Text>
       </View>
       <View style={styles.transactionDetails}>
-        <Text style={styles.transactionText}>
-          {item.from} → {item.to}
+        <Text style={styles.transactionText}>{item.guest}</Text>
+        <Text style={styles.dateText}>
+          {item.description} | {item.date}
         </Text>
-        <Text style={styles.dateText}>{item.date}</Text>
       </View>
       <Text
         style={[
           styles.amountText,
-          item.type === 'send' ? styles.negative : styles.positive,
+          item.type === 'SEND' ? styles.negative : styles.positive,
         ]}>
-        {item.amount}
+        {item.type === 'SEND'
+          ? `-${Number(item.amount).toLocaleString()}`
+          : Number(item.amount).toLocaleString()}
       </Text>
     </View>
   );
 
   return (
     <View style={styles.container}>
-      {/* 상단 Pay 머니 영역 */}
-      <View style={styles.moneyContainer}>
-        <Text style={styles.moneyText}>페이머니</Text>
-        <Text style={styles.amountTextLarge}>54,000원</Text>
-        <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.buttonText}>송금</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
-            <Text style={styles.buttonText}>충전</Text>
-          </TouchableOpacity>
+      <View style={styles.listContainer}>
+        {/* 검색창 */}
+        <View style={styles.searchContainer}>
+          {searchMode ? (
+            <TextInput
+              style={styles.searchInput}
+              placeholder="검색..."
+              value={searchText}
+              onChangeText={setSearchText}
+              onBlur={() => setSearchMode(false)}
+            />
+          ) : (
+            <View style={styles.searchBefore}>
+              {/* 드롭다운 메뉴 */}
+              <DropDownPicker
+                open={open}
+                value={value}
+                items={items}
+                setOpen={setOpen}
+                setValue={setValue}
+                setItems={setItems}
+                containerStyle={{
+                  width: '40%',
+                }}
+                style={{
+                  backgroundColor: colors.LIGHTGRAY,
+                  borderWidth: 0,
+                }}
+                dropDownContainerStyle={{
+                  backgroundColor: colors.WHITE,
+                  borderColor: colors.GRAY_100,
+                  shadowColor: colors.BLACK,
+                  shadowOffset: {width: 0, height: 2},
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 3,
+                }}
+              />
+              <TouchableOpacity onPress={() => setSearchMode(true)}>
+                <Icon
+                  name="magnifying-glass"
+                  size={24}
+                  color={colors.GRAY_700}
+                />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
+        {/* 송금 내역 리스트 */}
+        <FlatList
+          data={payHistory}
+          renderItem={renderTransaction}
+          style={styles.transactionList}
+        />
       </View>
-
-      {/* 검색창 */}
-      <View style={styles.searchContainer}>
-        {searchMode ? (
-          <TextInput
-            style={styles.searchInput}
-            placeholder="검색..."
-            value={searchText}
-            onChangeText={setSearchText}
-            onBlur={() => setSearchMode(false)}
-          />
-        ) : (
-          <TouchableOpacity onPress={() => setSearchMode(true)}>
-            <Text style={styles.searchIcon}>🔍</Text>
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* 송금 내역 리스트 */}
-      <FlatList
-        data={transactions}
-        renderItem={renderTransaction}
-        keyExtractor={item => item.id}
-        style={styles.transactionList}
-      />
-
-      {/* 하단 바 */}
-      <BottomBar />
     </View>
   );
 };
@@ -137,53 +151,28 @@ const PaylistScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  moneyContainer: {
-    padding: 20,
-    backgroundColor: '#F5F5F5',
-    borderRadius: 10,
-    margin: 16,
-  },
-  moneyText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  amountTextLarge: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  actionButton: {
-    backgroundColor: '#00C77F',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    padding: 16,
   },
   searchContainer: {
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    marginVertical: 6,
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    width: '100%',
+    paddingHorizontal: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 45,
+  },
+  searchBefore: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
   },
   searchInput: {
-    borderWidth: 1,
-    borderColor: '#00C77F',
-    borderRadius: 5,
     padding: 8,
-    width: '80%',
-  },
-  searchIcon: {
-    fontSize: 24,
+    borderBottomColor: colors.GREEN_700,
+    borderBottomWidth: 0.5,
+    width: '100%',
   },
   transactionList: {
     paddingHorizontal: 16,
@@ -193,19 +182,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomColor: colors.GRAY_300,
   },
   iconContainer: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: colors.GREEN_700,
     justifyContent: 'center',
     alignItems: 'center',
   },
   iconText: {
     fontSize: 14,
-    color: '#00C77F',
+    fontWeight: 'bold',
+    color: colors.WHITE,
   },
   transactionDetails: {
     flex: 1,
@@ -216,17 +206,23 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 12,
-    color: '#BDBDBD',
+    color: colors.GRAY_700,
   },
   amountText: {
     fontSize: 16,
-    fontWeight: 'bold',
   },
   positive: {
-    color: '#00C77F',
+    color: colors.PINK,
+    fontWeight: 'bold',
   },
   negative: {
-    color: '#FF3B30',
+    color: colors.BLACK,
+  },
+  listContainer: {
+    backgroundColor: colors.LIGHTGRAY,
+    borderRadius: 8,
+    flex: 1,
+    overflow: 'scroll',
   },
 });
 

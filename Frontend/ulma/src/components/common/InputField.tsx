@@ -17,9 +17,15 @@ interface InputFieldProps extends TextInputProps {
 const deviceHeight = Dimensions.get('screen').height;
 
 const InputField = forwardRef(
-  ({disabled = false, ...props}: InputFieldProps) => {
+  (
+    {disabled = false, ...props}: InputFieldProps,
+    ref: ForwardedRef<TextInput>,
+  ) => {
     const innerRef = useRef<TextInput | null>(null);
-    const [text, onChangeText] = useState(''); // useState 컴포넌트 내부로 이동
+    const [text, onChangeText] = useState('');
+
+    // ref를 innerRef로 연결하되, null 가능성 처리
+    React.useImperativeHandle(ref, () => innerRef.current || null);
 
     const handlePressInput = () => {
       innerRef.current?.focus();
@@ -31,7 +37,7 @@ const InputField = forwardRef(
           <TextInput
             ref={innerRef}
             style={[styles.input, disabled && styles.disabled]}
-            placeholderTextColor={colors.GRAY}
+            placeholderTextColor={colors.GRAY_700}
             value={text}
             onChangeText={onChangeText}
             spellCheck={false}
@@ -55,15 +61,15 @@ const styles = StyleSheet.create({
   input: {
     color: colors.BLACK,
     backgroundColor: 'transparent',
-    padding: 10,
+    paddingVertical: 10,
     fontSize: 18,
     borderBottomWidth: 1,
     borderBottomColor: colors.GREEN_700,
-    width: '90%',
+    width: '100%',
   },
   disabled: {
-    backgroundColor: colors.GRAY,
-    color: colors.GRAY,
+    backgroundColor: colors.GRAY_300,
+    color: colors.GRAY_700,
   },
 });
 

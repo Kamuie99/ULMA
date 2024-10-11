@@ -12,6 +12,7 @@ import {useRoute, useNavigation} from '@react-navigation/native';
 import TitleTextField from '@/components/common/TitleTextField';
 import CustomButton from '@/components/common/CustomButton';
 import InputField from '@/components/common/InputField';
+import Toast from 'react-native-toast-message';
 
 const EventDateScreen = () => {
   const [date, setDate] = useState('');
@@ -24,12 +25,15 @@ const EventDateScreen = () => {
   // 확인 버튼을 눌렀을 때 호출되는 함수
   const handleSave = () => {
     if (!date) {
-      Alert.alert('날짜를 입력하세요.');
+      Toast.show({
+        text1: '날짜를 입력하세요.',
+        type: 'error',
+      });
       return;
     }
     // navigation.navigate('다음페이지'); // 다음 페이지로 이동-내비게이션나중에설정
   };
-
+  ///
   return (
     <View style={styles.container}>
       <TitleTextField

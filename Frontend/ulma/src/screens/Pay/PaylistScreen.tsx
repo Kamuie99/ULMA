@@ -81,9 +81,7 @@ const PaylistScreen = () => {
           item.type === 'SEND' ? styles.negative : styles.positive,
         ]}>
         {item.type === 'SEND'
-          ? `                                                                                                                                                                                                      ${Number(
-              item.amount,
-            ).toLocaleString()}`
+          ? `-${Number(item.amount).toLocaleString()}`
           : Number(item.amount).toLocaleString()}
       </Text>
     </View>

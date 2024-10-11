@@ -4,10 +4,9 @@ import {
   TextInput,
   StyleSheet,
   Text,
-  Alert,
   TouchableOpacity,
-  KeyboardAvoidingView, // 추가
-  Platform, // 추가
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   Keyboard,
 } from 'react-native';
@@ -49,6 +48,7 @@ const ScheduleAddScreen = () => {
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const [recommAmount, setRecommAmount] = useState('');
 
+  // 키보드 상태 감지
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
@@ -70,13 +70,20 @@ const ScheduleAddScreen = () => {
     };
   }, []);
 
+  // 상태 업데이트 로직
   useFocusEffect(
     React.useCallback(() => {
-      // newEventInfo에 있는 정보를 이용하여 컴포넌트 상태를 업데이트
+      // newEventInfo를 기반으로 selectedUser 설정
       if (newEventInfo && newEventInfo.guestId && newEventInfo.name) {
-        setSelectedUser({id: newEventInfo.guestId, name: newEventInfo.name});
+        if (!selectedUser || selectedUser.guestId !== newEventInfo.guestId) {
+          setSelectedUser({
+            guestId: newEventInfo.guestId,
+            name: newEventInfo.name,
+          });
+        }
       }
 
+      // newEventInfo의 날짜와 시간을 설정
       if (newEventInfo?.date) {
         setDate(new Date(newEventInfo.date));
       }
@@ -92,35 +99,36 @@ const ScheduleAddScreen = () => {
       ) {
         setSelectedUser(route.params.selectedUser);
       }
-
-      return () => {
-        // 필요에 따라 클린업 로직을 추가할 수 있습니다.
-      };
-    }, [route.params, selectedUser, newEventInfo]), // newEventInfo를 의존성 배열에 추가
+    }, [route.params?.selectedUser, newEventInfo, selectedUser]),
   );
 
+  // 날짜 선택 처리
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
     setShowDatePicker(false);
     setDate(currentDate);
   };
 
+  // 시간 선택 처리
   const onTimeChange = (event, selectedTime) => {
     const currentTime = selectedTime || time;
     setShowTimePicker(false);
     setTime(currentTime);
   };
 
+  // 입력된 금액을 포맷팅하여 표시
   const formatNumberWithCommas = number => {
     return number.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
+  // 금액 입력 처리
   const handlePaidAmountChange = text => {
     const cleaned = text.replace(/,/g, '');
     const formatted = formatNumberWithCommas(cleaned);
     setPaidAmount(formatted);
   };
 
+  // 스케줄 추가 처리
   const addSchedule = async () => {
     if (!selectedUser || !name || (!paidAmount && !isPaidUndefined)) {
       Toast.show({
@@ -206,11 +214,11 @@ const ScheduleAddScreen = () => {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined} // iOS에서만 패딩 적용
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0} // iOS에선 약간의 오프셋을 추가해줄 수 있습니다
-    >
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.card}>
+          {/* 사용자 선택 */}
           <View style={styles.fieldContainer}>
             <Text style={styles.label}>누구의 경조사 인가요?</Text>
             <TouchableOpacity
@@ -231,7 +239,7 @@ const ScheduleAddScreen = () => {
             </TouchableOpacity>
           </View>
 
-          {/* 기타 입력 필드들 */}
+          {/* 경조사 이름 입력 */}
           <View style={styles.fieldContainer}>
             <Text style={styles.label}>어떤 경조사인가요?</Text>
             <TextInput
@@ -242,6 +250,7 @@ const ScheduleAddScreen = () => {
             />
           </View>
 
+          {/* 날짜 및 시간 선택 */}
           <View style={styles.dateTimeContainer}>
             <View style={styles.dateTimeField}>
               <Text style={styles.label}>날짜</Text>
@@ -272,6 +281,7 @@ const ScheduleAddScreen = () => {
             </View>
           </View>
 
+          {/* DateTimePicker 컴포넌트 */}
           {showDatePicker && (
             <DateTimePicker
               value={date}
@@ -289,6 +299,7 @@ const ScheduleAddScreen = () => {
             />
           )}
 
+          {/* 금액 입력 */}
           <View style={styles.fieldContainer}>
             <Text style={styles.label}>얼마를 드렸나요?</Text>
             <View style={styles.amountContainer}>
@@ -303,7 +314,7 @@ const ScheduleAddScreen = () => {
                 onChangeText={handlePaidAmountChange}
                 keyboardType="numeric"
                 editable={!isPaidUndefined}
-                onFocus={handleFocus}
+                onFocus={handleFocus} // 포커스될 때 AI 추천 금액 요청
               />
               <View style={styles.checkboxContainer}>
                 <CheckBox
@@ -322,10 +333,9 @@ const ScheduleAddScreen = () => {
           </View>
         </View>
 
+        {/* 추가하기 버튼 */}
         {!isKeyboardVisible && (
-          <>
-            <CustomButton label="추가하기" onPress={addSchedule} posY={30} />
-          </>
+          <CustomButton label="추가하기" onPress={addSchedule} posY={30} />
         )}
       </ScrollView>
     </KeyboardAvoidingView>

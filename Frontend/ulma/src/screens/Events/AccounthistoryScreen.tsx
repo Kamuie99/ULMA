@@ -107,7 +107,7 @@ function AccounthistoryScreen({navigation}: AccounthistoryScreenProps) {
 
   const formatAmount = (amount: string, transactionType: string) => {
     const formattedAmount = parseFloat(amount).toLocaleString(); // 3자리마다 쉼표 추가
-    return transactionType === 'SEND' ? `${formattedAmount}` : formattedAmount;
+    return transactionType === 'SEND' ? `-${formattedAmount}` : formattedAmount;
   };
 
   const registerParticipants = async (
